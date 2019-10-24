@@ -67,11 +67,24 @@ let calc es =
       if pemdas e Subtract then 
         match iter s (y :: rest) t with 
         | [] -> []
-        | y :: rest -> iter s (x -. y :: rest) []
+        | y :: rest -> iter s (y -. x :: rest) []
       else
-        iter s (x -. y :: rest) t
-    | Multiply :: t, x :: y :: rest -> iter s (x *. y :: rest) t
-    | Divide :: t, x :: y :: rest -> iter s (x /. y :: rest) t
+        iter s (y -. x :: rest) t
+    | Multiply :: t, x :: y :: rest -> 
+      if pemdas e Multiply then 
+        match iter s (y :: rest) t with 
+        | [] -> []
+        | y :: rest -> iter s (y *. x :: rest) []
+      else
+        iter s (y *. x :: rest) t
+    | Divide :: t, x :: y :: rest -> 
+      if pemdas e Divide then 
+        match iter s (y :: rest) t with 
+        | [] -> []
+        | y :: rest -> iter s (y /. x :: rest) []
+      else
+        iter s (y /. x :: rest) t
+    | Power :: t, x :: y :: rest -> iter s (y ** x :: rest) t
     | _ -> st
   in
   match iter (Stack.create ()) [] es with
@@ -96,7 +109,7 @@ let split_string input =
     | " " :: t -> remove_whitespace t 
     | "" :: t -> remove_whitespace t 
     | h :: t -> h :: remove_whitespace t 
-  in Str.full_split (Str.regexp " ?*?/?+?-?\^?\(?\)?") input 
+  in Str.full_split (Str.regexp " ") input 
      |> clean_list |> remove_whitespace
 
 let parse input =
