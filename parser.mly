@@ -28,7 +28,7 @@ prog:
 	
 expr:
 	| i = NUM { Num i }
-	| LPAREN; SUBT; i = NUM; RPAREN { Binop (Subt, Num 0., Num i) }
+	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }
 	| e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) } 
 	| e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
 	| e1 = expr; SUBT; e2 = expr { Binop (Subt, e1, e2) }
