@@ -3,5 +3,7 @@
 #load "lexer.cmo";;
 #load "parser.cmo";;
 #load "main.cmo";;
+#load "graphics.cma";;
 open Ast;;
 open Main;;
+
