@@ -7,7 +7,7 @@ open Main
 let make_i n i s =
   n >:: (fun _ -> assert_equal (string_of_float i) (interp s))
 
-let tests = [
+let repl_tests = [
   make_i "int" 22. "22";
   make_i "add" 22. "11+11";
   make_i "adds" 22. "(10+1)+(5+6)";
@@ -20,7 +20,12 @@ let tests = [
   make_i "div2" 1.5 "3/2";
   make_i "pow1" 9. "3^2";
   make_i "neg1" 5. "(-1)+(-1)-(-(4+3))";
-  make_i "fact" 6. "3!";
+  make_i "fact1" 6. "3!";
+  make_i "fact2" 123. "(3+2)! + 3"
 ]
 
-let _ = run_test_tt_main ("suite" >::: tests)
+let tests = [
+  repl_tests
+]
+
+let _ = run_test_tt_main ("suite" >::: repl_tests)
