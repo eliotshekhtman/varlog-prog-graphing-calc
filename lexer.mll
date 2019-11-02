@@ -14,6 +14,7 @@ rule read =
   | "-" { SUBT }
   | "/" { DIV }
   | "^" { POW }
+  | "!" { EXCL }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }

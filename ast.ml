@@ -6,10 +6,15 @@ type bop =
   | Div 
   | Pow
 
+type uop = 
+  | Fact
+
 type expr = 
-  | Var of string 
+  (* | Var of string  *)
   | Num of float
-  | Bool of bool 
+  (* | Bool of bool  *)
   | Binop of bop * expr * expr
-  | Let of string * expr * expr
-  | If of expr * expr * expr
+  | Uniop of uop * expr
+  (* | Let of string * expr * expr
+     | If of expr * expr * expr *)
+
