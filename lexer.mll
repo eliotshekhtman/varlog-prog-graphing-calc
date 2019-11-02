@@ -4,7 +4,7 @@
 
 let white = [' ' '\t']+
 let digit = ['0'-'9']
-let float = '-'? digit+ '.'? digit*
+let float = digit+ '.'? digit*
 
 rule read =
   parse 
