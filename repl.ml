@@ -85,6 +85,9 @@ let calc es =
       else
         iter s (y /. x :: rest) t
     | Power :: t, x :: y :: rest -> iter s (y ** x :: rest) t
+    | OpenParen :: t, _ -> 
+      iter s [] t (* Has to skip all the indeces inside, and pull the head from the paren exp, and then input that into a new iter s [new] t *)
+    | CloseParen :: t, _ -> st
     | _ -> st
   in
   match iter (Stack.create ()) [] es with
