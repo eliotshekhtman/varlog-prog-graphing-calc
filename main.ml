@@ -27,10 +27,11 @@ and step_bop bop e1 e2 = match bop, e1, e2 with
   | Subt, Num a, Num b -> Num (a -. b)
   | Div, Num a, Num b -> Num (a /. b)
   | Pow, Num a, Num b -> Num (a ** b)
-  | _ -> failwith "precondition violated"
+  | _ -> failwith "precondition violated: bop"
 
 and step_uop uop e = match uop, e with
   | Fact, Num a -> Num (fact a)
+  | _ -> failwith "precondition violated: uop"
 
 
 (** [eval e] fully evaluates [e] to a value. *)
@@ -49,7 +50,7 @@ let parse (s : string) : expr =
 let string_of_val (e : expr) : string =
   match e with
   | Num i -> string_of_float i
-  | Binop _ -> failwith "precondition violated"
+  | _ -> failwith "precondition violated: sov"
 
 (** [interp s] interprets [s] by lexing and parsing it, 
     evaluating it, and converting the result to a string. *)
