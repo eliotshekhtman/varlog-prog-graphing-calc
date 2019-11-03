@@ -9,3 +9,6 @@ test:
 
 clean:
 	ocamlbuild -clean
+
+play:
+	ocamlbuild -use-ocamlfind main.byte && ./main.byte

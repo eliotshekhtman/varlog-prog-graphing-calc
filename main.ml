@@ -61,5 +61,15 @@ let interp (s : string) : string =
 let rec run () =
   print_string "> ";
   match read_line () with
-  | s -> print_endline (interp s); run ()
+  | "" -> print_endline "Quitting"
+  | "QUIT" -> print_endline "Quitting"
+  | s -> begin 
+      match interp s with 
+      | exception (Match_failure _) -> print_endline "Error: no keyword"; run ()
+      | exception (Failure "lexing: empty token") -> 
+        print_endline "Error: unknown keyword"; run ()
+      | s -> print_endline s; run ()
+    end
   | _ -> print_endline "Quitting"
+
+let () = run ()
