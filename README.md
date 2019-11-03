@@ -10,11 +10,11 @@ Meeting times:
 # Core idea: 
 Programmable Calculator with more advanced TI-Basic 83-like language
 # Key features: 
-LBL and GOTO in the language
-Solver
-User defined functions (separate from language)
-Graphing (through GRAPH command)
-REPL for normal calculator evaluations
+- LBL and GOTO in the language
+- Solver
+- User defined functions (separate from language)
+- Graphing (through GRAPH command)
+- REPL for normal calculator evaluations
 # In-depth description: 
 We plan on making a programmable graphing calculator with three main sets of features.  First, there’ll be the base calculator REPL: we run basic commands and calculation strings with order of operations
 
@@ -23,18 +23,18 @@ Functions: more like extended operators, similar to OCaml functions, exist separ
 Scripts: amalgams of commands for more complex purposes.  Can have multiple side effects.
 
 # Roadmap: 
-MS1: REPL
-Satisfactory: implement base calculator REPL
-Good: order of operations, parentheses
-Excellent: implement graphing
-MS2: Functions/REPL++
-Satisfactory: Built-in complex commands (definite derivatives, definite integrals, etc)
-Good: implement solver
-Excellent: User defined operators
-MS3: Programming language
-Satisfactory: base commands (DISP, INPUT, etc)
-Good: IF THEN ELSE statements,variables, perhaps loops
-Excellent: LBL, GOTO
+- MS1: REPL
+- Satisfactory: implement base calculator REPL
+- Good: order of operations, parentheses
+- Excellent: implement graphing
+- MS2: Functions/REPL++
+- Satisfactory: Built-in complex commands (definite derivatives, definite integrals, etc)
+- Good: implement solver
+- Excellent: User defined operators
+- MS3: Programming language
+- Satisfactory: base commands (DISP, INPUT, etc)
+- Good: IF THEN ELSE statements,variables, perhaps loops
+- Excellent: LBL, GOTO
 
 # Preliminary sketch description: 
 Each of these is a module
