@@ -24,17 +24,17 @@ Scripts: amalgams of commands for more complex purposes.  Can have multiple side
 
 # Roadmap: 
 - MS1: REPL
-- Satisfactory: implement base calculator REPL
-- Good: order of operations, parentheses
-- Excellent: implement graphing
+  - Satisfactory: implement base calculator REPL
+  - Good: order of operations, parentheses
+  - Excellent: implement graphing
 - MS2: Functions/REPL++
-- Satisfactory: Built-in complex commands (definite derivatives, definite integrals, etc)
-- Good: implement solver
-- Excellent: User defined operators
+  - Satisfactory: Built-in complex commands (definite derivatives, definite integrals, etc)
+  - Good: implement solver
+  - Excellent: User defined operators
 - MS3: Programming language
-- Satisfactory: base commands (DISP, INPUT, etc)
-- Good: IF THEN ELSE statements,variables, perhaps loops
-- Excellent: LBL, GOTO
+  - Satisfactory: base commands (DISP, INPUT, etc)
+  - Good: IF THEN ELSE statements,variables, perhaps loops
+  - Excellent: LBL, GOTO
 
 # Preliminary sketch description: 
 Each of these is a module
