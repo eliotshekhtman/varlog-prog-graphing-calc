@@ -9,6 +9,7 @@ let is_value : expr -> bool = function
 
 (** [step e] takes a single step of evaluation of [e]. *)
 let rec step : expr -> expr = function
+  | Keyword _ -> failwith "precondition violated: too many keywords"
   | Num _ -> failwith "Does not step"
   | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> 
     step_bop bop e1 e2
@@ -56,4 +57,9 @@ let string_of_val (e : expr) : string =
     evaluating it, and converting the result to a string. *)
 let interp (s : string) : string =
   match s |> parse with 
-  | Eval e -> e |> eval |> string_of_val
+  | Keyword (k, e) -> begin 
+      match k with
+      | Eval -> e |> eval |> string_of_val
+      | Graph -> failwith "not implemented"
+    end
+  | _ -> failwith "no keyword"
