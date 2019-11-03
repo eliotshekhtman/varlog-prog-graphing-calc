@@ -3,9 +3,10 @@
 TODO:
 - make a varlog to hold variables
 
-CS 3110 Project - Charter
+# CS 3110 Project - Charter
 Members: Adith (ar729), Eliot (ess239), Omar (ob47)
 Meeting times: 
+
 Proposal
 Core idea: Programmable Calculator with more advanced TI-Basic 83-like language
 Key features: 
