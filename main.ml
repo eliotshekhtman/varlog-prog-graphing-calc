@@ -57,19 +57,3 @@ let string_of_val (e : expr) : string =
 let interp (s : string) : string =
   match s |> parse with 
   | Eval e -> e |> eval |> string_of_val
-
-let rec run () =
-  print_string "> ";
-  match read_line () with
-  | "" -> print_endline "Quitting"
-  | "QUIT" -> print_endline "Quitting"
-  | s -> begin 
-      match interp s with 
-      | exception (Match_failure _) -> print_endline "Error: no keyword"; run ()
-      | exception (Failure "lexing: empty token") -> 
-        print_endline "Error: unknown keyword"; run ()
-      | s -> print_endline s; run ()
-    end
-  | _ -> print_endline "Quitting"
-
-let () = run ()

@@ -11,4 +11,4 @@ clean:
 	ocamlbuild -clean
 
 play:
-	ocamlbuild -use-ocamlfind main.byte && ./main.byte
+	ocamlbuild -use-ocamlfind repl.byte && ./repl.byte
