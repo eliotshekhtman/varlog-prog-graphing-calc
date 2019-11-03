@@ -10,6 +10,7 @@ type uop =
   | Fact
 
 type expr = 
+  | Eval of expr
   (* | Var of string  *)
   | Num of float
   (* | Bool of bool  *)

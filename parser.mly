@@ -2,6 +2,7 @@
 open Ast
 %}
 
+%token EVAL
 %token <float> NUM
 %token TIMES
 %token PLUS
@@ -28,6 +29,7 @@ prog:
 	;
 	
 expr:
+  | EVAL; e = expr; { Eval (e) }
 	| i = NUM { Num i }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }
 	| e = expr; EXCL {Uniop (Fact, e)}

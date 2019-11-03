@@ -9,6 +9,7 @@ let float = digit+ '.'? digit*
 rule read =
   parse 
   | white { read lexbuf }
+  | "EVAL" { EVAL }
   | "*" { TIMES }
   | "+" { PLUS }
   | "-" { SUBT }

@@ -55,4 +55,11 @@ let string_of_val (e : expr) : string =
 (** [interp s] interprets [s] by lexing and parsing it, 
     evaluating it, and converting the result to a string. *)
 let interp (s : string) : string =
-  s |> parse |> eval |> string_of_val
+  match s |> parse with 
+  | Eval e -> e |> eval |> string_of_val
+
+let rec run () =
+  print_string "> ";
+  match read_line () with
+  | s -> print_endline (interp s); run ()
+  | _ -> print_endline "Quitting"
