@@ -4,3 +4,6 @@ IF r = 0 THEN GOTO 2 ELSE END
 DISP "r wasn't 0"
 LBL 2
 DISP "r was 0"
+
+VAR a : 5 END
+DISP a
