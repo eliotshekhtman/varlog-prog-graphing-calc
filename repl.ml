@@ -5,6 +5,8 @@ let rec run () =
   match read_line () with
   | "" -> run ()
   | "QUIT" -> print_endline "Quitting"
+  | "SET_SCALE" -> begin print_endline "x" end
+
   | s -> begin 
       match interp s with 
       | exception (Match_failure _) -> print_endline "Error: no keyword"; run ()
