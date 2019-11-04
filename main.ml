@@ -79,7 +79,7 @@ let rec step_graph v = function
     Binop (bop, e1, step_graph v e2)
   | Binop (bop, e1, e2) -> Binop (bop, step_graph v e1, e2)
   | Uniop (uop, e) when is_value_graph e ->
-    step_uop uop e
+    step_uop v uop e
   | Uniop (uop, e) -> Uniop (uop, step_graph v e)
 
 (** [step_bop bop v1 v2] implements the primitive operation
@@ -92,8 +92,8 @@ and step_bop v bop e1 e2 = match bop with
   | Pow -> Num ((get_val v e1) ** (get_val v e2))
   | _ -> failwith "precondition violated: bop"
 
-and step_uop uop e = match uop, e with
-  | Fact, Num a -> Num (fact a)
+and step_uop v uop e = match uop with
+  | Fact -> Num (fact (get_val v e))
   | _ -> failwith "precondition violated: uop"
 
 
