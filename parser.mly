@@ -29,7 +29,7 @@ prog:
 	;
 	
 expr:
-  | EVAL; e = expr; { Eval (e) }
+  | EVAL; e = expr; { Keyword (Eval, e) }
 	| i = NUM { Num i }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }
 	| e = expr; EXCL {Uniop (Fact, e)}

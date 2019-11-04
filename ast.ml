@@ -9,8 +9,12 @@ type bop =
 type uop = 
   | Fact
 
+type key =
+  | Eval
+  | Graph
+
 type expr = 
-  | Eval of expr
+  | Keyword of key * expr
   (* | Var of string  *)
   | Num of float
   (* | Bool of bool  *)
