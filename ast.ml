@@ -17,6 +17,7 @@ type expr =
   | Keyword of key * expr
   (* | Var of string  *)
   | Num of float
+  | XVar
   (* | Bool of bool  *)
   | Binop of bop * expr * expr
   | Uniop of uop * expr

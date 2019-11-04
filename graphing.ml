@@ -83,7 +83,7 @@ let rec graph_func x f =
       (x 
        |> float_of_int 
        |> xpix_to_coord 
-       |> func 
+       |> f
        |> ycoord_to_pix 
        |> int_of_float); 
     graph_func (x+1) f

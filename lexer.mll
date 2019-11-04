@@ -18,5 +18,6 @@ rule read =
   | "!" { EXCL }
   | "(" { LPAREN }
   | ")" { RPAREN }
+  | "x" { XVAR }
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
   | eof { EOF }
