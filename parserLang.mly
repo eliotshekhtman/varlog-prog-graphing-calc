@@ -39,7 +39,7 @@ expr:
 	| e1 = expr; SUBT; e2 = expr { Binop (Subt, e1, e2) }
 	| e1 = expr; DIV; e2 = expr { Binop (Div, e1, e2) }
 	| e1 = expr; POW; e2 = expr { Binop (Pow, e1, e2) }
-	| VAR; s = NAME; e1 = expr; END; e2 = expr; { Let (s, e1, e2) }
+	| VAR; s = NAME; e1 = expr; END; e2 = expr; { Bind (s, e1, e2) }
 	| LPAREN; e=expr; RPAREN {e} 
 	;
 	
