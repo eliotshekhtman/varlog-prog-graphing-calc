@@ -3,6 +3,7 @@ open Ast
 %}
 
 %token EVAL
+%token GRAPH
 %token XVAR
 %token <float> NUM
 %token TIMES
@@ -31,6 +32,7 @@ prog:
 	
 expr:
   | EVAL; e = expr; { Keyword (Eval, e) }
+	| GRAPH; e = expr; { Keyword (Graph, e) }
 	| i = NUM { Num i }
 	| XVAR; { XVar }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }

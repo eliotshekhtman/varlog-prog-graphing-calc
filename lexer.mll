@@ -10,6 +10,7 @@ rule read =
   parse 
   | white { read lexbuf }
   | "EVAL" { EVAL }
+  | "GRAPH" { GRAPH }
   | "*" { TIMES }
   | "+" { PLUS }
   | "-" { SUBT }

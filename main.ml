@@ -101,6 +101,7 @@ and step_uop v uop e = match uop with
 let rec eval_graph (e : expr) (v : float) : float = 
   match e with
   | Num n -> n
+  | XVar -> v
   | _ -> eval_graph (e |> step_graph v) v
 
 (** [interp s] interprets [s] by lexing and parsing it, 
