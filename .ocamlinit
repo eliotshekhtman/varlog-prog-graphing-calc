@@ -6,4 +6,4 @@
 #load "graphics.cma";;
 open Ast;;
 open Main;;
-
+open Graphics;;
