@@ -57,16 +57,16 @@ let scale ((a,b,c,d) : (int * int * int * int)) : unit =
 let _ = moveto 0 (ycoord_to_pix (0. |> func |> xpix_to_coord) |> int_of_float) 
 *)
 
-let rec graph_func x f =
+let rec graph_func xi xa yi ya x f =
   let _ = open_graph "" in
   let _ = set_window_title "Graph 2-D Functions" in
   let window_height = 800 in
   let window_width = 800 in
 
-  let x_min = 1. in
-  let x_max = 2. in
-  let y_min = 1. in
-  let y_max = 2. in
+  let x_min = xi in
+  let x_max = xa in
+  let y_min = yi in
+  let y_max = ya in
 
   let pixel_width = 
     (x_max -. x_min) /. (float_of_int window_width) in

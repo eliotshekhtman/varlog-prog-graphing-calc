@@ -108,9 +108,14 @@ let rec eval_graph (e : expr) (v : float) : float =
     evaluating it, and converting the result to a string. *)
 let interp (s : string) : string =
   match s |> parse with 
-  | Keyword (k, e) -> begin 
+  | Keyword (k, e) -> begin  
       match k with
       | Eval -> e |> eval |> string_of_val
-      | Graph -> Graphing.graph_func 0 (e |> eval_graph); "Graphed"
+      | Graph ->
+        let x_min = print_string "SET MIN X> "; read_line () |> float_of_string in
+        let x_max = print_string "SET MAX X> "; read_line () |> float_of_string in
+        let y_min = print_string "SET MIN Y> "; read_line () |> float_of_string in
+        let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
+        graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
     end
   | _ -> failwith "no keyword"
