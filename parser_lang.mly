@@ -1,5 +1,5 @@
 %{
-open Ast
+open AstLang
 %}
 
 %token <float> NUM
@@ -30,7 +30,7 @@ prog:
 	;
 	
 expr:
-	| i = NUM { Num i }
+	| i = NUM { Val (Num i) }
 	| s = NAME { Var s }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }
 	| e = expr; EXCL {Uniop (Fact, e)}

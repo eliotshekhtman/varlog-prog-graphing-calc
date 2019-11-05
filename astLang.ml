@@ -9,12 +9,15 @@ type bop =
 type uop = 
   | Fact
 
+type value = 
+  | Num of float 
+  | Bool of bool
+
 type expr = 
   | Var of string 
-  | Num of float
-  (* | Bool of bool  *)
+  | Val of value
   | Binop of bop * expr * expr
   | Uniop of uop * expr
-  | Let of string * expr * expr
+  | Bind of string * expr * expr
   | If of expr * expr * expr
 
