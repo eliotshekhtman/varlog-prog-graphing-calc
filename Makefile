@@ -1,14 +1,23 @@
+UNITS=authors ast main repl astLang graphing
+MLS_WITHOUT_MLIS=ast 
+MLS=$(UNITS:=.ml) $(MLS_WITHOUT_MLIS:=.ml)
+OBJECTS=$(UNITS:=.cmo) $(MLS_WITHOUT_MLIS:=.cmo) parser.cmo
+MLIS=$(UNITS:=.mli)
+TEST=test.byte
+OCAMLBUILD=ocamlbuild -use-ocamlfind
+PKGS=oUnit,str,graphics
+
 default: build
 	utop
 
 build:
-	ocamlbuild -use-ocamlfind main.byte
+	$(OCAMLBUILD) -pkg graphics $(OBJECTS)
 
 test:
-	ocamlbuild -use-ocamlfind test.byte && ./test.byte
+	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
 
 clean:
 	ocamlbuild -clean
 
 repl:
-	ocamlbuild -use-ocamlfind repl.byte && ./repl.byte
+	$(OCAMLBUILD) repl.byte -pkg graphics && ./repl.byte
