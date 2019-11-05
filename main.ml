@@ -110,6 +110,6 @@ let interp (s : string) : string =
   | Keyword (k, e) -> begin 
       match k with
       | Eval -> e |> eval |> string_of_val
-      | Graph -> graph_func 0 (e |> eval_graph); "Graphed"
+      | Graph -> Graphing.graph_func 0 (e |> eval_graph); "Graphed"
     end
   | _ -> failwith "no keyword"
