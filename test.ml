@@ -23,7 +23,9 @@ let eval_tests = [
   make_eval_test "fact1" 6. "3!";
   make_eval_test "fact2" 123. "(3+2)! + 3";
   make_eval_test "int1" 4.0001 "INTEGRAL((1,3),x)";
-  make_eval_test "int2" 15.0001 "1+3!+INTEGRAL((1,3),x)+4"
+  make_eval_test "int2" 15.0001 "1+3!+INTEGRAL((1,3),x)+4";
+  make_eval_test "sin1" 0.841470984808 "SIN 1";
+  make_eval_test "sin2" 5.00000979345 "1 + SIN(3+8) + 5";
 ]
 
 let tests = [
