@@ -91,14 +91,11 @@ let rec graph_func xi xa yi ya x f =
   let rec helper x = 
     if x >= window_width then () 
     else begin
-      Graphics.lineto 
-        x 
-        (x 
-         |> float_of_int 
-         |> xpix_to_coord 
-         |> f
-         |> ycoord_to_pix 
-         |> int_of_float); 
+      let y_pix = x |> float_of_int |> xpix_to_coord |> f 
+                  |> ycoord_to_pix |> int_of_float in
+      if y_pix < 0 then Graphics.moveto x 0
+      else if y_pix > window_height then Graphics.moveto x window_height
+      else Graphics.lineto x y_pix; 
       helper (x+1)
     end
   in helper 0
