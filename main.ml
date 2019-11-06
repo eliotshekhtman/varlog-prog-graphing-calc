@@ -33,12 +33,14 @@ and step_bop bop e1 e2 = match bop, e1, e2 with
   | Pow, Num a, Num b -> Num (a ** b)
   | _ -> failwith "precondition violated: bop"
 
+(** [step_uop uop v] implements the primitive operation
+    [uop v].  Requires: [v] is a value. *)
 and step_uop uop e = match uop, e with
   | Fact, Num a -> Num (fact a)
   | _ -> failwith "precondition violated: uop"
 
 
-(** [eval e] fully evaluates [e] to a value. *)
+(** [eval e] fully evaluates [e] step-wise to a value. *)
 let rec eval (e : expr) : expr = 
   if is_value e then e
   else e |> step |> eval
@@ -63,12 +65,13 @@ let is_value_graph : expr -> bool = function
   | XVar -> true
   | _ -> false
 
+(** [get_value v] is the value contained within value constructor [v]*)
 let get_val v = function
   | Num n -> n
   | XVar -> v 
   | _ -> failwith "precondition violated"
 
-(** [step e] takes a single step of evaluation of [e]. *)
+(** [step e] takes a single step in the graphing of [e]*)
 let rec step_graph v = function
   | Keyword _ -> failwith "precondition violated: too many keywords"
   | Num _ -> failwith "Does not step"
@@ -92,12 +95,14 @@ and step_bop v bop e1 e2 = match bop with
   | Pow -> Num ((get_val v e1) ** (get_val v e2))
   | _ -> failwith "precondition violated: bop"
 
+(** [step_bop uop v] implements the primitive operation
+    [uop v].  Requires: [v] is a value. *)
 and step_uop v uop e = match uop with
   | Fact -> Num (fact (get_val v e))
   | _ -> failwith "precondition violated: uop"
 
 
-(** [eval e] fully evaluates [e] to a value. *)
+(** [eval e] fully graphs [e].*)
 let rec eval_graph (e : expr) (v : float) : float = 
   match e with
   | Num n -> n
@@ -105,7 +110,9 @@ let rec eval_graph (e : expr) (v : float) : float =
   | _ -> eval_graph (e |> step_graph v) v
 
 (** [interp s] interprets [s] by lexing and parsing it, 
-    evaluating it, and converting the result to a string. *)
+    evaluating it, and returning either the value in the case of an expression
+    input or an indication that the expression has been graphed in the case
+    of a graphing request.*)
 let interp (s : string) : string =
   match s |> parse with 
   | Keyword (k, e) -> begin  
