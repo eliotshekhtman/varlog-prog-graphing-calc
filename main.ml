@@ -68,6 +68,12 @@ and step_bop v bop e1 e2 = match bop with
     [uop v].  Requires: [v] is a value. *)
 and step_uop v uop e = match uop with
   | Fact -> Num (fact (get_val v e))
+  | Sin -> Num (sin (get_val v e))
+  | Cos -> Num (cos (get_val v e))
+  | Tan -> Num (tan (get_val v e))
+  | ArcTan -> Num (atan (get_val v e))
+  | ArcCos -> Num (acos (get_val v e))
+  | ArcSin -> Num (asin (get_val v e))
   | _ -> failwith "precondition violated: uop"
 
 
@@ -107,7 +113,7 @@ let rec step : expr -> expr = function
   | Uniop (uop, e) -> Uniop (uop, step e)  
   | Derivative (der,e1,e2) when is_value e1 -> step_deriv der e1 e2
   | Derivative (der,e1,e2) -> Derivative (der, step e1, e2)
-  |_-> failwith "Ya fucked up"
+(* |_-> failwith "Ya fucked up" *)
 
 and step_deriv der e1 e2 = match der, e1, e2 with
   | Der, Num a, b -> Num (derive a (b|> eval_graph))
@@ -135,9 +141,9 @@ and step_uop uop e = match uop, e with
   | Sin, Num a -> Num (sin a)
   | Cos, Num a -> Num (cos a)
   | Tan, Num a -> Num (tan a)
-  | ArcSin, Num a -> Num(asin a)
-  | ArcCos,Num a -> Num(acos a)
-  | ArcTan, Num a -> Num(atan a)
+  | ArcSin, Num a -> Num (asin a)
+  | ArcCos,Num a -> Num (acos a)
+  | ArcTan, Num a -> Num (atan a)
   | _ -> failwith "precondition violated: uop"
 
 
