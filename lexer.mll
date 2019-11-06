@@ -25,11 +25,11 @@ rule read =
   | ")" { RPAREN }
   | "x" { XVAR }
   | "," {COMMA}
-  | "Sin" {SIN}
-  | "Cos" {COS}
-  | "Tan" {TAN}
-  | "Arctan" {ARCTAN}
-  | "Arccos" {ARCCOS}
-  | "Arcsin" {ARCSIN}
+  | "SIN" {SIN}
+  | "COS" {COS}
+  | "TAN" {TAN}
+  | "ARCTAN" {ARCTAN}
+  | "ARCCOS" {ARCCOS}
+  | "ARCSIN" {ARCSIN}
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
   | eof { EOF }

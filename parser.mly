@@ -34,6 +34,12 @@ open Ast
 %left COMB 
 %left PERM
 %left POW
+%right SIN 
+%right COS 
+%right TAN
+%right ARCSIN
+%right ARCCOS
+%right ARCTAN
 
 %start <Ast.expr> prog
 
@@ -60,12 +66,12 @@ expr:
 	| e1 = expr; POW; e2 = expr { Binop (Pow, e1, e2) }
 	| e1 = expr; COMB; e2 = expr { Binop (Comb, e1, e2) }
 	| e1 = expr; PERM; e2 = expr { Binop (Perm, e1, e2) }
-	| SIN; LPAREN; e = expr; RPAREN;{Uniop (Sin, e)}
-	| COS; LPAREN; e = expr; RPAREN;{Uniop (Cos, e)}
-	| TAN; LPAREN; e = expr; RPAREN;{Uniop (Tan, e)}
-	| ARCTAN; LPAREN; e = expr; RPAREN;{Uniop (ArcTan, e)}
-	| ARCCOS; LPAREN; e = expr; RPAREN;{Uniop (ArcCos, e)}
-	| ARCSIN; LPAREN; e = expr; RPAREN;{Uniop (ArcSin, e)}
+	| SIN; e = expr; {Uniop (Sin, e)}
+	| COS; e = expr; {Uniop (Cos, e)}
+	| TAN; e = expr; {Uniop (Tan, e)}
+	| ARCTAN; e = expr; {Uniop (ArcTan, e)}
+	| ARCCOS; e = expr; {Uniop (ArcCos, e)}
+	| ARCSIN; e = expr; {Uniop (ArcSin, e)}
 	| LPAREN; e=expr; RPAREN {e} 
 	;
 	
