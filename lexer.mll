@@ -19,6 +19,8 @@ rule read =
   | "/" { DIV }
   | "^" { POW }
   | "!" { EXCL }
+  | "C" { COMB }
+  | "P" { PERM }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "x" { XVAR }

@@ -53,6 +53,7 @@ let rec step_graph v = function
   | Uniop (uop, e) when is_value_graph e ->
     step_uop v uop e
   | Uniop (uop, e) -> Uniop (uop, step_graph v e)
+  | _ -> failwith "unimplemented"
 
 (** [step_bop bop v1 v2] implements the primitive operation
     [v1 bop v2].  Requires: [v1] and [v2] are both values. *)
@@ -125,6 +126,8 @@ and step_bop bop e1 e2 = match bop, e1, e2 with
   | Subt, Num a, Num b -> Num (a -. b)
   | Div, Num a, Num b -> Num (a /. b)
   | Pow, Num a, Num b -> Num (a ** b)
+  | Perm, Num a, Num b -> Num ((fact a) /. ((fact b) *. (a -. b |> fact)))
+  | Comb, Num a, Num b -> Num ((fact a) /. (fact b))
   (* | Der, Num a, b -> Num (derive a (b |> eval_graph)) *)
   | _ -> failwith "precondition violated: bop"
 
