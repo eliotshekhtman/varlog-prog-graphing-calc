@@ -57,6 +57,11 @@ let scale ((a,b,c,d) : (int * int * int * int)) : unit =
 let _ = moveto 0 (ycoord_to_pix (0. |> func |> xpix_to_coord) |> int_of_float) 
 *)
 
+let better_int_of_float (f : float) = 
+  if f >= (max_int |> float_of_int) then max_int / 2
+  else if f <= (min_int |> float_of_int) then min_int / 2
+  else f |> int_of_float
+
 let rec graph_func xi xa yi ya x f =
   (* Set up window *)
   let _ = open_graph "" in
@@ -112,21 +117,26 @@ let rec graph_func xi xa yi ya x f =
       horz_ticks (c-1) (w + tick_width)
     end
     else () in
+  vert_ticks num_ticks 0; horz_ticks num_ticks 0;
 
   (* Set up for the graphing of the function *)
   let _ = moveto 0 (ycoord_to_pix (0. |> f |> xpix_to_coord) |> int_of_float) 
   in
 
   let rec helper x = 
-    if x >= window_width then () 
+    if x >= window_width then ()
     else begin
       let y_pix = x |> float_of_int |> xpix_to_coord |> f 
-                  |> ycoord_to_pix |> int_of_float in
-      if y_pix < 0 then Graphics.moveto x 0
-      else if y_pix > window_height then Graphics.moveto x window_height
+                  |> ycoord_to_pix |> better_int_of_float in
+      print_string ((x |> float_of_int |> xpix_to_coord |> f |> string_of_float) ^ " ");
+      print_endline (current_y () |> string_of_int);
+      if current_y () <= 0 && y_pix < 0 then Graphics.moveto x 0
+      else if y_pix < 0 then Graphics.lineto x 0
+      else if current_y () >= window_height && y_pix > window_height then Graphics.moveto x window_height
+      else if y_pix > window_height then Graphics.lineto x window_height
       else Graphics.lineto x y_pix; 
       helper (x+1)
     end
-  in vert_ticks num_ticks 0; horz_ticks num_ticks 0; helper 0
+  in helper 0
 
 (* let _ = graph_func 0 func *)
