@@ -128,8 +128,8 @@ let rec graph_func xi xa yi ya x f =
     else begin
       let y_pix = x |> float_of_int |> xpix_to_coord |> f 
                   |> ycoord_to_pix |> better_int_of_float in
-      print_string ((x |> float_of_int |> xpix_to_coord |> f |> string_of_float) ^ " ");
-      print_endline (current_y () |> string_of_int);
+      (* print_string ((x |> float_of_int |> xpix_to_coord |> f |> string_of_float) ^ " "); *)
+      (* print_endline (current_y () |> string_of_int); *)
       if current_y () <= 0 && y_pix < 0 then Graphics.moveto x 0
       else if y_pix < 0 then Graphics.lineto x 0
       else if current_y () >= window_height && y_pix > window_height then Graphics.moveto x window_height
