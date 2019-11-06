@@ -1,7 +1,9 @@
 open Ast
 open Graphing
 
-let rec fact n = if n = 0. then 1. else n *. fact (n -. 1.)
+let rec fact n = 
+  if n < 0. then failwith "not integer"
+  else if n = 0. then 1. else n *. fact (n -. 1.)
 
 (** [is_value e] is whether [e] is a value. *)
 let is_value : expr -> bool = function
