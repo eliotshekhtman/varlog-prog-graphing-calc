@@ -5,6 +5,8 @@ type bop =
   | Subt
   | Div 
   | Pow
+  | Comb 
+  | Perm
 
 
 

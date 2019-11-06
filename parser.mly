@@ -20,6 +20,8 @@ open Ast
 %token DIV
 %token POW
 %token EXCL
+%token COMB 
+%token PERM
 %token LPAREN
 %token RPAREN
 %token COMMA
@@ -29,6 +31,8 @@ open Ast
 %left SUBT 
 %left TIMES  
 %left DIV
+%left COMB 
+%left PERM
 %left POW
 
 %start <Ast.expr> prog
@@ -54,6 +58,8 @@ expr:
 	| e1 = expr; SUBT; e2 = expr { Binop (Subt, e1, e2) }
 	| e1 = expr; DIV; e2 = expr { Binop (Div, e1, e2) }
 	| e1 = expr; POW; e2 = expr { Binop (Pow, e1, e2) }
+	| e1 = expr; COMB; e2 = expr { Binop (Comb, e1, e2) }
+	| e1 = expr; PERM; e2 = expr { Binop (Perm, e1, e2) }
 	| SIN; LPAREN; e = expr; RPAREN;{Uniop (Sin, e)}
 	| COS; LPAREN; e = expr; RPAREN;{Uniop (Cos, e)}
 	| TAN; LPAREN; e = expr; RPAREN;{Uniop (Tan, e)}
