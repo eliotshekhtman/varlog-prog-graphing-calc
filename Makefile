@@ -14,7 +14,7 @@ build:
 	$(OCAMLBUILD) -pkg graphics $(OBJECTS)
 
 test:
-	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
+	$(OCAMLBUILD) -tag 'debug' $(TEST) -pkg graphics && ./$(TEST)
 
 clean:
 	ocamlbuild -clean
