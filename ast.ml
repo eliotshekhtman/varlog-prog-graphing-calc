@@ -6,6 +6,10 @@ type bop =
   | Div 
   | Pow
 
+
+type der = 
+  | Der
+
 type top =
   | Integral
 
@@ -24,6 +28,7 @@ type expr =
   | XVar
   (* | Bool of bool  *)
   | Binop of bop * expr * expr
+  | Derivative of der * expr * expr
   | Ternop of top * (expr * expr) * expr
   | Uniop of uop * expr
   (* | Let of string * expr * expr

@@ -12,6 +12,7 @@ rule read =
   | "EVAL" { EVAL }
   | "GRAPH" { GRAPH }
   | "INTEGRAL" {INTEGRAL}
+  | "DERIVATIVE" {DERIVATIVE}
   | "*" { TIMES }
   | "+" { PLUS }
   | "-" { SUBT }

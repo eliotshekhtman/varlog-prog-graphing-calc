@@ -85,6 +85,9 @@ let rec integrate a b acc fn =
     let area = acc +. 0.0001 *. fn (a+.0.0001) in
     integrate (a+.0.0001) b area fn 
 
+let derive a fn = 
+  (fn (a+.0.0001) -. fn (a-.0.0001)) /. 0.0002
+
 (** [step e] takes a single step of evaluation of [e]. *)
 let rec step : expr -> expr = function
   | Keyword _ -> failwith "precondition violated: too many keywords"
@@ -102,12 +105,18 @@ let rec step : expr -> expr = function
   | Uniop (uop, e) when is_value e ->
     step_uop uop e
   | Uniop (uop, e) -> Uniop (uop, step e)  
+  | Derivative (der,e1,e2) when is_value e1 -> step_deriv der e1 e2
+  | Derivative (der,e1,e2) -> Derivative (der, step e1, e2)
   |_-> failwith "Ya fucked up"
 
+and step_deriv der e1 e2 = match der, e1, e2 with
+  | Der, Num a, b -> Num (derive a (b|> eval_graph))
+  |_-> failwith "you are dumb"
 
 and step_top top e1 e2 e3 = match top, e1, e2, e3 with
   | Integral, Num a, Num b, c -> Num (integrate a b 0. (c|>eval_graph))
   |_-> failwith "precondition violated"
+
 (** [step_bop bop v1 v2] implements the primitive operation
     [v1 bop v2].  Requires: [v1] and [v2] are both values. *)
 and step_bop bop e1 e2 = match bop, e1, e2 with
@@ -116,6 +125,7 @@ and step_bop bop e1 e2 = match bop, e1, e2 with
   | Subt, Num a, Num b -> Num (a -. b)
   | Div, Num a, Num b -> Num (a /. b)
   | Pow, Num a, Num b -> Num (a ** b)
+  (* | Der, Num a, b -> Num (derive a (b |> eval_graph)) *)
   | _ -> failwith "precondition violated: bop"
 
 (** [step_uop uop v] implements the primitive operation

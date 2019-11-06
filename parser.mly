@@ -5,6 +5,7 @@ open Ast
 %token EVAL
 %token GRAPH
 %token INTEGRAL
+%token DERIVATIVE
 %token XVAR
 %token <float> NUM
 %token TIMES
@@ -37,6 +38,7 @@ expr:
 	| GRAPH; e = expr; { Keyword (Graph, e) }
 	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
 		{ Ternop (Integral, (e1 , e2), e3) }
+	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{Derivative (Der, e1, e2)}
 	| i = NUM { Num i }
 	| XVAR; { XVar }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }
