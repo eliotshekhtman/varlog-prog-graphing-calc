@@ -21,7 +21,9 @@ let eval_tests = [
   make_eval_test "pow1" 9. "3^2";
   make_eval_test "neg1" 5. "(-1)+(-1)-(-(4+3))";
   make_eval_test "fact1" 6. "3!";
-  make_eval_test "fact2" 123. "(3+2)! + 3"
+  make_eval_test "fact2" 123. "(3+2)! + 3";
+  make_eval_test "int1" 4.0001 "INTEGRAL((1,3),x)";
+  make_eval_test "int2" 15.0001 "1+3!+INTEGRAL((1,3),x)+4"
 ]
 
 let tests = [
