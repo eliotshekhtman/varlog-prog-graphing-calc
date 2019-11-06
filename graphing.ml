@@ -1,67 +1,17 @@
 open Graphics
 
-
-
-(* let _ = size_x ()
-   let _ = size_y () *)
-(* let _ = plot 100 100
-   let _ = plot 101 101
-   let _ = plot 102 102
-   let _ = plot 103 103
-   let _ = plot 104 104
-   let _ = plot 105 105
-   let _ = plot 106 106
-   let _ = plot 107 107 *)
-
-
-
-
-
-
-let linear a b inputs = b
-
-(* 
-let draw_string_v s =
-
-  let (xi,yi) = Graphics.current_point()
-  and l = String.length s
-  and (_,h) = Graphics.text_size s
-  in
-  Graphics.draw_char s.[0];
-  for i=1 to l-1 do
-    let (_,b) = Graphics.current_point()
-    in Graphics.moveto xi (b-h);
-    Graphics.draw_char s.[i]
-  done;
-  let (a,_) = Graphics.current_point() in Graphics.moveto a yi *)
-
-
-
-(* let _ = moveto 2 130 *)
-(* let _ = draw_string_v "abscissa" *)
-
-(* let _ = moveto 135 280  *)
-(* let _ = draw_string_v "ordinate" *)
-
-(* 
-let scale ((a,b,c,d) : (int * int * int * int)) : unit = 
-  match (a,b,c,d) with 
-  | a -> begin 
-     *)
-
-(** [xpix_to_coord x] is the coordinate value for the pixel [x]
-    pixels away from the left bound of the graph. *)
-
-
-(* 
-let _ = moveto 0 (ycoord_to_pix (0. |> func |> xpix_to_coord) |> int_of_float) 
-*)
-
+(** [better_int_of_float f] is [f] cast to an integer, for the purposes
+    of the graph: if it's too big or too small, set to the extrema of [int],
+    divided by 2, because we'll never set the graph to be that large 
+    anyways. *)
 let better_int_of_float (f : float) = 
   if f >= (max_int |> float_of_int) then max_int / 2
   else if f <= (min_int |> float_of_int) then min_int / 2
   else f |> int_of_float
 
+(** [graph_func xi xa yi ya x f] is [unit], but it graphs function f, 
+    starting at pixel [x], with bounds min x = [xi], max x = [xa],
+    min y = [yi], max y = [ya]. *)
 let rec graph_func xi xa yi ya x f =
   (* Set up window *)
   let _ = open_graph "" in
@@ -128,11 +78,14 @@ let rec graph_func xi xa yi ya x f =
     else begin
       let y_pix = x |> float_of_int |> xpix_to_coord |> f 
                   |> ycoord_to_pix |> better_int_of_float in
-      (* print_string ((x |> float_of_int |> xpix_to_coord |> f |> string_of_float) ^ " "); *)
+      (* print_string 
+         ((x |> float_of_int |> xpix_to_coord |> f |> string_of_float) 
+         ^ " "); *)
       (* print_endline (current_y () |> string_of_int); *)
       if current_y () <= 0 && y_pix < 0 then Graphics.moveto x 0
       else if y_pix < 0 then Graphics.lineto x 0
-      else if current_y () >= window_height && y_pix > window_height then Graphics.moveto x window_height
+      else if current_y () >= window_height && y_pix > window_height then 
+        Graphics.moveto x window_height
       else if y_pix > window_height then Graphics.lineto x window_height
       else Graphics.lineto x y_pix; 
       helper (x+1)
