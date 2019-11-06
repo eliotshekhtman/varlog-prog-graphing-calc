@@ -7,6 +7,8 @@ type bop =
   | Pow
 
 
+
+
 type der = 
   | Der
 
@@ -15,6 +17,12 @@ type top =
 
 type uop = 
   | Fact
+  | Sin
+  | Cos 
+  | Tan 
+  | ArcSin
+  | ArcCos
+  | ArcTan
 
 type key =
   | Eval

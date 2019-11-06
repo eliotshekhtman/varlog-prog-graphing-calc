@@ -132,6 +132,12 @@ and step_bop bop e1 e2 = match bop, e1, e2 with
     [uop v].  Requires: [v] is a value. *)
 and step_uop uop e = match uop, e with
   | Fact, Num a -> Num (fact a)
+  | Sin, Num a -> Num (sin a)
+  | Cos, Num a -> Num (cos a)
+  | Tan, Num a -> Num (tan a)
+  | ArcSin, Num a -> Num(asin a)
+  | ArcCos,Num a -> Num(acos a)
+  | ArcTan, Num a -> Num(atan a)
   | _ -> failwith "precondition violated: uop"
 
 
