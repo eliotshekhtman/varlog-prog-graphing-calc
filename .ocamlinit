@@ -4,6 +4,6 @@
 #load "parser.cmo";;
 #load "main.cmo";;
 #load "graphics.cma";;
+open Graphics;;
 open Ast;;
 open Main;;
-open Graphics;;
