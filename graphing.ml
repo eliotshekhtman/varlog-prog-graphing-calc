@@ -20,6 +20,7 @@ let rec graph_func xi xa yi ya x f =
   let window_width = 800 in
   let _ = resize_window window_width window_height in
   let num_ticks = 10 in
+  set_color black;
 
   let tick_height = window_height / num_ticks in
   let tick_width = window_width / num_ticks in
@@ -72,7 +73,7 @@ let rec graph_func xi xa yi ya x f =
   (* Set up for the graphing of the function *)
   let _ = moveto 0 (ycoord_to_pix (0. |> f |> xpix_to_coord) |> int_of_float) 
   in
-
+  set_color blue;
   let rec helper x = 
     if x >= window_width then ()
     else begin
