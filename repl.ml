@@ -4,7 +4,7 @@ open Graphing
 let rec run () =
   print_string "> ";
   match read_line () with
-  | exception (Graphics.Graphic_failure _) -> print_endline "Quitting"
+  | exception (Graphics.Graphic_failure _) -> print_endline ""; print_endline "Quitting"
   | "" -> run ()
   | "QUIT" -> print_endline "Quitting"
   | "SET_SCALE" -> begin print_endline "x" end
