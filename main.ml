@@ -9,41 +9,6 @@ let is_value : expr -> bool = function
   | XVar -> failwith "precondition violated: variable"
   | _ -> false
 
-(** [step e] takes a single step of evaluation of [e]. *)
-let rec step : expr -> expr = function
-  | Keyword _ -> failwith "precondition violated: too many keywords"
-  | Num _ -> failwith "Does not step"
-  | XVar -> failwith "precondition violated: variable"
-  | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> 
-    step_bop bop e1 e2
-  | Binop (bop, e1, e2) when is_value e1 ->
-    Binop (bop, e1, step e2)
-  | Binop (bop, e1, e2) -> Binop (bop, step e1, e2)
-  | Uniop (uop, e) when is_value e ->
-    step_uop uop e
-  | Uniop (uop, e) -> Uniop (uop, step e)
-
-(** [step_bop bop v1 v2] implements the primitive operation
-    [v1 bop v2].  Requires: [v1] and [v2] are both values. *)
-and step_bop bop e1 e2 = match bop, e1, e2 with
-  | Add, Num a, Num b -> Num (a +. b)
-  | Mult, Num a, Num b -> Num (a *. b)
-  | Subt, Num a, Num b -> Num (a -. b)
-  | Div, Num a, Num b -> Num (a /. b)
-  | Pow, Num a, Num b -> Num (a ** b)
-  | _ -> failwith "precondition violated: bop"
-
-(** [step_uop uop v] implements the primitive operation
-    [uop v].  Requires: [v] is a value. *)
-and step_uop uop e = match uop, e with
-  | Fact, Num a -> Num (fact a)
-  | _ -> failwith "precondition violated: uop"
-
-
-(** [eval e] fully evaluates [e] step-wise to a value. *)
-let rec eval (e : expr) : expr = 
-  if is_value e then e
-  else e |> step |> eval
 
 (** [parse s] parses [s] into an AST. *)
 let parse (s : string) : expr =
@@ -76,6 +41,10 @@ let rec step_graph v = function
   | Keyword _ -> failwith "precondition violated: too many keywords"
   | Num _ -> failwith "Does not step"
   | XVar -> failwith "precondition violated: variable"
+  (* | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
+     step_top top e1 e2 e3
+     | Ternop (top, (e1,e2), e3) when is_value e1 -> Ternop(top, (e1, step e2), e3)
+     | Ternop (top, (e1,e2), e3)-> Ternop(top, (step e1, e2), e3) *)
   | Binop (bop, e1, e2) when is_value_graph e1 && is_value_graph e2 -> 
     step_bop v bop e1 e2
   | Binop (bop, e1, e2) when is_value_graph e1 ->
@@ -108,6 +77,59 @@ let rec eval_graph (e : expr) (v : float) : float =
   | Num n -> n
   | XVar -> v
   | _ -> eval_graph (e |> step_graph v) v
+
+
+let rec integrate a b acc fn = 
+  if(a >= b) then acc 
+  else
+    let area = acc +. 0.0001 *. fn (a+.0.0001) in
+    integrate (a+.0.0001) b area fn 
+
+(** [step e] takes a single step of evaluation of [e]. *)
+let rec step : expr -> expr = function
+  | Keyword _ -> failwith "precondition violated: too many keywords"
+  | Num _ -> failwith "Does not step"
+  | XVar -> failwith "precondition violated: variable"
+  | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
+    step_top top e1 e2 e3
+  | Ternop (top, (e1,e2), e3) when is_value e1 -> Ternop(top, (e1, step e2), e3)
+  | Ternop (top, (e1,e2), e3)-> Ternop(top, (step e1, e2), e3)
+  | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> 
+    step_bop bop e1 e2
+  | Binop (bop, e1, e2) when is_value e1 ->
+    Binop (bop, e1, step e2)
+  | Binop (bop, e1, e2) -> Binop (bop, step e1, e2)
+  | Uniop (uop, e) when is_value e ->
+    step_uop uop e
+  | Uniop (uop, e) -> Uniop (uop, step e)  
+  |_-> failwith "Ya fucked up"
+
+
+and step_top top e1 e2 e3 = match top, e1, e2, e3 with
+  | Integral, Num a, Num b, c -> Num (integrate a b 0. (c|>eval_graph))
+  |_-> failwith "precondition violated"
+(** [step_bop bop v1 v2] implements the primitive operation
+    [v1 bop v2].  Requires: [v1] and [v2] are both values. *)
+and step_bop bop e1 e2 = match bop, e1, e2 with
+  | Add, Num a, Num b -> Num (a +. b)
+  | Mult, Num a, Num b -> Num (a *. b)
+  | Subt, Num a, Num b -> Num (a -. b)
+  | Div, Num a, Num b -> Num (a /. b)
+  | Pow, Num a, Num b -> Num (a ** b)
+  | _ -> failwith "precondition violated: bop"
+
+(** [step_uop uop v] implements the primitive operation
+    [uop v].  Requires: [v] is a value. *)
+and step_uop uop e = match uop, e with
+  | Fact, Num a -> Num (fact a)
+  | _ -> failwith "precondition violated: uop"
+
+
+(** [eval e] fully evaluates [e] step-wise to a value. *)
+let rec eval (e : expr) : expr = 
+  if is_value e then e
+  else e |> step |> eval
+
 
 (** [interp s] interprets [s] by lexing and parsing it, 
     evaluating it, and returning either the value in the case of an expression

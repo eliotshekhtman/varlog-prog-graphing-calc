@@ -4,6 +4,7 @@ open Ast
 
 %token EVAL
 %token GRAPH
+%token INTEGRAL
 %token XVAR
 %token <float> NUM
 %token TIMES
@@ -14,6 +15,7 @@ open Ast
 %token EXCL
 %token LPAREN
 %token RPAREN
+%token COMMA
 %token EOF
 
 %left PLUS
@@ -33,6 +35,8 @@ prog:
 expr:
   | EVAL; e = expr; { Keyword (Eval, e) }
 	| GRAPH; e = expr; { Keyword (Graph, e) }
+	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
+		{ Ternop (Integral, (e1 , e2), e3) }
 	| i = NUM { Num i }
 	| XVAR; { XVar }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }

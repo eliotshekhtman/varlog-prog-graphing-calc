@@ -11,6 +11,7 @@ rule read =
   | white { read lexbuf }
   | "EVAL" { EVAL }
   | "GRAPH" { GRAPH }
+  | "INTEGRAL" {INTEGRAL}
   | "*" { TIMES }
   | "+" { PLUS }
   | "-" { SUBT }
@@ -20,5 +21,6 @@ rule read =
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "x" { XVAR }
+  | "," {COMMA}
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
   | eof { EOF }
