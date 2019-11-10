@@ -1,19 +1,44 @@
 open AstLang
 
-module VarLog = struct
-  type t = (string * value) list
+module type VL = sig 
+  type var 
+  type t
+  val empty : t
+  val find : string -> t -> value option
+  val bind : string -> value -> t -> unit
+end
 
-  let empty = []
-  let bind id v vl = (id, v) :: vl 
-  let find id vl = List.assoc id vl
+module VarLog : VL = struct
+  type var = string * value
+  type t = var list ref
+
+  let empty : t = ref []
+
+  let find id vl = 
+    let rec helper = function 
+      | [] -> None 
+      | h :: t -> 
+        if (fst h) = id then Some (snd h)
+        else helper t
+    in helper !vl
+
+  let bind id v vl = 
+    let rec helper = function 
+      | [] -> [(id, v)]
+      | h :: t -> 
+        if (fst h) = id then (id, v) :: t 
+        else helper t
+    in vl := helper !vl
+
 end
 
 let substitute vv vl =
   match vv with 
   | Val v -> v
   | Var v -> begin 
-      try VarLog.find v vl 
-      with (_) -> failwith "precondition violated: no binding" 
+      match VarLog.find v vl with 
+      | None -> failwith "precondition violated: no binding"
+      | Some v -> v
     end
   | _ -> failwith "precondition violated: not variable or value"
 
