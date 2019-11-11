@@ -52,6 +52,7 @@ let rec fact n = if n = 0. then 1. else n *. fact (n -. 1.)
 (** [is_value e] is whether [e] is a value. *)
 let is_value : expr -> bool = function
   | Val _ -> true
+  | Var _ -> true
   | _ -> false
 
 (** [step e] takes a single step of evaluation of [e]. *)
@@ -66,6 +67,9 @@ let rec step vl = function
   | Uniop (uop, e) when is_value e ->
     step_uop vl uop e
   | Uniop (uop, e) -> Uniop (uop, step vl e)
+  | Bind (s, e1, e2) when is_value e1 ->
+    VarLog.bind s (substitute e1 vl) vl; step vl e2
+  | Bind (s, e1, e2) -> Bind (s, step vl e1, e2)
   | _ -> failwith "fuck u"
 
 (** [step_bop bop v1 v2] implements the primitive operation
