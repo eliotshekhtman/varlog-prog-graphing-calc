@@ -33,14 +33,14 @@ type key =
 
 type expr = 
   | Keyword of key * expr
-  (* | Var of string  *)
+  | Var of string 
   | Num of float
-  | XVar
   (* | Bool of bool  *)
   | Binop of bop * expr * expr
   | Derivative of der * expr * expr
   | Ternop of top * (expr * expr) * expr
   | Uniop of uop * expr
+  | Bind of string * expr * expr
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
 

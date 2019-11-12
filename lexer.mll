@@ -4,7 +4,11 @@
 
 let white = [' ' '\t']+
 let digit = ['0'-'9']
+let lletter = ['a'-'z']
+let uletter = ['A'-'Z']
 let float = digit+ '.'? digit*
+let word = (uletter | lletter)+
+let string = '"' word '"'
 
 rule read =
   parse 
@@ -23,7 +27,6 @@ rule read =
   | "P" { PERM }
   | "(" { LPAREN }
   | ")" { RPAREN }
-  | "x" { XVAR }
   | "," {COMMA}
   | "SIN" {SIN}
   | "COS" {COS}
@@ -32,4 +35,8 @@ rule read =
   | "ARCCOS" {ARCCOS}
   | "ARCSIN" {ARCSIN}
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
+  | "VAR" { VAR }
+  | ":" { COLON }
+  | "END" { END }
+  | word { NAME (Lexing.lexeme lexbuf) }
   | eof { EOF }
