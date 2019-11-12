@@ -8,7 +8,7 @@ let rec fact n =
 (** [is_value e] is whether [e] is a value. *)
 let is_value : expr -> bool = function
   | Num _ -> true
-  | XVar -> failwith "precondition violated: variable"
+  | Var _ -> failwith "precondition violated: variable"
   | _ -> false
 
 
@@ -29,20 +29,20 @@ let string_of_val (e : expr) : string =
 (** [is_value e] is whether [e] is a value. *)
 let is_value_graph : expr -> bool = function
   | Num _ -> true
-  | XVar -> true
+  | Var "x" -> true
   | _ -> false
 
 (** [get_value v] is the value contained within value constructor [v]*)
 let get_val v = function
   | Num n -> n
-  | XVar -> v 
+  | Var "x" -> v 
   | _ -> failwith "precondition violated"
 
 (** [step e] takes a single step in the graphing of [e]*)
 let rec step_graph v = function
   | Keyword _ -> failwith "precondition violated: too many keywords"
   | Num _ -> failwith "Does not step"
-  | XVar -> failwith "precondition violated: variable"
+  | Var _ -> failwith "precondition violated: variable"
   (* | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
      step_top top e1 e2 e3
      | Ternop (top, (e1,e2), e3) when is_value e1 -> Ternop(top, (e1, step e2), e3)
@@ -84,7 +84,7 @@ and step_uop v uop e = match uop with
 let rec eval_graph (e : expr) (v : float) : float = 
   match e with
   | Num n -> n
-  | XVar -> v
+  | Var "x" -> v
   | _ -> eval_graph (e |> step_graph v) v
 
 
@@ -101,7 +101,7 @@ let derive a fn =
 let rec step : expr -> expr = function
   | Keyword _ -> failwith "precondition violated: too many keywords"
   | Num _ -> failwith "Does not step"
-  | XVar -> failwith "precondition violated: variable"
+  | Var _ -> failwith "precondition violated: variable"
   | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
     step_top top e1 e2 e3
   | Ternop (top, (e1,e2), e3) when is_value e1 -> Ternop(top, (e1, step e2), e3)
