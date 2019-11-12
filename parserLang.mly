@@ -3,6 +3,7 @@ open AstLang
 %}
 
 %token <float> NUM
+%token <string> NAME
 %token TIMES
 %token PLUS
 %token SUBT
@@ -12,6 +13,7 @@ open AstLang
 %token LPAREN
 %token RPAREN
 %token VAR
+%token COLON
 %token END
 %token EOF
 
@@ -21,7 +23,7 @@ open AstLang
 %left DIV
 %left POW
 
-%start <Ast.expr> prog
+%start <AstLang.expr> prog
 
 %%
 
@@ -32,14 +34,14 @@ prog:
 expr:
 	| i = NUM { Val (Num i) }
 	| s = NAME { Var s }
-	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }
+	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Val (Num 0.), e) }
 	| e = expr; EXCL {Uniop (Fact, e)}
 	| e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) } 
 	| e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
 	| e1 = expr; SUBT; e2 = expr { Binop (Subt, e1, e2) }
 	| e1 = expr; DIV; e2 = expr { Binop (Div, e1, e2) }
 	| e1 = expr; POW; e2 = expr { Binop (Pow, e1, e2) }
-	| VAR; s = NAME; e1 = expr; END; e2 = expr; { Bind (s, e1, e2) }
+	| VAR; s = NAME; COLON; e1 = expr; END; e2 = expr; { Bind ("", e1, e2) }
 	| LPAREN; e=expr; RPAREN {e} 
 	;
 	

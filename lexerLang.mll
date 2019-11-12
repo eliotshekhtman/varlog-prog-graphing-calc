@@ -1,5 +1,5 @@
 {
-  open Parser
+  open ParserLang
 }
 
 let white = [' ' '\t']+
@@ -23,6 +23,7 @@ rule read =
   | ")" { RPAREN }
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
   | "VAR" { VAR }
+  | ":" { COLON }
   | "END" { END }
   | word { NAME (Lexing.lexeme lexbuf) }
   | eof { EOF }
