@@ -1,9 +1,10 @@
-DISP "Reset?"
-PROMPT r
-IF r = 0 THEN GOTO 2 ELSE END
-DISP "r wasn't 0"
-LBL 2
-DISP "r was 0"
+GOTO a
 
-VAR a : 5 END
-DISP a
+GOTO b
+LBL a
+IF 2 = 2 THEN GOTO b ELSE GOTO c END
+GOTO c
+LBL d
+IF 2 = 2 THEN
+GOTO d
+ELSE GOTO a END
