@@ -1,7 +1,7 @@
 UNITS=authors ast main repl astLang graphing
-MLS_WITHOUT_MLIS=ast 
+MLS_WITHOUT_MLIS=ast astLang
 MLS=$(UNITS:=.ml) $(MLS_WITHOUT_MLIS:=.ml)
-OBJECTS=$(UNITS:=.cmo) $(MLS_WITHOUT_MLIS:=.cmo) parser.cmo
+OBJECTS=$(UNITS:=.cmo) $(MLS_WITHOUT_MLIS:=.cmo) parser.cmo parserLang.cmo
 MLIS=$(UNITS:=.mli)
 TEST=test.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind

@@ -1,7 +1,9 @@
 #require "str";;
 #directory "_build";;
 #load "lexer.cmo";;
+#load "lexerLang.cmo";;
 #load "parser.cmo";;
+#load "parserLang.cmo";;
 #load "main.cmo";;
 #load "graphics.cma";;
 open Graphics;;
