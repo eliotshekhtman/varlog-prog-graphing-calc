@@ -31,11 +31,14 @@ type key =
   | Graph
   (* | Derivative *)
 
+type value = 
+  | Num of float 
+  | Bool of bool 
+
 type expr = 
   | Keyword of key * expr
+  | Val of value
   | Var of string 
-  | Num of float
-  (* | Bool of bool  *)
   | Binop of bop * expr * expr
   | Derivative of der * expr * expr
   | Ternop of top * (expr * expr) * expr

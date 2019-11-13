@@ -58,9 +58,9 @@ expr:
 	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
 		{ Ternop (Integral, (e1 , e2), e3) }
 	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{Derivative (Der, e1, e2)}
-	| i = NUM { Num i }
+	| i = NUM { Val (Num i) }
 	| s = NAME { Var s }
-	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Num 0., e) }
+	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Val (Num 0.), e) }
 	| e = expr; EXCL {Uniop (Fact, e)}
 	| e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) } 
 	| e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
@@ -75,7 +75,7 @@ expr:
 	| ARCTAN; e = expr; {Uniop (ArcTan, e)}
 	| ARCCOS; e = expr; {Uniop (ArcCos, e)}
 	| ARCSIN; e = expr; {Uniop (ArcSin, e)}
-	| VAR; s = NAME; COLON; e1 = expr; END; e2 = expr; { Bind ("", e1, e2) }
+	| VAR; s = NAME; COLON; e1 = expr; END; e2 = expr; { Bind (s, e1, e2) }
 	| LPAREN; e=expr; RPAREN {e} 
 	;
 	
