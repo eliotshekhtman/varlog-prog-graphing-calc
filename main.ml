@@ -144,6 +144,7 @@ and step_bop bop e1 e2 = match bop, e1, e2 with
 (** [step_uop uop v] implements the primitive operation
     [uop v].  Requires: [v] is a value. *)
 and step_uop uop e = match uop, e with
+  | Subt, Val (Num a) -> Val (Num (~-.a))
   | Fact, Val (Num a) -> Val (Num (fact a))
   | Sin, Val (Num a) -> Val (Num (sin a))
   | Cos, Val (Num a) -> Val (Num (cos a))

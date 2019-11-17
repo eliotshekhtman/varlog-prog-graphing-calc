@@ -62,6 +62,7 @@ expr:
 	| s = NAME { Var s }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Val (Num 0.), e) }
 	| e = expr; EXCL {Uniop (Fact, e)}
+	| SUBT; e = expr; { Uniop (Subt, e) }
 	| e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) } 
 	| e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
 	| e1 = expr; SUBT; e2 = expr { Binop (Subt, e1, e2) }

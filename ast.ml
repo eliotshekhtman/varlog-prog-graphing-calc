@@ -18,6 +18,7 @@ type top =
   | Integral
 
 type uop = 
+  | Subt
   | Fact
   | Sin
   | Cos 
