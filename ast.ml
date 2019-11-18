@@ -45,6 +45,7 @@ type expr =
   | Ternop of top * (expr * expr) * expr
   | Uniop of uop * expr
   | Bind of string * expr * expr
+  | Disp of expr * expr
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
 

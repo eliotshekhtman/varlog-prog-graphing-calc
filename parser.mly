@@ -27,6 +27,7 @@ open Ast
 %token COMMA
 %token VAR
 %token COLON
+%token DISP
 %token END
 %token EOF
 
@@ -76,6 +77,7 @@ expr:
 	| ARCTAN; e = expr; {Uniop (ArcTan, e)}
 	| ARCCOS; e = expr; {Uniop (ArcCos, e)}
 	| ARCSIN; e = expr; {Uniop (ArcSin, e)}
+	| DISP; e1 = expr; END; e2 = expr { Disp (e1, e2) }
 	| VAR; s = NAME; COLON; e1 = expr; END; e2 = expr; { Bind (s, e1, e2) }
 	| LPAREN; e=expr; RPAREN {e} 
 	;

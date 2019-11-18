@@ -67,6 +67,12 @@ let rec step vl = function
   | Bind (s, e1, e2) when is_value e1 -> 
     VarLog.bind s (substitute e1 vl) vl; step vl e2
   | Bind (s, e1, e2) -> Bind (s, step vl e1, e2)
+  | Disp ((Val v), e) -> begin 
+      match v with 
+      | Num n -> n |> string_of_float |> print_endline; step vl e
+      | Bool b -> b |> string_of_bool |> print_endline; step vl e
+    end
+  | Disp (e1, e2) -> Disp ((step vl e1), e2)
   | _ -> failwith "fuck u"
 
 (** [step_bop bop v1 v2] implements the primitive operation

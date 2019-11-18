@@ -2,7 +2,7 @@
   open Parser
 }
 
-let white = [' ' '\t']+
+let white = [' ' '\t' '\n']+
 let digit = ['0'-'9']
 let lletter = ['a'-'z']
 let uletter = ['A'-'Z']
@@ -17,6 +17,7 @@ rule read =
   | "GRAPH" { GRAPH }
   | "INTEGRAL" {INTEGRAL}
   | "DERIVATIVE" {DERIVATIVE}
+  | "DISP" { DISP }
   | "*" { TIMES }
   | "+" { PLUS }
   | "-" { SUBT }
