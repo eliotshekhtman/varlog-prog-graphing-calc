@@ -4,6 +4,7 @@ open Ast
 
 %token EVAL
 %token GRAPH
+%token NEWTON
 %token INTEGRAL
 %token DERIVATIVE
 %token SIN
@@ -56,6 +57,7 @@ prog:
 expr:
   | EVAL; e = expr; { Keyword (Eval, e) }
 	| GRAPH; e = expr; { Keyword (Graph, e) }
+	| NEWTON; e = expr; { Keyword (Newton, e) }
 	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
 		{ Ternop (Integral, (e1 , e2), e3) }
 	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{Derivative (Der, e1, e2)}

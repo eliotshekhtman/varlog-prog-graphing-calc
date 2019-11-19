@@ -15,6 +15,7 @@ rule read =
   | white { read lexbuf }
   | "EVAL" { EVAL }
   | "GRAPH" { GRAPH }
+  | "NEWTON" { NEWTON }
   | "INTEGRAL" {INTEGRAL}
   | "DERIVATIVE" {DERIVATIVE}
   | "DISP" { DISP }

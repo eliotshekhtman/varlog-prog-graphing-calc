@@ -160,6 +160,24 @@ let rec eval (e : expr) : expr =
   if is_value e then e
   else e |> step |> eval
 
+let rec newton_disp n lst acc = 
+  match acc, lst with 
+  | a, _ when a > n -> print_endline ("\n" ^ "Input coefficients: ")
+  | a, h :: t when a = n -> begin 
+      print_string (h ^ "x^" ^ (a |> string_of_int)); 
+      newton_disp n t (a+1)
+    end
+  | a, h :: t -> begin 
+      print_string (h ^ "x^" ^ (a |> string_of_int) ^ " + "); 
+      newton_disp n t (a+1)
+    end
+  | _, _ -> failwith "precondition violated: power"
+
+let newton_helper n = 
+  if n < 0. || n > 5. then failwith "Keep power to within 0-5"
+  else 
+    newton_disp (n |> int_of_float) ["A"; "B"; "C"; "D"; "E"; "F"] 0
+
 
 (** [interp s] interprets [s] by lexing and parsing it, 
     evaluating it, and returning either the value in the case of an expression
@@ -176,5 +194,10 @@ let interp (s : string) : string =
         let y_min = print_string "SET MIN Y> "; read_line () |> float_of_string in
         let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
         graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
+      | Newton -> begin 
+          match e with 
+          | Val (Num n) -> newton_helper n; ""
+          | _ -> "Improper input: enter the power of the function"
+        end
     end
   | _ -> failwith "no keyword"

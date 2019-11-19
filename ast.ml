@@ -30,6 +30,7 @@ type uop =
 type key =
   | Eval
   | Graph
+  | Newton
   (* | Derivative *)
 
 type value = 
