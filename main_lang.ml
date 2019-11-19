@@ -1,4 +1,5 @@
 open Ast 
+open Evallang
 
 let parse (s : string) : defn = 
   let lexbuf = Lexing.from_string s in 
@@ -14,3 +15,10 @@ let read_file file =
   let channel = Stdlib.open_in file in 
   let s = pull_string file channel in 
   s |> parse
+
+let interp s = 
+  try 
+    s |> read_file |> Evallang.eval_init; ""
+  with 
+  | End_of_file -> ""
+  | _ -> "Error: invalid input"
