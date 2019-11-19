@@ -194,6 +194,7 @@ let rec newton_make lst x =
   let rec deriv lst x = 
     match lst with 
     | [] -> 0.
+    | h :: [] -> 0.
     | h :: t -> 
       let ele = (t |> List.length |> float_of_int) in 
       ele *. h *. x ** (ele -. 1.) +. deriv t x
@@ -208,13 +209,11 @@ let rec newton_make lst x =
   let numer = norm lst x in 
   let denom = deriv lst x in 
   if denom = 0. || numer = 0. || denom = nan || numer = nan then x 
-  else x -. numer /. denom
+  else x -. (numer /. denom)
 
 let rec newton_apply f = 
   let rec apply n f r = 
-    let res = f r in 
-    if res = nan || res = (~-.nan) then r
-    else
+    let res = f r in
     if r = res then r 
     else
     if n <= 0 then r else apply (n-1) f res
