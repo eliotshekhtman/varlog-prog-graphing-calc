@@ -162,10 +162,16 @@ let rec eval (e : expr) : expr =
 
 let close_int (f : float) = 
   let f' = f |> int_of_float |> float_of_int in 
+  if f > 0. then
+    if f < f' +. 0.0000001 && f > f' -. 0.0000001 then (true, f') 
+    else 
+    if f < f' +. 1.0000001 && f > f' +. 1. -. 0.0000001 then (true, f' +. 1.)
+    else (false, f)
+  else 
   if f < f' +. 0.0000001 && f > f' -. 0.0000001 then (true, f') 
   else 
-  if f < f' +. 1.0000001 && f > f' +. 1. -. 0.0000001 then (true, f' +. 1.)
-  else (false, f)
+  if f > f' -. 1.0000001 && f < f' -. 1. +. 0.0000001 then (true, f' -. 1.)
+  else (false, f) 
 
 let rec newton_disp n lst acc = 
   match acc, lst with 
