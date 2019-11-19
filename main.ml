@@ -242,6 +242,110 @@ let newton_helper n =
     newton_apply f
 
 
+let matrix = [| [|1.;2.;3.|];[|0.;1.;5.|];[|5.;6.;0.|] |]
+let matrix_made = Array.make_matrix 3 3 4
+
+let find_det a d b c = a *. d -. b *. c
+
+let determined (matrix:float array array ) = 
+  let a1 = matrix.(1).(1) in
+  let d1 = matrix.(2).(2) in
+  let b1 = matrix.(1).(2) in
+  let c1 = matrix.(2).(1) in
+  let det1 = find_det a1 d1 b1 c1 in 
+  print_endline (string_of_float det1);
+  let a2 = matrix.(1).(0) in
+  let d2 = matrix.(2).(2) in
+  let b2 = matrix.(1).(2) in
+  let c2 = matrix.(2).(0) in
+  let det2 = -1. *. find_det a2 d2 b2 c2 in
+  print_endline (string_of_float det2);
+  let a3 = matrix.(1).(0) in
+  let d3 = matrix.(2).(1) in
+  let b3 = matrix.(1).(1) in
+  let c3 = matrix.(2).(0) in
+  let det3 = find_det a3 d3 b3 c3 in
+  print_endline (string_of_float det3);
+  let a4 = matrix.(0).(1) in
+  let d4 = matrix.(2).(2) in
+  let b4 = matrix.(0).(2) in
+  let c4 = matrix.(2).(1) in
+  let det4 = -1. *.find_det a4 d4 b4 c4 in
+  let a5 = matrix.(0).(0) in
+  let d5 = matrix.(2).(2) in
+  let b5 = matrix.(0).(2) in
+  let c5 = matrix.(2).(0) in
+  let det5 = find_det a5 d5 b5 c5 in
+  let a6 = matrix.(0).(0) in
+  let d6 = matrix.(2).(1) in
+  let b6 = matrix.(0).(1) in
+  let c6 = matrix.(2).(0) in
+  let det6 = -1. *.find_det a6 d6 b6 c6 in
+  let a7 = matrix.(0).(1) in
+  let d7 = matrix.(1).(2) in
+  let b7 = matrix.(0).(2) in
+  let c7 = matrix.(1).(1) in
+  let det7 = find_det a7 d7 b7 c7 in
+  let a8 = matrix.(0).(0) in
+  let d8 = matrix.(1).(2) in
+  let b8 = matrix.(0).(2) in
+  let c8 = matrix.(1).(0) in
+  let det8 = -1. *.find_det a8 d8 b8 c8 in
+  let a9 = matrix.(0).(0) in
+  let d9 = matrix.(1).(1) in
+  let b9 = matrix.(0).(1) in
+  let c9 = matrix.(1).(0) in
+  let det9 = find_det a9 d9 b9 c9 in
+  let det = (matrix.(0).(0)*.det1) +. (matrix.(0).(1) *. det2) +. (matrix.(0).(2)*.det3) in
+  print_endline (string_of_float det);
+  let new_matrix = ([|[|det1;det2;det3;|]; [|det4;det5;det6;|];[|det7;det8;det9;|]|], det) in
+  new_matrix
+
+let reflect (matrix: float array array) =
+  let temp1 = matrix.(1).(0) in
+  matrix.(1).(0) <- matrix.(0).(1);
+  matrix.(0).(1) <- temp1; 
+  let temp2 = matrix.(2).(0) in
+  matrix.(2).(0) <- matrix.(0).(2);
+  matrix.(0).(2) <- temp2; 
+  let temp3 = matrix.(2).(1) in
+  matrix.(2).(1) <- matrix.(1).(2);
+  matrix.(1).(2) <- temp3; 
+  matrix
+
+let normalized matrix det = 
+  let inverse_det = det ** -1. in
+  matrix.(0).(0) <- inverse_det *. matrix.(0).(0);
+  matrix.(0).(1) <- inverse_det *. matrix.(0).(1);
+  matrix.(0).(2) <- inverse_det *. matrix.(0).(2);
+  matrix.(1).(0) <- inverse_det *. matrix.(1).(0);
+  matrix.(1).(1) <- inverse_det *. matrix.(1).(1);
+  matrix.(1).(2) <- inverse_det *. matrix.(1).(2);
+  matrix.(2).(0) <- inverse_det *. matrix.(2).(0);
+  matrix.(2).(1) <- inverse_det *. matrix.(2).(1);
+  matrix.(2).(2) <- inverse_det *. matrix.(2).(2);
+  matrix
+
+let inversed (matrix: float array array) = 
+  let determinant_and_matrix = determined matrix in
+  let reflected = reflect (determinant_and_matrix |> fst) in
+  let final = normalized reflected (determinant_and_matrix |> snd) in
+  final
+
+let matrix_mult (matrix: float array array) (vector: float array) = 
+  let inverse_matrix = inversed matrix in
+  let answer_vector = [|0.;0.;0.|] in
+  for i = 0 to 2 do
+    let acc = ref 0. in
+    for j = 0 to 2 do
+      acc := !acc +. inverse_matrix.(i).(j) *. vector.(j);
+    done;
+    answer_vector.(i) <- !acc
+  done;
+  answer_vector
+
+
+
 (** [interp s] interprets [s] by lexing and parsing it, 
     evaluating it, and returning either the value in the case of an expression
     input or an indication that the expression has been graphed in the case
