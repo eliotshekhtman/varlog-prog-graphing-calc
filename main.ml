@@ -368,5 +368,6 @@ let interp (s : string) : string =
         let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
         graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
       | Newton -> newton_helper (e |> eval |> get_val 0.)
+      | Exec -> ""
     end
   | _ -> failwith "no keyword"

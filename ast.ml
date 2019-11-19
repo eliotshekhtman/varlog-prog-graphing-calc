@@ -31,6 +31,7 @@ type key =
   | Eval
   | Graph
   | Newton
+  | Exec
   (* | Derivative *)
 
 type value = 
