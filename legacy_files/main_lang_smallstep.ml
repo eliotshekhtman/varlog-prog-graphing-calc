@@ -98,7 +98,7 @@ let rec eval vl e =
 (** [parse s] parses [s] into an AST. *)
 let parse (s : string) : expr =
   let lexbuf = Lexing.from_string s in
-  let ast = Parser.prog Lexer.read lexbuf in
+  let ast = Parser.parse_expr Lexer.read lexbuf in
   ast
 
 (** [string_of_val e] converts [e] to a string.

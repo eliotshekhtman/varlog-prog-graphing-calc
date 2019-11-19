@@ -30,6 +30,9 @@ open Ast
 %token COLON
 %token DISP
 %token END
+%token IF 
+%token THEN 
+%token ELSE
 %token EOF
 
 %left PLUS
@@ -46,14 +49,19 @@ open Ast
 %right ARCCOS
 %right ARCTAN
 
-%start <Ast.expr> prog
+%start <Ast.expr> parse_expr 
+%start <Ast.defn> parse_defn
 
 %%
 
-prog:
+parse_expr:
 	| e = expr; EOF { e }
 	;
-	
+
+parse_defn: 
+  | d = defn; EOF { d }
+	;
+
 expr:
   | EVAL; e = expr; { Keyword (Eval, e) }
 	| GRAPH; e = expr; { Keyword (Graph, e) }
@@ -84,3 +92,9 @@ expr:
 	| LPAREN; e=expr; RPAREN {e} 
 	;
 	
+defn: 
+  | VAR; s = NAME; COLON; e = expr; END; d = defn; { DBind (s, e, d) }
+	| s = NAME; COLON; e = expr; END; d = defn; { DAssign (s, e, d) }
+	| DISP; e = expr; END; d = defn; { DDisp (e, d) }
+	| IF; e = expr; THEN; d1 = defn; ELSE; d2 = defn; { DIf (e, d1, d2) }
+  | END; { DEnd }

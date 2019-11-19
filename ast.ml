@@ -50,3 +50,9 @@ type expr =
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
 
+type defn = 
+  | DBind of string * expr * defn 
+  | DAssign of string * expr * defn
+  | DIf of expr * defn * defn 
+  | DDisp of expr * defn 
+  | DEnd
