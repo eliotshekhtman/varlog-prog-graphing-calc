@@ -173,10 +173,61 @@ let rec newton_disp n lst acc =
     end
   | _, _ -> failwith "precondition violated: power"
 
+let rec newton_inputs n lst = 
+  match n, lst with 
+  | n, _ when n < 0 -> []
+  | n, h :: t -> begin 
+      print_string (h ^ "> ");
+      let value = (read_line () |> parse |> eval |> get_val 0.) in 
+      value :: newton_inputs (n-1) t
+    end
+  | _, _ -> failwith "aaa"
+
+let rec newton_make lst x = 
+  let rec deriv lst x = 
+    match lst with 
+    | [] -> 0.
+    | h :: t -> 
+      let ele = (t |> List.length |> float_of_int) in 
+      ele *. h *. x ** (ele -. 1.) +. deriv t x
+  in 
+  let rec norm lst x = 
+    match lst with 
+    | [] -> 0.
+    | h :: t -> 
+      let ele = (t |> List.length |> float_of_int) in 
+      h *. x ** ele +. norm t x
+  in 
+  let numer = norm lst x in 
+  let denom = deriv lst x in 
+  if denom = 0. || numer = 0. || denom = nan || numer = nan then x 
+  else x -. numer /. denom
+
+let rec newton_apply f = 
+  let rec apply n f r = 
+    let res = f r in 
+    if res = nan || res = (~-.nan) then r
+    else
+    if r = res then r 
+    else
+    if n <= 0 then r else apply (n-1) f res
+  in
+  print_string "x = ";
+  match read_line () with 
+  | "QUIT" -> "Quitting" 
+  | s -> 
+    let inp = (s |> parse |> eval |> get_val 0.) in 
+    (apply 1000000 f inp) |> string_of_float |> print_endline; newton_apply f
+
 let newton_helper n = 
-  if n < 0. || n > 5. then failwith "Keep power to within 0-5"
+  if n < 0. || n > 5. then failwith "Error: Keep power to within 0-5"
   else 
-    newton_disp (n |> int_of_float) ["A"; "B"; "C"; "D"; "E"; "F"] 0
+    let lst = ["A"; "B"; "C"; "D"; "E"; "F"] in 
+    let n' = int_of_float n in 
+    newton_disp n' lst 0; 
+    let inputs = newton_inputs n' lst in 
+    let f = inputs |> List.rev |> newton_make in 
+    newton_apply f
 
 
 (** [interp s] interprets [s] by lexing and parsing it, 
@@ -194,10 +245,6 @@ let interp (s : string) : string =
         let y_min = print_string "SET MIN Y> "; read_line () |> float_of_string in
         let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
         graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
-      | Newton -> begin 
-          match e with 
-          | Val (Num n) -> newton_helper n; ""
-          | _ -> "Improper input: enter the power of the function"
-        end
+      | Newton -> newton_helper (e |> eval |> get_val 0.)
     end
   | _ -> failwith "no keyword"
