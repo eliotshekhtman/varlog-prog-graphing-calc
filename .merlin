@@ -1,3 +1,5 @@
 PKG oUnit
 PKG graphics
 B _build
+PKG str 
+PKG unix

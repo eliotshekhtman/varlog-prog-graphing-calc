@@ -28,6 +28,7 @@ open Ast
 %token COMMA
 %token VAR
 %token COLON
+%token QUOTE
 %token DISP
 %token END
 %token IF 
@@ -70,6 +71,7 @@ expr:
 		{ Ternop (Integral, (e1 , e2), e3) }
 	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{Derivative (Der, e1, e2)}
 	| i = NUM { Val (Num i) }
+	| QUOTE; s = NAME; QUOTE; { Val (Str s) }
 	| s = NAME { Var s }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Val (Num 0.), e) }
 	| e = expr; EXCL {Uniop (Fact, e)}
@@ -94,7 +96,18 @@ expr:
 	
 defn: 
   | VAR; s = NAME; COLON; e = expr; END; d = defn; { DBind (s, e, d) }
+	| VAR; s = NAME; COLON; e = expr; END; { DBind (s, e, DEnd) }
+	| VAR; s = NAME; COLON; e = expr; { DBind (s, e, DEnd) }
 	| s = NAME; COLON; e = expr; END; d = defn; { DAssign (s, e, d) }
+	| s = NAME; COLON; e = expr; END; { DAssign (s, e, DEnd) }
+	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
 	| DISP; e = expr; END; d = defn; { DDisp (e, d) }
-	| IF; e = expr; THEN; d1 = defn; ELSE; d2 = defn; { DIf (e, d1, d2) }
+	| DISP; e = expr; END; { DDisp (e, DEnd) }
+	| DISP; e = expr; { DDisp (e, DEnd) }
+	| IF; e = expr; THEN; d1 = defn; END; ELSE; d2 = defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = defn; END; d2 = defn; { DIf (e, d1, DEnd, d2) }
+	| IF; e = expr; THEN; d = defn; END; { DIf (e, d, DEnd, DEnd) }
+	| IF; e = expr; THEN; d = defn; { DIf (e, d, DEnd, DEnd) }
+	| END; d = defn; { d }
+	| d = defn; END; { d }
   | END; { DEnd }

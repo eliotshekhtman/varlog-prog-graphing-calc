@@ -36,6 +36,7 @@ type key =
 type value = 
   | Num of float 
   | Bool of bool 
+  | Str of string
 
 type expr = 
   | Keyword of key * expr
@@ -53,6 +54,6 @@ type expr =
 type defn = 
   | DBind of string * expr * defn 
   | DAssign of string * expr * defn
-  | DIf of expr * defn * defn 
+  | DIf of expr * defn * defn * defn
   | DDisp of expr * defn 
   | DEnd

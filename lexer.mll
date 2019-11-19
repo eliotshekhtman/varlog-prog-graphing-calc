@@ -8,7 +8,7 @@ let lletter = ['a'-'z']
 let uletter = ['A'-'Z']
 let float = digit+ '.'? digit*
 let word = (uletter | lletter)+
-let string = '"' word '"'
+let string = (word | white)+
 let endchar = ['\n']+
 
 rule read =
@@ -31,6 +31,7 @@ rule read =
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "," {COMMA}
+  | "\"" { QUOTE }
   | "SIN" {SIN}
   | "COS" {COS}
   | "TAN" {TAN}
