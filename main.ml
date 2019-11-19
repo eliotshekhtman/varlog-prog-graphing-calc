@@ -160,6 +160,13 @@ let rec eval (e : expr) : expr =
   if is_value e then e
   else e |> step |> eval
 
+let close_int (f : float) = 
+  let f' = f |> int_of_float |> float_of_int in 
+  if f < f' +. 0.0000001 && f > f' -. 0.0000001 then (true, f') 
+  else 
+  if f < f' +. 1.0000001 && f > f' +. 1. -. 0.0000001 then (true, f' +. 1.)
+  else (false, f)
+
 let rec newton_disp n lst acc = 
   match acc, lst with 
   | a, _ when a > n -> print_endline ("\n" ^ "Input coefficients: ")
@@ -217,7 +224,13 @@ let rec newton_apply f =
   | "QUIT" -> "Quitting" 
   | s -> 
     let inp = (s |> parse |> eval |> get_val 0.) in 
-    (apply 1000000 f inp) |> string_of_float |> print_endline; newton_apply f
+    let res = apply 1000000 f inp in 
+    let res' = close_int res in
+    res |> string_of_float |> print_endline; 
+    (if fst res' then 
+       print_endline ("Similar integer: " ^ (snd res' |> string_of_float)) 
+     else ());
+    newton_apply f
 
 let newton_helper n = 
   if n < 0. || n > 5. then failwith "Error: Keep power to within 0-5"
