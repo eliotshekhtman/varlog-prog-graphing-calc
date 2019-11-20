@@ -4,7 +4,10 @@ open Evalexpr
 open String
 open Stdlib
 
+
+(* exception DeterminantZero *)
 exception No_keyword
+exception DeterminantZero
 
 let close_int (f : float) = 
   let f' = f |> int_of_float |> float_of_int in 
@@ -111,7 +114,22 @@ let matrix_made = Array.make_matrix 3 3 4
 
 let find_det a d b c = a *. d -. b *. c
 
-let determined (matrix:float array array ) = 
+
+
+let determined_matrix2 matrix = 
+  let a1 = matrix.(0).(0) in
+  let d1 = matrix.(1).(1) in
+  let b1 = matrix.(0).(1) in
+  let c1 = matrix.(1).(0) in
+  let det = find_det a1 d1 b1 c1 in
+  let new_matrix = ([|
+      [|d1; -1. *. b1|];
+      [|-1.*.c1; a1|]
+    |], det) in new_matrix
+(* d,-b,-c,a *)
+
+
+let determined_matrix3 (matrix:float array array ) = 
   let a1 = matrix.(1).(1) in
   let d1 = matrix.(2).(2) in
   let b1 = matrix.(1).(2) in
@@ -161,9 +179,10 @@ let determined (matrix:float array array ) =
   let c9 = matrix.(1).(0) in
   let det9 = find_det a9 d9 b9 c9 in
   let det = (matrix.(0).(0)*.det1) +. (matrix.(0).(1) *. det2) +. (matrix.(0).(2)*.det3) in
-  (* print_endline (string_of_float det); *)
-  let new_matrix = ([|[|det1;det2;det3;|]; [|det4;det5;det6;|];[|det7;det8;det9;|]|], det) in
-  new_matrix
+  if det = 0. then raise DeterminantZero
+  else 
+    let new_matrix = ([|[|det1;det2;det3;|]; [|det4;det5;det6;|];[|det7;det8;det9;|]|], det) in
+    new_matrix
 
 let reflect (matrix: float array array) =
   let temp1 = matrix.(1).(0) in
@@ -177,31 +196,50 @@ let reflect (matrix: float array array) =
   matrix.(1).(2) <- temp3; 
   matrix
 
-let normalized matrix det = 
-  let inverse_det = det ** -1. in
-  matrix.(0).(0) <- inverse_det *. matrix.(0).(0);
-  matrix.(0).(1) <- inverse_det *. matrix.(0).(1);
-  matrix.(0).(2) <- inverse_det *. matrix.(0).(2);
-  matrix.(1).(0) <- inverse_det *. matrix.(1).(0);
-  matrix.(1).(1) <- inverse_det *. matrix.(1).(1);
-  matrix.(1).(2) <- inverse_det *. matrix.(1).(2);
-  matrix.(2).(0) <- inverse_det *. matrix.(2).(0);
-  matrix.(2).(1) <- inverse_det *. matrix.(2).(1);
-  matrix.(2).(2) <- inverse_det *. matrix.(2).(2);
-  matrix
+let normalized matrix det num= 
+  print_string (string_of_float det);
+  print_string ("reached this point 1******");
+  let inverse_det = if det = 0. then raise DeterminantZero else det ** -1. in
+  if(num = 3) then (
+    print_string (inverse_det |> string_of_float);
+    matrix.(0).(0) <- inverse_det *. matrix.(0).(0);
+    matrix.(0).(1) <- inverse_det *. matrix.(0).(1);
+    matrix.(0).(2) <- inverse_det *. matrix.(0).(2);
+    matrix.(1).(0) <- inverse_det *. matrix.(1).(0);
+    matrix.(1).(1) <- inverse_det *. matrix.(1).(1);
+    matrix.(1).(2) <- inverse_det *. matrix.(1).(2);
+    matrix.(2).(0) <- inverse_det *. matrix.(2).(0);
+    matrix.(2).(1) <- inverse_det *. matrix.(2).(1);
+    matrix.(2).(2) <- inverse_det *. matrix.(2).(2);
+    matrix
+  ) 
+  else (
+    matrix.(0).(0) <- inverse_det *. matrix.(0).(0);
+    matrix.(0).(1) <- inverse_det *. matrix.(0).(1);
+    matrix.(1).(0) <- inverse_det *. matrix.(1).(0);
+    matrix.(1).(1) <- inverse_det *. matrix.(1).(1);
+    matrix
+  )
 
-let inversed (matrix: float array array) = 
-  let determinant_and_matrix = determined matrix in
-  let reflected = reflect (determinant_and_matrix |> fst) in
-  let final = normalized reflected (determinant_and_matrix |> snd) in
-  final
+let inversed (matrix: float array array) num = 
+  if num = 3 then 
+    let determined3_matrix = determined_matrix3 matrix in
+    let reflected = reflect (determined3_matrix |> fst) in
+    let final = normalized reflected (determined3_matrix |> snd) num in
+    final
+  else 
+    let determined2_matrix = determined_matrix2 matrix in
+    let final = 
+      normalized (determined2_matrix |> fst) (determined2_matrix |> snd) num in
+    final 
 
-let solve_linear_equation (matrix: float array array) (vector: float array) = 
-  let inverse_matrix = inversed matrix in
-  let answer_vector = [|0.;0.;0.|] in
-  for i = 0 to 2 do
+
+let solve_linear_equation (matrix: float array array) (vector: float array) num = 
+  let inverse_matrix = inversed matrix num in
+  let answer_vector = if num = 3 then [|0.;0.;0.|] else [|0.;0.|] in
+  for i = 0 to num-1 do
     let acc = ref 0. in
-    for j = 0 to 2 do
+    for j = 0 to num-1 do
       acc := !acc +. inverse_matrix.(i).(j) *. vector.(j);
     done;
     answer_vector.(i) <- !acc
@@ -226,23 +264,44 @@ let linear_prompt = "Please input the first equation of your system of equations
     if(not (head = "")) then rmv_empty_elements tail (head::new_arr)
     else rmv_empty_elements tail new_arr *)
 
-let parse_lin_equation str = 
+let parse_lin_equation3 str  = 
   (*turn the string to an array by using [String.split_on_char sep]*)
   let string_array = String.split_on_char (',') (str) in
   match string_array with
-  |s1::s2::s3::s4::[] -> 
-    let x = s1|>parse|> eval_expr [] |> fst |> pull_num in
-    let y = s2|>parse|> eval_expr [] |> fst |> pull_num in
-    let z = s3|>parse|> eval_expr [] |> fst |> pull_num in
-    let answer1 = s4|> parse |> eval_expr [] |> fst |> pull_num in
-    ([|x;y;z|], answer1);
-  |_-> failwith "not enough values"
+  |s1::s2::s3::s4::[]  -> 
+    let x = s1 |> parse |> eval_expr [] |> fst |> pull_num in
+    let y = s2 |> parse |> eval_expr [] |> fst |> pull_num in
+    let z = s3 |> parse |> eval_expr [] |> fst |> pull_num in
+    let answer = s4 |> parse |> eval_expr [] |> fst |> pull_num in
+    ([|x;y;z|], answer);
+  |_-> failwith "Wrong number of values"
 
-let print_linear_equation_answer arr =
-  print_string ("x = " ^ string_of_float arr.(0)^", ");
-  print_string ("y = " ^ string_of_float arr.(1)^", ");
-  print_string ("z = " ^ string_of_float arr.(2));
-  ()
+
+let parse_lin_equation2 str =  
+  let string_array = String.split_on_char (',') (str) in
+  match string_array with 
+  |s1::s2::s3::[] -> 
+    let x = s1 |> parse |> eval_expr [] |> fst |> pull_num in
+    let y = s2 |> parse |> eval_expr [] |> fst |> pull_num in
+    let answer = s3 |> parse |> eval_expr [] |> fst |> pull_num in
+    ([|x;y|], answer);
+  |_-> failwith "Wrong number of values"
+
+let print_linear_equation_answer arr num =
+  if(num = 3) then
+    (
+      print_string ("x = " ^ string_of_float arr.(0) ^ ", ");
+      print_string ("y = " ^ string_of_float arr.(1) ^ ", ");
+      print_string ("z = " ^ string_of_float arr.(2)); 
+      ()
+    )
+  else
+    (
+      print_string ("x = " ^ string_of_float arr.(0) ^ ", ");
+      print_string ("y = " ^ string_of_float arr.(1));
+      ()
+    )
+
 
 (** [interp s] interprets [s] by lexing and parsing it, 
     evaluating it, and returning either the value in the case of an expression
@@ -263,17 +322,34 @@ let interp (s : string) : string =
       (* newton_helper (e |> eval_expr [] |> fst |> (fun v -> match v with Num n -> n | _ -> failwith "Error: invalid input: not a number")) *)
       | Exec -> exec_helper (e |> eval_expr [] |> fst)
     end
-  |Solver -> begin 
-      print_string linear_prompt;
-      let eq1 = read_line() |> parse_lin_equation in
-      print_string "Please input equation 2 in the same format:\n\nequation 2> ";
-      let eq2 = read_line() |> parse_lin_equation in
-      print_string "Please input equation 3 in the same format:\n\nequation 3> ";
-      let eq3 = read_line() |> parse_lin_equation in
-      let matrix = [|(fst eq1); (fst eq2); (fst eq3)|] in
-      let target_vector = [|(snd eq1);(snd eq2);(snd eq3)|] in
-      let answer = solve_linear_equation matrix target_vector in
-      print_linear_equation_answer answer;
-      "\nSolved!!!!!!!!!!" 
+  | Solver s ->begin
+      match s with
+      |"three" ->  begin
+          print_string linear_prompt;
+          let eq1 = read_line() |> parse_lin_equation3 in
+          print_string "Please input equation 2 in the same format:\n\nequation 2> ";
+          let eq2 = read_line() |> parse_lin_equation3 in
+          print_string "Please input equation 3 in the same format:\n\nequation 3> ";
+          let eq3 = read_line() |> parse_lin_equation3 in
+          let matrix = [|(fst eq1); (fst eq2); (fst eq3)|] in
+          let target_vector = [|(snd eq1);(snd eq2);(snd eq3)|] in
+          let answer = solve_linear_equation matrix target_vector 3 in
+          print_string "1...........";
+          print_linear_equation_answer answer 3;
+          "\nSolved!!!!!!!!!!" 
+        end
+      | "two" -> begin
+          print_string linear_prompt;
+          let eq1 = read_line() |> parse_lin_equation2 in
+          print_string "Please input equation 2 in the same format:\n\nequation 2> ";
+          let eq2 = read_line() |> parse_lin_equation2 in
+          let matrix = [|(fst eq1); (fst eq2);|] in
+          let target_vector = [|(snd eq1);(snd eq2)|] in
+          let answer = solve_linear_equation matrix target_vector 2 in
+          print_string "1...........";
+          print_linear_equation_answer answer 2;
+          "\nSolved!!!!!!!!!!" 
+        end
+      | _-> failwith "Invalid input. Only 3x3 or 2x2 systems are supported"
     end
   | _ -> raise No_keyword

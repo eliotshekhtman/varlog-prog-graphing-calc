@@ -1,5 +1,6 @@
 open Main 
 open Graphing
+open Printexc
 
 let rec run () =
   print_string "> ";
@@ -12,6 +13,10 @@ let rec run () =
   | s -> begin 
       match interp s with 
       | exception No_keyword -> print_endline "Error: no keyword"; run ()
+      | exception Main.DeterminantZero  ->
+        print_endline "Cannot solve this equation. Either there are infinitely many solutions, or none at all"; run ()
+      | exception Division_by_zero ->
+        print_endline "Division by 0 exc"; run ()
       | exception _ -> 
         print_endline "Error: invalid input"; run ()
       | s -> print_endline s; run ()
