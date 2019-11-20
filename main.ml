@@ -36,7 +36,7 @@ let rec newton_inputs n lst =
   | n, _ when n < 0 -> []
   | n, h :: t -> begin 
       print_string (h ^ "> ");
-      let value = (read_line () |> parse |> eval [] |> get_val 0.) in 
+      let value = (read_line () |> parse |> eval_expr [] |> fst |> pull_num) in 
       value :: newton_inputs (n-1) t
     end
   | _, _ -> failwith "aaa"
@@ -73,7 +73,7 @@ let rec newton_apply f =
   match read_line () with 
   | "QUIT" -> "Quitting" 
   | s -> 
-    let inp = (s |> parse |> eval [] |> get_val 0.) in 
+    let inp = (s |> parse |> eval_expr [] |> fst |> pull_num) in 
     let res = apply 1000000 f inp in 
     let res' = close_int res in
     res |> string_of_float |> print_endline; 
@@ -195,9 +195,9 @@ let solve_linear_equation (matrix: float array array) (vector: float array) =
   done;
   answer_vector
 
-let exec_helper e = 
-  match e with 
-  | Val (Str s) -> Main_lang.interp (s ^ ".txt")
+let exec_helper v = 
+  match v with 
+  | Str s -> Main_lang.interp (s ^ ".txt")
   | _ -> "Error: invalid input: requires a string filename input"
 
 
@@ -218,10 +218,10 @@ let parse_lin_equation str =
   let string_array = String.split_on_char (',') (str) in
   match string_array with
   |s1::s2::s3::s4::[] -> 
-    let x = s1|>parse|> eval [] |> Evalexpr.get_val 0. in
-    let y = s2|>parse|> eval []|> Evalexpr.get_val 0. in
-    let z = s3|>parse|> eval []|> Evalexpr.get_val 0. in
-    let answer1 = s4|> parse |> eval []|> Evalexpr.get_val 0. in
+    let x = s1|>parse|> eval_expr [] |> fst |> pull_num in
+    let y = s2|>parse|> eval_expr [] |> fst |> pull_num in
+    let z = s3|>parse|> eval_expr [] |> fst |> pull_num in
+    let answer1 = s4|> parse |> eval_expr [] |> fst |> pull_num in
     ([|x;y;z|], answer1);
   |_-> failwith "not enough values"
 
@@ -231,9 +231,6 @@ let print_linear_equation_answer arr =
   print_string ("z = " ^ string_of_float arr.(2));
   ()
 
-
-
-
 (** [interp s] interprets [s] by lexing and parsing it, 
     evaluating it, and returning either the value in the case of an expression
     input or an indication that the expression has been graphed in the case
@@ -242,15 +239,15 @@ let interp (s : string) : string =
   match s |> parse with 
   | Keyword (k, e) -> begin  
       match k with
-      | Eval -> e |> eval [] |> string_of_val
+      | Eval -> e |> eval_expr [] |> fst |> string_of_val
       | Graph ->
         let x_min = print_string "SET MIN X> "; read_line () |> float_of_string in
         let x_max = print_string "SET MAX X> "; read_line () |> float_of_string in
         let y_min = print_string "SET MIN Y> "; read_line () |> float_of_string in
         let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
         graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
-      | Newton -> newton_helper (e |> eval [] |> get_val 0.)
-      | Exec -> exec_helper (e |> eval [])
+      | Newton -> newton_helper (e |> eval_expr [] |> fst |> (fun v -> match v with Num n -> n | _ -> failwith "Error: invalid input: not a number"))
+      | Exec -> exec_helper (e |> eval_expr [] |> fst)
     end
   |Solver -> begin 
       print_string linear_prompt;

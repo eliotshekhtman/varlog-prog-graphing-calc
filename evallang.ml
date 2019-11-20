@@ -28,7 +28,7 @@ let rec eval d vl =
   | _ -> failwith "Unimplemented"
 
 and eval_disp e d vl = 
-  let v = e |> Evalexpr.eval (!vl) |> Evalexpr.string_of_val in 
+  let v = e |> eval_expr (!vl) |> fst |> string_of_val in 
   print_endline v;
   eval d vl
 

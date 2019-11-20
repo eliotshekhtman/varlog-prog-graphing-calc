@@ -24,13 +24,14 @@ let is_int f =
 
 (** [string_of_val e] converts [e] to a string.
     Requires: [e] is a value. *)
-let string_of_val (v : value) : string =
-  match v with
-  | Num i -> 
+let string_of_val (e : expr) : string =
+  match e with
+  | Val (Num i) -> 
     if is_int i then i |> int_of_float |> string_of_int
     else string_of_float i
-  | Bool b -> string_of_bool b
-  | Str s -> s
+  | Val (Bool b) -> string_of_bool b
+  | Val (Str s) -> s
+  | _ -> failwith "precondition violated: not a value"
 
 
 (** [is_value e] is whether [e] is a value. *)
@@ -114,53 +115,81 @@ let add_helper v1 v2 =
 let substitute vl s = 
   try List.assoc s vl with _ -> failwith "precondition violated: unbound var"
 
-let pull_num = function 
-  | Num n -> n 
-  | _ -> failwith "precondition violated: not a number"
-
-let rec eval_expr vl e = 
-  match e with 
+(** [step e] takes a single step of evaluation of [e]. *)
+let rec step vl e : expr * ((string * value) list) = 
+  match e with
   | Keyword _ -> failwith "precondition violated: too many keywords"
-  | Val v -> (v, vl) 
-  | Var v -> ((substitute vl v), vl) 
-  | Uniop (uop, e) -> eval_uop vl uop e
-  | Binop (bop, e1, e2) -> eval_bop vl bop e1 e2 
-  | Ternop (top, (e1, e2), e3) -> eval_top vl top e1 e2 e2
-  | Derivative (der, e1, e2) -> eval_deriv vl der e1 e2
-  | _ -> failwith "lol right"
-and eval_bop vl b e1 e2 = 
-  let r1 = eval_expr vl e1 in 
-  let (r2, vl2) = eval_expr (snd r1) e2 in 
-  match b, (fst r1), r2 with 
-  | Add, v1, v2 -> (add_helper v1 v2, vl2)
-  | Subt, Num a, Num b -> (Num (a -. b), vl2)
-  | Mult, Num a, Num b -> (Num (a *. b), vl2)
-  | Div, Num a, Num b -> (Num (a /. b), vl2)
-  | Pow, Num a, Num b -> (Num (a ** b), vl2)
-  | Perm, Num a, Num b -> 
-    let res = (fact a) /. ((fact b) *. (a -. b |> fact)) in (Num (res), vl2)
-  | Comb, Num a, Num b -> (Num ((fact a) /. (fact b)), vl2)
-  | _ -> failwith "precondition violated: bop input types"
-and eval_uop vl u e = 
-  let (r, vl') = eval_expr vl e in 
-  match u, r with 
-  | Subt, Num n -> (Num (~-.n), vl')
-  | Fact, Num n -> (Num (fact n), vl')
-  | Sin, Num n -> (Num (sin n), vl')
-  | Cos, Num n -> (Num (cos n), vl')
-  | Tan, Num n -> (Num (tan n), vl')
-  | ArcSin, Num n -> (Num (asin n), vl')
-  | ArcCos, Num n -> (Num (acos n), vl')
-  | ArcTan, Num n -> (Num (atan n), vl')
+  | Val _ -> failwith "Does not step"
+  | Var v -> (Val (substitute vl v)), vl
+  | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
+    (step_top top e1 e2 e3), vl
+  | Ternop (top, (e1,e2), e3) when is_value e1 -> 
+    let r = step vl e2 in 
+    Ternop(top, (e1, (fst r)), e3), (snd r)
+  | Ternop (top, (e1,e2), e3)-> 
+    let r = step vl e1 in
+    Ternop(top, ((fst r), e2), e3), (snd r)
+  | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> 
+    (step_bop bop e1 e2), vl
+  | Binop (bop, e1, e2) when is_value e1 ->
+    let r = step vl e2 in
+    Binop (bop, e1, (fst r)), (snd r)
+  | Binop (bop, e1, e2) -> 
+    let r = step vl e1 in 
+    Binop (bop, (fst r), e2), (snd r)
+  | Uniop (uop, e) when is_value e ->
+    (step_uop uop e), vl
+  | Uniop (uop, e) -> 
+    let r = step vl e in
+    Uniop (uop, (fst r)), (snd r) 
+  | Derivative (der,e1,e2) when is_value e1 -> 
+    (step_deriv der e1 e2), vl
+  | Derivative (der,e1,e2) -> 
+    let r = step vl e1 in
+    Derivative (der, (fst r), e2), (snd r)
+  | PreString s -> 
+    let len = String.length s - 2 in 
+    Val (Str (String.sub s 1 len)), vl
+  |_-> failwith "unimplemented"
+
+and step_deriv der e1 e2 = match der, e1, e2 with
+  | Der, Val (Num a), b -> Val (Num (derive a (b|> eval_graph)))
+  |_-> failwith "you are dumb"
+
+and step_top top e1 e2 e3 = match top, e1, e2, e3 with
+  | Integral, Val (Num a), Val (Num b), c -> Val (Num (integrate a b 0. (c|>eval_graph)))
+  |_-> failwith "precondition violated"
+
+(** [step_bop bop v1 v2] implements the primitive operation
+    [v1 bop v2].  Requires: [v1] and [v2] are both values. *)
+and step_bop bop e1 e2 = match bop, e1, e2 with
+  | Add, Val a, Val b -> Val (add_helper a b)
+  | Mult, Val (Num a), Val (Num b) -> Val (Num (a *. b))
+  | Subt, Val (Num a), Val (Num b) -> Val (Num (a -. b))
+  | Div, Val (Num a), Val (Num b) -> Val (Num (a /. b))
+  | Pow, Val (Num a), Val (Num b) -> Val (Num (a ** b))
+  | Perm, Val (Num a), Val (Num b) -> 
+    let res = (fact a) /. ((fact b) *. (a -. b |> fact)) in Val (Num (res))
+  | Comb, Val (Num a), Val (Num b) -> Val (Num ((fact a) /. (fact b)))
+  (* | Der, Num a, b -> Num (derive a (b |> eval_graph)) *)
+  | _ -> failwith "precondition violated: bop"
+
+(** [step_uop uop v] implements the primitive operation
+    [uop v].  Requires: [v] is a value. *)
+and step_uop uop e = match uop, e with
+  | Subt, Val (Num a) -> Val (Num (~-.a))
+  | Fact, Val (Num a) -> Val (Num (fact a))
+  | Sin, Val (Num a) -> Val (Num (sin a))
+  | Cos, Val (Num a) -> Val (Num (cos a))
+  | Tan, Val (Num a) -> Val (Num (tan a))
+  | ArcSin, Val (Num a) -> Val (Num (asin a))
+  | ArcCos,Val (Num a) -> Val (Num (acos a))
+  | ArcTan, Val (Num a) -> Val (Num (atan a))
   | _ -> failwith "precondition violated: uop"
-and eval_top vl top e1 e2 e3 = 
-  let r1 = eval_expr vl e1 in 
-  let r2 = eval_expr (snd r1) e2 in 
-  match top, (fst r1), (fst r2) with 
-  | Integral, Num a, Num b -> (Num (integrate a b 0. (e3 |> eval_graph)), (snd r2))
-  | _ -> failwith "precondition violated: top"
-and eval_deriv vl der e1 e2 = 
-  let r1 = eval_expr vl e1 in 
-  match der, (fst r1) with 
-  | Der, Num a -> (Num (derive a (e2 |> eval_graph)), (snd r1))
-  | _ -> failwith "precondition violated: derivative"
+
+
+(** [eval e] fully evaluates [e] step-wise to a value. *)
+let rec eval (vl : (string * value) list) (e : expr) : expr = 
+  if is_value e then e
+  else 
+    let r = e |> step vl in eval (snd r) (fst r)
