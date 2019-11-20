@@ -63,6 +63,14 @@ let rec newton_make lst x =
   if denom = 0. || numer = 0. || denom = nan || numer = nan then x 
   else x -. (numer /. denom)
 
+let rec newton_make' e x = 
+  let deriv eq n = derive n eq in
+  let n = eval_graph e in 
+  let d = deriv n in 
+  let numer = n x in let denom = d x in 
+  if denom = 0. || numer = 0. || denom = nan || numer = nan then x 
+  else x -. (numer /. denom)
+
 let rec newton_apply f = 
   let rec apply n f r = 
     let res = f r in
@@ -93,6 +101,10 @@ let newton_helper n =
     let f = inputs |> List.rev |> newton_make in 
     newton_apply f
 
+let newton_helper' e = 
+  let f = newton_make' e in 
+  print_endline "Enter guesses for values: ";
+  newton_apply f
 
 let matrix = [| [|1.;2.;3.|];[|0.;1.;5.|];[|5.;6.;0.|] |]
 let matrix_made = Array.make_matrix 3 3 4
@@ -247,7 +259,8 @@ let interp (s : string) : string =
         let y_min = print_string "SET MIN Y> "; read_line () |> float_of_string in
         let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
         graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
-      | Newton -> newton_helper (e |> eval_expr [] |> fst |> (fun v -> match v with Num n -> n | _ -> failwith "Error: invalid input: not a number"))
+      | Newton -> newton_helper' e
+      (* newton_helper (e |> eval_expr [] |> fst |> (fun v -> match v with Num n -> n | _ -> failwith "Error: invalid input: not a number")) *)
       | Exec -> exec_helper (e |> eval_expr [] |> fst)
     end
   |Solver -> begin 

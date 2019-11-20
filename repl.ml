@@ -23,8 +23,8 @@ let flex () =
   print_endline "[GRAPH f] to graph a function";
   print_endline "  (implicitly set to y)";
   print_endline "  Do not close the graphing window";
-  print_endline "[NEWTON n] to evaluate polynomial";
-  print_endline "  function of 1 variable, 0<=n<=5";
+  print_endline "[NEWTON f] to evaluate a function";
+  print_endline "  of 1 variable, using guesses";
   print_endline "[EXEC fn] to execute a text file;";
   print_endline "  don't include file extension";
   print_endline "----------------------------------"; ()
