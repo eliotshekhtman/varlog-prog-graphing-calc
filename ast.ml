@@ -41,6 +41,7 @@ type value =
 
 type expr = 
   | Solver
+  | PreString of string
   | Keyword of key * expr
   | Val of value
   | Var of string 
@@ -58,4 +59,4 @@ type defn =
   | DAssign of string * expr * defn
   | DIf of expr * defn * defn * defn
   | DDisp of expr * defn 
-  | DEnd
+  | DEnd 
