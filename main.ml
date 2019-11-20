@@ -34,7 +34,7 @@ let rec newton_inputs n lst =
   | n, _ when n < 0 -> []
   | n, h :: t -> begin 
       print_string (h ^ "> ");
-      let value = (read_line () |> parse |> eval |> get_val 0.) in 
+      let value = (read_line () |> parse |> eval [] |> get_val 0.) in 
       value :: newton_inputs (n-1) t
     end
   | _, _ -> failwith "aaa"
@@ -71,7 +71,7 @@ let rec newton_apply f =
   match read_line () with 
   | "QUIT" -> "Quitting" 
   | s -> 
-    let inp = (s |> parse |> eval |> get_val 0.) in 
+    let inp = (s |> parse |> eval [] |> get_val 0.) in 
     let res = apply 1000000 f inp in 
     let res' = close_int res in
     res |> string_of_float |> print_endline; 
@@ -206,14 +206,14 @@ let interp (s : string) : string =
   match s |> parse with 
   | Keyword (k, e) -> begin  
       match k with
-      | Eval -> e |> eval |> string_of_val
+      | Eval -> e |> eval [] |> string_of_val
       | Graph ->
         let x_min = print_string "SET MIN X> "; read_line () |> float_of_string in
         let x_max = print_string "SET MAX X> "; read_line () |> float_of_string in
         let y_min = print_string "SET MIN Y> "; read_line () |> float_of_string in
         let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
         graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
-      | Newton -> newton_helper (e |> eval |> get_val 0.)
-      | Exec -> exec_helper (e |> eval)
+      | Newton -> newton_helper (e |> eval [] |> get_val 0.)
+      | Exec -> exec_helper (e |> eval [])
     end
   | _ -> failwith "no keyword"

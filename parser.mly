@@ -16,6 +16,7 @@ open Ast
 %token ARCCOS
 %token <float> NUM
 %token <string> NAME
+%token <string> STRING
 %token TIMES
 %token PLUS
 %token SUBT
@@ -73,7 +74,7 @@ expr:
 		{ Ternop (Integral, (e1 , e2), e3) }
 	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{Derivative (Der, e1, e2)}
 	| i = NUM { Val (Num i) }
-	| QUOTE; s = NAME; QUOTE; { Val (Str s) }
+	| s = STRING; { PreString s }
 	| s = NAME { Var s }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Val (Num 0.), e) }
 	| e = expr; EXCL {Uniop (Fact, e)}

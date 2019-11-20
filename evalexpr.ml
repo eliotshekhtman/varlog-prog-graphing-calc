@@ -17,11 +17,18 @@ let parse (s : string) : expr =
   let ast = Parser.parse_expr Lexer.read lexbuf in
   ast
 
+let is_int f = 
+  let f' = f |> int_of_float |> float_of_int in 
+  if f = f' then true 
+  else false
+
 (** [string_of_val e] converts [e] to a string.
     Requires: [e] is a value. *)
 let string_of_val (e : expr) : string =
   match e with
-  | Val (Num i) -> string_of_float i
+  | Val (Num i) -> 
+    if is_int i then i |> int_of_float |> string_of_int
+    else string_of_float i
   | Val (Bool b) -> string_of_bool b
   | Val (Str s) -> s
   | _ -> failwith "precondition violated: not a value"
@@ -33,7 +40,6 @@ let is_value_graph : expr -> bool = function
   | Var "x" -> true
   | _ -> false
 
-(** [get_value v] is the value contained within value constructor [v]*)
 let get_val v = function
   | Val (Num n) -> n
   | Var "x" -> v 
@@ -98,26 +104,53 @@ let rec integrate a b acc fn =
 let derive a fn = 
   (fn (a+.0.0001) -. fn (a-.0.0001)) /. 0.0002
 
+let add_helper v1 v2 = 
+  match v1, v2 with 
+  | Num a, Num b -> Num (a +. b)
+  | Str a, Str b -> Str (a ^ b)
+  | Num a, Str b -> Str ((a |> string_of_float) ^ b)
+  | Str a, Num b -> Str (a ^ (b |> string_of_float))
+  | _ -> failwith "precondition violated: add types"
+
+let substitute vl s = 
+  try List.assoc s vl with _ -> failwith "precondition violated: unbound var"
+
 (** [step e] takes a single step of evaluation of [e]. *)
-let rec step : expr -> expr = function
+let rec step vl e : expr * ((string * value) list) = 
+  match e with
   | Keyword _ -> failwith "precondition violated: too many keywords"
   | Val _ -> failwith "Does not step"
-  | Var _ -> failwith "precondition violated: variable"
+  | Var v -> (Val (substitute vl v)), vl
   | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
-    step_top top e1 e2 e3
-  | Ternop (top, (e1,e2), e3) when is_value e1 -> Ternop(top, (e1, step e2), e3)
-  | Ternop (top, (e1,e2), e3)-> Ternop(top, (step e1, e2), e3)
+    (step_top top e1 e2 e3), vl
+  | Ternop (top, (e1,e2), e3) when is_value e1 -> 
+    let r = step vl e2 in 
+    Ternop(top, (e1, (fst r)), e3), (snd r)
+  | Ternop (top, (e1,e2), e3)-> 
+    let r = step vl e1 in
+    Ternop(top, ((fst r), e2), e3), (snd r)
   | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> 
-    step_bop bop e1 e2
+    (step_bop bop e1 e2), vl
   | Binop (bop, e1, e2) when is_value e1 ->
-    Binop (bop, e1, step e2)
-  | Binop (bop, e1, e2) -> Binop (bop, step e1, e2)
+    let r = step vl e2 in
+    Binop (bop, e1, (fst r)), (snd r)
+  | Binop (bop, e1, e2) -> 
+    let r = step vl e1 in 
+    Binop (bop, (fst r), e2), (snd r)
   | Uniop (uop, e) when is_value e ->
-    step_uop uop e
-  | Uniop (uop, e) -> Uniop (uop, step e)  
-  | Derivative (der,e1,e2) when is_value e1 -> step_deriv der e1 e2
-  | Derivative (der,e1,e2) -> Derivative (der, step e1, e2)
-  |_-> failwith "Ya fucked up"
+    (step_uop uop e), vl
+  | Uniop (uop, e) -> 
+    let r = step vl e in
+    Uniop (uop, (fst r)), (snd r) 
+  | Derivative (der,e1,e2) when is_value e1 -> 
+    (step_deriv der e1 e2), vl
+  | Derivative (der,e1,e2) -> 
+    let r = step vl e1 in
+    Derivative (der, (fst r), e2), (snd r)
+  | PreString s -> 
+    let len = String.length s - 2 in 
+    Val (Str (String.sub s 1 len)), vl
+  |_-> failwith "unimplemented"
 
 and step_deriv der e1 e2 = match der, e1, e2 with
   | Der, Val (Num a), b -> Val (Num (derive a (b|> eval_graph)))
@@ -130,7 +163,7 @@ and step_top top e1 e2 e3 = match top, e1, e2, e3 with
 (** [step_bop bop v1 v2] implements the primitive operation
     [v1 bop v2].  Requires: [v1] and [v2] are both values. *)
 and step_bop bop e1 e2 = match bop, e1, e2 with
-  | Add, Val (Num a), Val (Num b) -> Val (Num (a +. b))
+  | Add, Val a, Val b -> Val (add_helper a b)
   | Mult, Val (Num a), Val (Num b) -> Val (Num (a *. b))
   | Subt, Val (Num a), Val (Num b) -> Val (Num (a -. b))
   | Div, Val (Num a), Val (Num b) -> Val (Num (a /. b))
@@ -156,6 +189,7 @@ and step_uop uop e = match uop, e with
 
 
 (** [eval e] fully evaluates [e] step-wise to a value. *)
-let rec eval (e : expr) : expr = 
+let rec eval (vl : (string * value) list) (e : expr) : expr = 
   if is_value e then e
-  else e |> step |> eval
+  else 
+    let r = e |> step vl in eval (snd r) (fst r)

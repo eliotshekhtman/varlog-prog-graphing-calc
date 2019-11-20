@@ -8,11 +8,12 @@ let lletter = ['a'-'z']
 let uletter = ['A'-'Z']
 let float = digit+ '.'? digit*
 let word = (uletter | lletter)+
-let string = (word | white)+
+let string = '"' (word | digit | white)+ '"'
 let endchar = '\n'+
 
 rule read =
   parse 
+  | string { STRING (Lexing.lexeme lexbuf) }
   | white { read lexbuf }
   | "EVAL" { EVAL }
   | "GRAPH" { GRAPH }

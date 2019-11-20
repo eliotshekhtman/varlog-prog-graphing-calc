@@ -40,6 +40,7 @@ type value =
   | Str of string
 
 type expr = 
+  | PreString of string
   | Keyword of key * expr
   | Val of value
   | Var of string 
