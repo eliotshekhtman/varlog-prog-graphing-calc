@@ -40,6 +40,8 @@ rule read =
   | "ARCTAN" {ARCTAN}
   | "ARCCOS" {ARCCOS}
   | "ARCSIN" {ARCSIN}
+  | "2x2" {TWOVAR}
+  | "3x3" {THREEVAR}
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
   | "VAR" { VAR }
   | ":" { COLON }

@@ -2,6 +2,8 @@
 open Ast
 %}
 
+%token TWOVAR
+%token THREEVAR
 %token SOLVE
 %token EVAL
 %token GRAPH
@@ -98,7 +100,8 @@ expr:
 	| ARCSIN; e = expr; {Uniop (ArcSin, e)}
 	| VAR; s = NAME; COLON; e1 = expr; END; e2 = expr; { Bind (s, e1, e2) }
 	| LPAREN; e=expr; RPAREN {e} 
-	| SOLVE; {Solver}
+	| SOLVE; THREEVAR; {Solver "three"}
+	| SOLVE; TWOVAR; {Solver "two"}
 	;
 	
 defn: 
