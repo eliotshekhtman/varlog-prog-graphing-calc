@@ -1,6 +1,8 @@
 open Ast
 open Graphing
 open Evalexpr
+open String
+open Stdlib
 
 
 let close_int (f : float) = 
@@ -102,19 +104,19 @@ let determined (matrix:float array array ) =
   let b1 = matrix.(1).(2) in
   let c1 = matrix.(2).(1) in
   let det1 = find_det a1 d1 b1 c1 in 
-  print_endline (string_of_float det1);
+  (* print_endline (string_of_float det1); *)
   let a2 = matrix.(1).(0) in
   let d2 = matrix.(2).(2) in
   let b2 = matrix.(1).(2) in
   let c2 = matrix.(2).(0) in
   let det2 = -1. *. find_det a2 d2 b2 c2 in
-  print_endline (string_of_float det2);
+  (* print_endline (string_of_float det2); *)
   let a3 = matrix.(1).(0) in
   let d3 = matrix.(2).(1) in
   let b3 = matrix.(1).(1) in
   let c3 = matrix.(2).(0) in
   let det3 = find_det a3 d3 b3 c3 in
-  print_endline (string_of_float det3);
+  (* print_endline (string_of_float det3); *)
   let a4 = matrix.(0).(1) in
   let d4 = matrix.(2).(2) in
   let b4 = matrix.(0).(2) in
@@ -146,7 +148,7 @@ let determined (matrix:float array array ) =
   let c9 = matrix.(1).(0) in
   let det9 = find_det a9 d9 b9 c9 in
   let det = (matrix.(0).(0)*.det1) +. (matrix.(0).(1) *. det2) +. (matrix.(0).(2)*.det3) in
-  print_endline (string_of_float det);
+  (* print_endline (string_of_float det); *)
   let new_matrix = ([|[|det1;det2;det3;|]; [|det4;det5;det6;|];[|det7;det8;det9;|]|], det) in
   new_matrix
 
@@ -181,7 +183,7 @@ let inversed (matrix: float array array) =
   let final = normalized reflected (determinant_and_matrix |> snd) in
   final
 
-let matrix_mult (matrix: float array array) (vector: float array) = 
+let solve_linear_equation (matrix: float array array) (vector: float array) = 
   let inverse_matrix = inversed matrix in
   let answer_vector = [|0.;0.;0.|] in
   for i = 0 to 2 do
@@ -197,6 +199,40 @@ let exec_helper e =
   match e with 
   | Val (Str s) -> Main_lang.interp (s ^ ".txt")
   | _ -> "Error: invalid input: requires a string filename input"
+
+
+let linear_prompt = "Please input the first equation of your system of equations. Each equation should be written
+  (there is a max of 3 unknowns allowed) in this form:\n 
+  (5+3), 0, (-4*1), (4/2) \n where this corresponds to the equation 8x + 0y -4z = 2\n\nequation 1>"
+
+(* let rec rmv_empty_elements arr new_arr= 
+   match arr with
+   | [] -> List.rev new_arr
+   | head::tail ->
+    (*If the element represented by [head] is NOT "", prepend to [new_arr]*)
+    if(not (head = "")) then rmv_empty_elements tail (head::new_arr)
+    else rmv_empty_elements tail new_arr *)
+
+let parse_lin_equation str = 
+  (*turn the string to an array by using [String.split_on_char sep]*)
+  let string_array = String.split_on_char (',') (str) in
+  match string_array with
+  |s1::s2::s3::s4::[] -> 
+    let x = s1|>parse|> eval |> Evalexpr.get_val 0. in
+    let y = s2|>parse|> eval |> Evalexpr.get_val 0. in
+    let z = s3|>parse|> eval |> Evalexpr.get_val 0. in
+    let answer1 = s4|> parse |> eval |> Evalexpr.get_val 0. in
+    ([|x;y;z|], answer1);
+  |_-> failwith "not enough values"
+
+let print_linear_equation_answer arr =
+  print_string ("x = " ^ string_of_float arr.(0)^", ");
+  print_string ("y = " ^ string_of_float arr.(1)^", ");
+  print_string ("z = " ^ string_of_float arr.(2));
+  ()
+
+
+
 
 (** [interp s] interprets [s] by lexing and parsing it, 
     evaluating it, and returning either the value in the case of an expression
@@ -215,5 +251,18 @@ let interp (s : string) : string =
         graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
       | Newton -> newton_helper (e |> eval |> get_val 0.)
       | Exec -> exec_helper (e |> eval)
+    end
+  |Solver -> begin 
+      print_string linear_prompt;
+      let eq1 = read_line() |> parse_lin_equation in
+      print_string "Please input equation 2 in the same format:\n\nequation 2>";
+      let eq2 = read_line() |> parse_lin_equation in
+      print_string "Please input equation 3 in the same format:\n\nequation 3>";
+      let eq3 = read_line() |> parse_lin_equation in
+      let matrix = [|(fst eq1); (fst eq2); (fst eq3)|] in
+      let target_vector = [|(snd eq1);(snd eq2);(snd eq3)|] in
+      let answer = solve_linear_equation matrix target_vector in
+      print_linear_equation_answer answer;
+      "\nSolved!!!!!!!!!!" 
     end
   | _ -> failwith "no keyword"

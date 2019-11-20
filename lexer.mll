@@ -17,6 +17,7 @@ rule read =
   | "EVAL" { EVAL }
   | "GRAPH" { GRAPH }
   | "NEWTON" { NEWTON }
+  | "SOLVE" {SOLVE}
   | "EXEC" { EXEC }
   | "INTEGRAL" {INTEGRAL}
   | "DERIVATIVE" {DERIVATIVE}

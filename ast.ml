@@ -40,6 +40,7 @@ type value =
   | Str of string
 
 type expr = 
+  | Solver
   | Keyword of key * expr
   | Val of value
   | Var of string 
