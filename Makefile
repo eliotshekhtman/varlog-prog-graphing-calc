@@ -1,4 +1,4 @@
-UNITS=authors ast main evallang main_lang repl graphing
+UNITS=authors ast evalexpr evallang main main_lang repl graphing
 MLS_WITHOUT_MLIS=ast
 MLS=$(UNITS:=.ml) $(MLS_WITHOUT_MLIS:=.ml)
 OBJECTS=$(UNITS:=.cmo) $(MLS_WITHOUT_MLIS:=.cmo) parser.cmo

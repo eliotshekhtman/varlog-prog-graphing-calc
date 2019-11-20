@@ -1,5 +1,5 @@
 open Ast 
-open Main 
+open Evalexpr 
 
 module VarLog = struct
   type var = string * value
@@ -27,7 +27,7 @@ let rec eval d vl =
   | _ -> failwith "Unimplemented"
 
 and eval_disp e d vl = 
-  let v = e |> Main.eval |> Main.string_of_val in 
+  let v = e |> Evalexpr.eval |> Evalexpr.string_of_val in 
   print_endline v;
   eval d vl
 

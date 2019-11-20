@@ -10,15 +10,16 @@ let read_file file =
   let rec pull_string f ch = 
     match Stdlib.input_line ch with 
     | exception End_of_file -> (close_in ch; "")
-    | s -> s ^ pull_string f ch
+    | s -> s ^ "\n" ^ pull_string f ch
   in
   let channel = Stdlib.open_in file in 
   let s = pull_string file channel in 
-  s |> parse
+  s
 
 let interp s = 
   try 
-    s |> read_file |> Evallang.eval_init; ""
+    s |> read_file |> parse |> eval_init; ""
   with 
   | End_of_file -> ""
-  | _ -> "Error: invalid input"
+  | Sys_error _ -> "Error: invalid input: no text file with given name"
+  | _ -> "Error: parsing error" 

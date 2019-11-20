@@ -9,7 +9,7 @@ let uletter = ['A'-'Z']
 let float = digit+ '.'? digit*
 let word = (uletter | lletter)+
 let string = (word | white)+
-let endchar = ['\n']+
+let endchar = '\n'+
 
 rule read =
   parse 
