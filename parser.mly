@@ -18,6 +18,7 @@ open Ast
 %token <float> NUM
 %token <string> NAME
 %token <string> STRING
+%token <bool> BOOL
 %token TIMES
 %token PLUS
 %token SUBT
@@ -75,6 +76,7 @@ expr:
 	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{Derivative (Der, e1, e2)}
 	| i = NUM { Val (Num i) }
 	| s = STRING; { PreString s }
+	| b = BOOL; { Val (Bool b) }
 	| s = NAME { Var s }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Val (Num 0.), e) }
 	| e = expr; EXCL {Uniop (Fact, e)}
@@ -107,10 +109,18 @@ defn:
 	| DISP; e = expr; END; d = defn; { DDisp (e, d) }
 	| DISP; e = expr; END; { DDisp (e, DEnd) }
 	| DISP; e = expr; { DDisp (e, DEnd) }
-	| IF; e = expr; THEN; d1 = defn; END; ELSE; d2 = defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; d1 = defn; END; d2 = defn; { DIf (e, d1, DEnd, d2) }
-	| IF; e = expr; THEN; d = defn; END; { DIf (e, d, DEnd, DEnd) }
-	| IF; e = expr; THEN; d = defn; { DIf (e, d, DEnd, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; END; d2 = defn; { DIf (e, d1, DEnd, d2) }
+	| IF; e = expr; THEN; d = short_defn; END; { DIf (e, d, DEnd, DEnd) }
+	| IF; e = expr; THEN; d = short_defn; { DIf (e, d, DEnd, DEnd) }
 	| END; d = defn; { d }
 	| d = defn; END; { d }
   | END; { DEnd }
+
+short_defn:
+	| DISP; e = expr; { DDisp (e, DEnd) }
+	| LPAREN; d = defn; RPAREN; { d }
+	| END; { DEnd }

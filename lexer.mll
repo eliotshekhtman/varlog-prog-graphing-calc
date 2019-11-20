@@ -47,6 +47,8 @@ rule read =
   | "IF" { IF }
   | "THEN" { THEN } 
   | "ELSE" { ELSE }
+  | "true" { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
+  | "false" { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
   | endchar { END }
   | word { NAME (Lexing.lexeme lexbuf) }
   | eof { EOF }
