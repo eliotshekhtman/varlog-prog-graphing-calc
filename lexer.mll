@@ -34,7 +34,6 @@ rule read =
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "," {COMMA}
-  | "\"" { QUOTE }
   | "SIN" {SIN}
   | "COS" {COS}
   | "TAN" {TAN}

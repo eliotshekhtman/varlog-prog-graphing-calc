@@ -97,8 +97,8 @@ let rec eval_graph (e : expr) (v : float) : float =
 let rec integrate a b acc fn = 
   if(a >= b) then acc 
   else
-    let area = acc +. 0.0001 *. fn (a+.0.0001) in
-    integrate (a+.0.0001) b area fn 
+    let area = acc +. 0.000001 *. fn (a+.0.000001) in
+    integrate (a+.0.000001) b area fn 
 
 let derive a fn = 
   (fn (a+.0.000000001) -. fn (a-.0.000000001)) /. 0.000000002
@@ -107,8 +107,8 @@ let add_helper v1 v2 =
   match v1, v2 with 
   | Num a, Num b -> Num (a +. b)
   | Str a, Str b -> Str (a ^ b)
-  | Num a, Str b -> Str ((a |> string_of_float) ^ b)
-  | Str a, Num b -> Str (a ^ (b |> string_of_float))
+  | Num a, Str b -> Str ((v1 |> string_of_val) ^ b)
+  | Str a, Num b -> Str (a ^ (v2 |> string_of_val))
   | _ -> failwith "precondition violated: add types"
 
 let substitute vl s = 
@@ -122,10 +122,13 @@ let rec eval_expr vl e =
   match e with 
   | Keyword _ -> failwith "precondition violated: too many keywords"
   | Val v -> (v, vl) 
+  | PreString s -> 
+    let len = String.length s - 2 in 
+    ((Str (String.sub s 1 len)), vl)
   | Var v -> ((substitute vl v), vl) 
   | Uniop (uop, e) -> eval_uop vl uop e
   | Binop (bop, e1, e2) -> eval_bop vl bop e1 e2 
-  | Ternop (top, (e1, e2), e3) -> eval_top vl top e1 e2 e2
+  | Ternop (top, (e1, e2), e3) -> eval_top vl top e1 e2 e3
   | Derivative (der, e1, e2) -> eval_deriv vl der e1 e2
   | _ -> failwith "lol right"
 and eval_bop vl b e1 e2 = 

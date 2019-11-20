@@ -4,6 +4,7 @@ open Evalexpr
 open String
 open Stdlib
 
+exception No_keyword
 
 let close_int (f : float) = 
   let f' = f |> int_of_float |> float_of_int in 
@@ -252,9 +253,9 @@ let interp (s : string) : string =
   |Solver -> begin 
       print_string linear_prompt;
       let eq1 = read_line() |> parse_lin_equation in
-      print_string "Please input equation 2 in the same format:\n\nequation 2>";
+      print_string "Please input equation 2 in the same format:\n\nequation 2> ";
       let eq2 = read_line() |> parse_lin_equation in
-      print_string "Please input equation 3 in the same format:\n\nequation 3>";
+      print_string "Please input equation 3 in the same format:\n\nequation 3> ";
       let eq3 = read_line() |> parse_lin_equation in
       let matrix = [|(fst eq1); (fst eq2); (fst eq3)|] in
       let target_vector = [|(snd eq1);(snd eq2);(snd eq3)|] in
@@ -262,4 +263,4 @@ let interp (s : string) : string =
       print_linear_equation_answer answer;
       "\nSolved!!!!!!!!!!" 
     end
-  | _ -> failwith "no keyword"
+  | _ -> raise No_keyword

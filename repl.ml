@@ -11,7 +11,7 @@ let rec run () =
 
   | s -> begin 
       match interp s with 
-      | exception (Failure "no keyword") -> print_endline "Error: no keyword"; run ()
+      | exception No_keyword -> print_endline "Error: no keyword"; run ()
       | exception _ -> 
         print_endline "Error: invalid input"; run ()
       | s -> print_endline s; run ()

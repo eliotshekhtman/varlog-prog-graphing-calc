@@ -25,12 +25,22 @@ let rec eval d vl =
   match d with 
   | DEnd -> ()
   | DDisp (e, d) -> eval_disp e d vl 
+  | DAssign (s, e, d) -> eval_assign s e d vl
   | _ -> failwith "Unimplemented"
 
 and eval_disp e d vl = 
   let v = e |> eval_expr (!vl) |> fst |> string_of_val in 
   print_endline v;
   eval d vl
+and eval_assign s e d vl =
+  let v = e |> eval_expr (!vl) |> fst in 
+  VarLog.bind s v vl; eval d vl
+and eval_if e d1 d2 d3 vl = begin
+  match e |> eval_expr (!vl) |> fst with 
+  | Bool true -> eval d1 vl
+  | Bool false -> eval d2 vl 
+  | _ -> failwith "precondition violated: if guard"
+end; eval d3 vl
 
 (** [string_of_val e] converts [e] to a string.
     Requires: [e] is a value. *)
