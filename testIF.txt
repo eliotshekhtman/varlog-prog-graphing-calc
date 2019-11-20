@@ -8,3 +8,13 @@ DISP "Hello"
 ELSE
 DISP "Goodbye"
 DISP "Ok actually leaving now"
+
+
+DISP "a"
+IF true THEN DISP "b" 
+ELSE DISP "c" 
+DISP "c"
+IF true THEN
+DISP "d"
+ELSE 
+DISP "a" 

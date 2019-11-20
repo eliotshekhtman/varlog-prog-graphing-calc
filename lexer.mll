@@ -43,6 +43,8 @@ rule read =
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
   | "VAR" { VAR }
   | ":" { COLON }
+  | "GOTO" { GOTO }
+  | "LBL" { LBL }
   | "END" { END }
   | "IF" { IF }
   | "THEN" { THEN } 

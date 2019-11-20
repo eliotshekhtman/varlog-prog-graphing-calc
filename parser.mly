@@ -37,6 +37,8 @@ open Ast
 %token IF 
 %token THEN 
 %token ELSE
+%token GOTO 
+%token LBL
 %token EOF
 
 %left PLUS
@@ -112,12 +114,21 @@ defn:
 	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
 	| IF; e = expr; END; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
 	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
 	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
 	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
 	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
 	| IF; e = expr; THEN; d1 = short_defn; END; d2 = defn; { DIf (e, d1, DEnd, d2) }
 	| IF; e = expr; THEN; d = short_defn; END; { DIf (e, d, DEnd, DEnd) }
 	| IF; e = expr; THEN; d = short_defn; { DIf (e, d, DEnd, DEnd) }
+	| GOTO; s = NAME; END; d = defn; { DGoto (s, d) }
+	| LBL; s = NAME; END; d = defn; { DLabel (s, d) }
+	| GOTO; s = NAME; END; { DGoto (s, DEnd) }
+	| GOTO; s = NAME; { DGoto (s, DEnd) }
+	| LBL; s = NAME; END; { DLabel (s, DEnd) }
+	| LBL; s = NAME; { DLabel (s, DEnd) }
 	| END; d = defn; { d }
 	| d = defn; END; { d }
   | END; { DEnd }

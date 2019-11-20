@@ -59,4 +59,6 @@ type defn =
   | DAssign of string * expr * defn
   | DIf of expr * defn * defn * defn
   | DDisp of expr * defn 
+  | DGoto of string * defn
+  | DLabel of string * defn
   | DEnd 
