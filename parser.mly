@@ -23,6 +23,12 @@ open Ast
 %token PLUS
 %token SUBT
 %token DIV
+%token EQ 
+%token NEQ
+%token LEQ
+%token GEQ
+%token LT
+%token GT
 %token POW
 %token EXCL
 %token COMB 
@@ -48,6 +54,12 @@ open Ast
 %left COMB 
 %left PERM
 %left POW
+%left EQ
+%left NEQ
+%left LEQ
+%left GEQ
+%left LT
+%left GT
 %right SIN 
 %right COS 
 %right TAN
@@ -90,6 +102,12 @@ expr:
 	| e1 = expr; POW; e2 = expr { Binop (Pow, e1, e2) }
 	| e1 = expr; COMB; e2 = expr { Binop (Comb, e1, e2) }
 	| e1 = expr; PERM; e2 = expr { Binop (Perm, e1, e2) }
+	| e1 = expr; EQ; e2 = expr { Binop (Eq, e1, e2) }
+	| e1 = expr; NEQ; e2 = expr { Binop (Neq, e1, e2) }
+	| e1 = expr; GEQ; e2 = expr { Binop (Geq, e1, e2) }
+	| e1 = expr; LEQ; e2 = expr { Binop (Leq, e1, e2) }
+	| e1 = expr; GT; e2 = expr { Binop (Gt, e1, e2) }
+	| e1 = expr; LT; e2 = expr { Binop (Lt, e1, e2) }
 	| SIN; e = expr; {Uniop (Sin, e)}
 	| COS; e = expr; {Uniop (Cos, e)}
 	| TAN; e = expr; {Uniop (Tan, e)}
@@ -102,9 +120,6 @@ expr:
 	;
 	
 defn: 
-  | VAR; s = NAME; COLON; e = expr; END; d = defn; { DBind (s, e, d) }
-	| VAR; s = NAME; COLON; e = expr; END; { DBind (s, e, DEnd) }
-	| VAR; s = NAME; COLON; e = expr; { DBind (s, e, DEnd) }
 	| s = NAME; COLON; e = expr; END; d = defn; { DAssign (s, e, d) }
 	| s = NAME; COLON; e = expr; END; { DAssign (s, e, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
@@ -135,5 +150,7 @@ defn:
 
 short_defn:
 	| DISP; e = expr; { DDisp (e, DEnd) }
+	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
+	| GOTO; s = NAME; { DGoto (s, DEnd) }
 	| LPAREN; d = defn; RPAREN; { d }
 	| END; { DEnd }

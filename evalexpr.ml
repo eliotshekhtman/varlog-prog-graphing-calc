@@ -111,6 +111,32 @@ let add_helper v1 v2 =
   | Str a, Num b -> Str (a ^ (v2 |> string_of_val))
   | _ -> failwith "precondition violated: add types"
 
+let eq_helper v1 v2 = 
+  match v1, v2 with 
+  | Num a, Num b -> Bool (a = b)
+  | Str a, Str b -> Bool (a = b)
+  | Bool a, Bool b -> Bool (a = b) 
+  | _ -> Bool false
+
+let lt_helper v1 v2 = 
+  match v1, v2 with 
+  | Num a, Num b -> Bool (a < b)
+  | Str a, Str b -> Bool (a < b)
+  | Bool a, Bool b -> Bool (a < b) 
+  | _ -> Bool false
+
+let gt_helper v1 v2 = 
+  match v1, v2 with 
+  | Num a, Num b -> Bool (a > b)
+  | Str a, Str b -> Bool (a > b)
+  | Bool a, Bool b -> Bool (a > b) 
+  | _ -> Bool false
+
+let not_val v = 
+  match v with 
+  | Bool b -> Bool (not b)
+  | _ -> failwith "precondition violated: not bool"
+
 let substitute vl s = 
   try List.assoc s vl with _ -> failwith "precondition violated: unbound var"
 
@@ -143,6 +169,12 @@ and eval_bop vl b e1 e2 =
   | Perm, Num a, Num b -> 
     let res = (fact a) /. ((fact b) *. (a -. b |> fact)) in (Num (res), vl2)
   | Comb, Num a, Num b -> (Num ((fact a) /. (fact b)), vl2)
+  | Eq, v1, v2 -> (eq_helper v1 v2, vl2)
+  | Neq, v1, v2 -> (eq_helper v1 v2 |> not_val, vl2)
+  | Lt, v1, v2 -> (lt_helper v1 v2, vl2)
+  | Geq, v1, v2 -> (lt_helper v1 v2 |> not_val, vl2)
+  | Gt, v1, v2 -> (gt_helper v1 v2, vl2)
+  | Leq, v1, v2 -> (gt_helper v1 v2 |> not_val, vl2)
   | _ -> failwith "precondition violated: bop input types"
 and eval_uop vl u e = 
   let (r, vl') = eval_expr vl e in 

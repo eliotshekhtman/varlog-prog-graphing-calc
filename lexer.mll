@@ -34,6 +34,12 @@ rule read =
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "," {COMMA}
+  | "=" { EQ }
+  | "<" { LT }
+  | ">" { GT }
+  | "<=" { LEQ }
+  | ">=" { GEQ }
+  | "!=" { NEQ }
   | "SIN" {SIN}
   | "COS" {COS}
   | "TAN" {TAN}

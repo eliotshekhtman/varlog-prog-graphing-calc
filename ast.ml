@@ -1,12 +1,17 @@
 type bop = 
   | Add
   | Mult 
-  | Leq
   | Subt
   | Div 
   | Pow
   | Comb 
   | Perm
+  | Eq 
+  | Lt 
+  | Gt 
+  | Geq 
+  | Leq 
+  | Neq 
 
 
 
