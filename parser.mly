@@ -109,6 +109,8 @@ defn:
 	| DISP; e = expr; END; d = defn; { DDisp (e, d) }
 	| DISP; e = expr; END; { DDisp (e, DEnd) }
 	| DISP; e = expr; { DDisp (e, DEnd) }
+	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; END; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
 	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
 	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
 	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }

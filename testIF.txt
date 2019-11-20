@@ -1,3 +1,10 @@
 IF true THEN DISP "Hi"
 IF false THEN DISP "Hi x2"
 DISP "bye"
+
+IF true
+THEN 
+DISP "Hello"
+ELSE
+DISP "Goodbye"
+DISP "Ok actually leaving now"
