@@ -5,7 +5,7 @@ module VarLog = struct
   type var = string * value
   type t = ((var list) * ((string * defn) list)) ref
 
-  let empty : t = ref ([], [])
+  let empty () : t = ref ([], [])
 
   let find id vl = 
     try Some (List.assoc id (fst !vl)) with _ -> None
@@ -72,4 +72,4 @@ let rec find_lbls vl = function
   | DLabel (s, d) -> VarLog.bind_lbl s d vl; find_lbls vl d
   | _ -> failwith "Unimplemented"
 
-let eval_init d = eval d (find_lbls VarLog.empty d)
+let eval_init d = eval d (find_lbls (VarLog.empty ()) d)
