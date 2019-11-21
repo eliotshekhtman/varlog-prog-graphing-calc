@@ -8,7 +8,10 @@ let make_eval_test n i s =
   n >:: (fun _ -> assert_equal i (interp ("EVAL " ^ s)))
 
 let eval_tests = [
-  make_eval_test "int" "22" "22";
+  make_eval_test "integer" "22" "22";
+  make_eval_test "float" "23.5" "23.5";
+  make_eval_test "string" "Hello World" {|"Hello World"|};
+  make_eval_test "bool" "true" "true";
   make_eval_test "add" "22" "11+11";
   make_eval_test "adds" "22" "(10+1)+(5+6)";
   make_eval_test "mul1" "22" "2*11";
@@ -26,6 +29,15 @@ let eval_tests = [
   make_eval_test "int2" "15.0000009999" "1+3!+INTEGRAL((1,3),x)+4";
   make_eval_test "sin1" "0.841470984808" "SIN 1";
   make_eval_test "sin2" "5.00000979345" "1 + SIN(3+8) + 5";
+  make_eval_test "eq1" "true" "1 = 1";
+  make_eval_test "eq2" "false" "1 = 2";
+  make_eval_test "eq3" "true" "true = true";
+  make_eval_test "eq4" "false" "true = false";
+  make_eval_test "eq5" "true" {|"hello" = "hello"|};
+  make_eval_test "eq6" "false" {|"hello" = "hi"|};
+  make_eval_test "lt1" "true" "1 < 2";
+  make_eval_test "lt2" "true" "1 < 1.2";
+  make_eval_test "lt3" "true" "false < true";
 ]
 
 let tests = [
