@@ -156,7 +156,22 @@ let rec eval_expr vl e =
   | Binop (bop, e1, e2) -> eval_bop vl bop e1 e2 
   | Ternop (top, (e1, e2), e3) -> eval_top vl top e1 e2 e3
   | Derivative (der, e1, e2) -> eval_deriv vl der e1 e2
+  | Boolop (boop, e1, e2) -> eval_boop vl boop e1 e2
   | _ -> failwith "lol right"
+and eval_boop vl b e1 e2 = 
+  let r1 = eval_expr vl e1 in 
+  match b, (fst r1) with 
+  | And, Bool false -> (Bool false, snd r1)
+  | Or, Bool true -> (Bool true, snd r1) 
+  | _ -> 
+    let (r2, vl2) = eval_expr (snd r1) e2 in 
+    begin 
+      match b, (fst r1), r2 with 
+      | And, Bool a, Bool b -> (Bool (a && b), vl2)
+      | Or, Bool a, Bool b -> (Bool (a || b), vl2) 
+      | Xor, Bool a, Bool b -> (Bool (a <> b), vl2)
+      | _ -> failwith "unimplemented"
+    end
 and eval_bop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 
   let (r2, vl2) = eval_expr (snd r1) e2 in 
@@ -179,6 +194,7 @@ and eval_bop vl b e1 e2 =
 and eval_uop vl u e = 
   let (r, vl') = eval_expr vl e in 
   match u, r with 
+  | Not, Bool b -> (Bool (not b), vl')
   | Subt, Num n -> (Num (~-.n), vl')
   | Fact, Num n -> (Num (fact n), vl')
   | Sin, Num n -> (Num (sin n), vl')

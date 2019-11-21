@@ -17,6 +17,7 @@ open Ast
 %token ARCTAN
 %token ARCSIN
 %token ARCCOS
+%token NOT
 %token <float> NUM
 %token <string> NAME
 %token <string> STRING
@@ -31,6 +32,12 @@ open Ast
 %token GEQ
 %token LT
 %token GT
+%token AND 
+%token OR 
+%token NAND 
+%token NOR
+%token XOR 
+%token NXOR
 %token POW
 %token EXCL
 %token COMB 
@@ -62,6 +69,10 @@ open Ast
 %left GEQ
 %left LT
 %left GT
+%left AND 
+%left OR
+%left NAND 
+%left NOR
 %right SIN 
 %right COS 
 %right TAN
@@ -110,6 +121,13 @@ expr:
 	| e1 = expr; LEQ; e2 = expr { Binop (Leq, e1, e2) }
 	| e1 = expr; GT; e2 = expr { Binop (Gt, e1, e2) }
 	| e1 = expr; LT; e2 = expr { Binop (Lt, e1, e2) }
+	| e1 = expr; AND; e2 = expr { Boolop (And, e1, e2) }
+	| e1 = expr; NOR; e2 = expr { Uniop (Not, Boolop (Or, e1, e2)) }
+	| e1 = expr; NAND; e2 = expr { Uniop (Not, Boolop (And, e1, e2)) }
+	| e1 = expr; OR; e2 = expr { Boolop (Or, e1, e2) }
+	| e1 = expr; XOR; e2 = expr { Boolop (Xor, e1, e2) }
+	| e1 = expr; NXOR; e2 = expr { Uniop (Not, Boolop (Xor, e1, e2)) }
+	| NOT; e = expr; { Uniop (Not, e) }
 	| SIN; e = expr; {Uniop (Sin, e)}
 	| COS; e = expr; {Uniop (Cos, e)}
 	| TAN; e = expr; {Uniop (Tan, e)}

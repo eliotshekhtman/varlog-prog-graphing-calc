@@ -13,8 +13,10 @@ type bop =
   | Leq 
   | Neq 
 
-
-
+type boop = 
+  | And 
+  | Or 
+  | Xor 
 
 type der = 
   | Der
@@ -31,6 +33,7 @@ type uop =
   | ArcSin
   | ArcCos
   | ArcTan
+  | Not
 
 type key =
   | Eval
@@ -51,6 +54,7 @@ type expr =
   | Val of value
   | Var of string 
   | Binop of bop * expr * expr
+  | Boolop of boop * expr * expr
   | Derivative of der * expr * expr
   | Ternop of top * (expr * expr) * expr
   | Uniop of uop * expr

@@ -28,21 +28,32 @@ rule read =
   | "-" { SUBT }
   | "/" { DIV }
   | "^" { POW }
-  | "!" { EXCL }
   | "C" { COMB }
   | "P" { PERM }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "," {COMMA}
-  | "=" { EQ }
-  | "<" { LT }
-  | ">" { GT }
   | "<=" { LEQ }
   | ">=" { GEQ }
   | "!=" { NEQ }
+  | "=" { EQ }
+  | "<" { LT }
+  | ">" { GT }
+  | "NOT" { NOT }
+  | "XOR" { XOR }
+  | "NXOR" { NXOR }
+  | "NAND" { NAND }
+  | "NOR" { NOR }
+  | "!&" { NAND }
+  | "!|" { NOR }
+  | "&" { AND }
+  | "|" { OR }
+  | "AND" { AND }
+  | "OR" { OR }
   | "SIN" {SIN}
   | "COS" {COS}
   | "TAN" {TAN}
+  | "!" { EXCL }
   | "ARCTAN" {ARCTAN}
   | "ARCCOS" {ARCCOS}
   | "ARCSIN" {ARCSIN}
