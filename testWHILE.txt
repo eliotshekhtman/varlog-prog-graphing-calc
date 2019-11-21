@@ -1,0 +1,5 @@
+x : 0 
+LBL a
+DISP "Yeehaw x " + (x+1)
+x : x+1
+IF x < 10 THEN GOTO a
