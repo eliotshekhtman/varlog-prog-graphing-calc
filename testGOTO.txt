@@ -1,11 +1,9 @@
 GOTO a
 
-GOTO b
+IF 1=1 THEN (DISP 1+1
+GOTO b)
+
 LBL a
-IF true THEN GOTO b 
-ELSE GOTO c 
-GOTO c
-LBL d
-IF true THEN
-GOTO d
-ELSE GOTO a 
+DISP "a"
+LBL b
+DISP "b"
