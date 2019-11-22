@@ -157,6 +157,14 @@ let rec eval_expr vl e =
   | Ternop (top, (e1, e2), e3) -> eval_top vl top e1 e2 e3
   | Derivative (der, e1, e2) -> eval_deriv vl der e1 e2
   | Boolop (boop, e1, e2) -> eval_boop vl boop e1 e2
+  | GetKey -> 
+    let c = Graphics.wait_next_event [Graphics.Key_pressed] in 
+    (Str (Char.escaped c.Graphics.key), vl)
+  | Prompt -> begin
+      print_string ">> ";
+      let s = read_line() in
+      s |> parse |> eval_expr vl
+    end
   | _ -> failwith "lol right"
 and eval_boop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 

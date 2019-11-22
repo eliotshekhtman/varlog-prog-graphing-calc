@@ -23,6 +23,9 @@ rule read =
   | "INTEGRAL" {INTEGRAL}
   | "DERIVATIVE" {DERIVATIVE}
   | "DISP" { DISP }
+  | "GETKEY" { GETKEY }
+  | "PROMPT" { PROMPT }
+  | "OUTPUT" { OUTPUT }
   | "*" { TIMES }
   | "+" { PLUS }
   | "-" { SUBT }

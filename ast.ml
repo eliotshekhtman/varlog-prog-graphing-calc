@@ -60,6 +60,8 @@ type expr =
   | Uniop of uop * expr
   | Bind of string * expr * expr
   | Disp of expr * expr
+  | GetKey
+  | Prompt
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
 
@@ -70,4 +72,5 @@ type defn =
   | DDisp of expr * defn 
   | DGoto of string * defn
   | DLabel of string * defn
+  | DOutput of expr * expr * expr * defn
   | DEnd 

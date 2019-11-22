@@ -54,6 +54,9 @@ open Ast
 %token ELSE
 %token GOTO 
 %token LBL
+%token GETKEY
+%token PROMPT
+%token OUTPUT
 %token EOF
 
 %left PLUS
@@ -138,6 +141,8 @@ expr:
 	| LPAREN; e=expr; RPAREN {e} 
 	| SOLVE; THREEVAR; {Solver "three"}
 	| SOLVE; TWOVAR; {Solver "two"}
+	| GETKEY; { GetKey }
+	| PROMPT; { Prompt }
 	;
 	
 defn: 
@@ -165,6 +170,8 @@ defn:
 	| GOTO; s = NAME; { DGoto (s, DEnd) }
 	| LBL; s = NAME; END; { DLabel (s, DEnd) }
 	| LBL; s = NAME; { DLabel (s, DEnd) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, d) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }
 	| END; d = defn; { d }
 	| d = defn; END; { d }
   | END; { DEnd }
