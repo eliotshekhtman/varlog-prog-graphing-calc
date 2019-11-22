@@ -1,9 +1,10 @@
 open Main 
 open Graphing
 open Printexc
+open ANSITerminal
 
 let rec run () =
-  print_string "> ";
+  Stdlib.print_string "> "; 
   match read_line () with
   | exception (Graphics.Graphic_failure _) -> print_endline ""; print_endline "Quitting"
   | "" -> run ()

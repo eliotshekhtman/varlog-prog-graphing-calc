@@ -1,1 +1,1 @@
-true: package(oUnit), use_menhir
+true: package(oUnit), use_menhir, package(ANSITerminal)
