@@ -9,6 +9,8 @@ open Stdlib
 exception No_keyword
 exception DeterminantZero
 
+(** [close_int f] is the nearest integer, as a float, to [f] if [f] is
+    less than 10^(-7) away from an integer; else, it's just [f] *)
 let close_int (f : float) = 
   let f' = f |> int_of_float |> float_of_int in 
   if f > 0. then
@@ -22,51 +24,9 @@ let close_int (f : float) =
   if f > f' -. 1.0000001 && f < f' -. 1. +. 0.0000001 then (true, f' -. 1.)
   else (false, f) 
 
-let rec newton_disp n lst acc = 
-  match acc, lst with 
-  | a, _ when a > n -> print_endline ("\n" ^ "Input coefficients: ")
-  | a, h :: t when a = n -> begin 
-      print_string (h ^ "x^" ^ (a |> string_of_int)); 
-      newton_disp n t (a+1)
-    end
-  | a, h :: t -> begin 
-      print_string (h ^ "x^" ^ (a |> string_of_int) ^ " + "); 
-      newton_disp n t (a+1)
-    end
-  | _, _ -> failwith "precondition violated: power"
-
-let rec newton_inputs n lst = 
-  match n, lst with 
-  | n, _ when n < 0 -> []
-  | n, h :: t -> begin 
-      print_string (h ^ "> ");
-      let value = (read_line () |> parse |> eval_expr [] |> fst |> pull_num) in 
-      value :: newton_inputs (n-1) t
-    end
-  | _, _ -> failwith "aaa"
-
-let rec newton_make lst x = 
-  let rec deriv lst x = 
-    match lst with 
-    | [] -> 0.
-    | h :: [] -> 0.
-    | h :: t -> 
-      let ele = (t |> List.length |> float_of_int) in 
-      ele *. h *. x ** (ele -. 1.) +. deriv t x
-  in 
-  let rec norm lst x = 
-    match lst with 
-    | [] -> 0.
-    | h :: t -> 
-      let ele = (t |> List.length |> float_of_int) in 
-      h *. x ** ele +. norm t x
-  in 
-  let numer = norm lst x in 
-  let denom = deriv lst x in 
-  if denom = 0. || numer = 0. || denom = nan || numer = nan then x 
-  else x -. (numer /. denom)
-
-let rec newton_make' e x = 
+(** [newton_make e x] is the result of applying [x] to one step of
+    Newton's Method *)
+let rec newton_make e x = 
   let deriv eq n = derive n eq in
   let n = eval_graph e in 
   let d = deriv n in 
@@ -74,7 +34,11 @@ let rec newton_make' e x =
   if denom = 0. || numer = 0. || denom = nan || numer = nan then x 
   else x -. (numer /. denom)
 
+(** [newton_apply f] is the string "Quitting", and prints the repl
+    loop for applying different guesses to Newton's Method for 
+    function [f] *)
 let rec newton_apply f = 
+  (** [apply n f r] is the result of applying [f] to [r] [n] times *)
   let rec apply n f r = 
     let res = f r in
     if r = res then r 
@@ -94,18 +58,10 @@ let rec newton_apply f =
      else ());
     newton_apply f
 
-let newton_helper n = 
-  if n < 0. || n > 5. then failwith "Error: Keep power to within 0-5"
-  else 
-    let lst = ["A"; "B"; "C"; "D"; "E"; "F"] in 
-    let n' = int_of_float n in 
-    newton_disp n' lst 0; 
-    let inputs = newton_inputs n' lst in 
-    let f = inputs |> List.rev |> newton_make in 
-    newton_apply f
-
-let newton_helper' e = 
-  let f = newton_make' e in 
+(** [newton_helper e] is "Quitting", and instantiates the repl, 
+    combining the creation of [f] for [newton_apply f] *)
+let newton_helper e = 
+  let f = newton_make e in 
   print_endline "Enter guesses for values: ";
   newton_apply f
 
@@ -302,11 +258,6 @@ let print_linear_equation_answer arr num =
       ()
     )
 
-
-(** [interp s] interprets [s] by lexing and parsing it, 
-    evaluating it, and returning either the value in the case of an expression
-    input or an indication that the expression has been graphed in the case
-    of a graphing request.*)
 let interp (s : string) : string =
   match s |> parse with 
   | Keyword (k, e) -> begin  
@@ -318,7 +269,7 @@ let interp (s : string) : string =
         let y_min = print_string "SET MIN Y> "; read_line () |> float_of_string in
         let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
         graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
-      | Newton -> newton_helper' e
+      | Newton -> newton_helper e
       (* newton_helper (e |> eval_expr [] |> fst |> (fun v -> match v with Num n -> n | _ -> failwith "Error: invalid input: not a number")) *)
       | Exec -> exec_helper (e |> eval_expr [] |> fst)
     end

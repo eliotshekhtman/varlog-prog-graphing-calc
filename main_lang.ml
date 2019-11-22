@@ -1,11 +1,13 @@
 open Ast 
 open Evallang
 
+(** [parse s] is the defn resulting from [s] *)
 let parse (s : string) : defn = 
   let lexbuf = Lexing.from_string s in 
   let ast = Parser.parse_defn Lexer.read lexbuf in 
   ast
 
+(** [read_file file] is the text on file [file] *)
 let read_file file = 
   let rec pull_string f ch = 
     match Stdlib.input_line ch with 
@@ -16,6 +18,10 @@ let read_file file =
   let s = pull_string file channel in 
   s
 
+(** [interp s] is the error displayed after attempting to run
+    the file represented by string [s], but also enables the 
+    cohesive running of the file, with all the side-effects
+    entailed *)
 let interp s = 
   try 
     s |> read_file |> parse |> eval_init; ""

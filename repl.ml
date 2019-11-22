@@ -3,6 +3,7 @@ open Graphing
 open Printexc
 open ANSITerminal
 
+(** [run ()] is the actual running repl loop of the program *)
 let rec run () =
   Stdlib.print_string "> "; 
   match read_line () with
@@ -23,6 +24,7 @@ let rec run () =
       | s -> print_endline s; run ()
     end
 
+(** [flex ()] displays the intro description text when make repl is run *)
 let flex () = 
   print_endline "------------ V/\\RL0G -------------";
   print_endline "[EVAL e] to evaluate an expression";
@@ -35,6 +37,9 @@ let flex () =
   print_endline "  don't include file extension";
   print_endline "----------------------------------"; ()
 
+(** Allows the repl to run automatically when make repl is called; creates
+    a default open graph window from the start so it'd make sense that 
+    closing it would end the program *)
 let () = 
   graph_func (-10.) 10. (-10.) 10. 0 (fun x -> 100000.);
   flex ();
