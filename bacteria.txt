@@ -6,3 +6,7 @@ DISP "b"
 b : PROMPT 
 DISP "c"
 c : PROMPT
+DISP "d"
+d : PROMPT 
+DISP "e"
+e : PROMPT 

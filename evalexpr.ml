@@ -228,7 +228,7 @@ let rec eval_expr vl e =
     end
   | MakeMatrix (a,b) -> eval_matrix a b vl 
   | MatrixGet (m, a, b) -> eval_matrixget vl m a b
-  | RandInt (lb, ub) -> eval_randint vl lb up
+  | RandInt (lb, ub) -> eval_randint vl lb ub
   | _ -> failwith "lol right"
 
 and eval_randint vl a b = 

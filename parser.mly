@@ -19,6 +19,7 @@ let has_dups lst =
 %token EXEC
 %token INTEGRAL
 %token DERIVATIVE
+%token RANDINT
 %token SIN
 %token COS
 %token TAN
