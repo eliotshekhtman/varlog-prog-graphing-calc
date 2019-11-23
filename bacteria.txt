@@ -1,0 +1,8 @@
+matrix : MATRIX(30,30)
+DISP "Initial count of each"
+DISP "a"
+a : PROMPT
+DISP "b"
+b : PROMPT 
+DISP "c"
+c : PROMPT

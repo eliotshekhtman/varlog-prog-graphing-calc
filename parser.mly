@@ -117,8 +117,9 @@ expr:
 	| EXEC; e = expr; { Keyword (Exec, e) }
 	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
 		{ Ternop (Integral, (e1 , e2), e3) }
-	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{ Derivative (Der, e1, e2) }
+	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { Derivative (Der, e1, e2) }
 	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; { MatrixGet (m, e1, e2) }
+	| RANDINT; LPAREN e1 = expr; COMMA; e2 = expr; RPAREN; { RandInt (e1, e2) }
 	| i = NUM { Val (Num i) }
 	| s = STRING; { PreString s }
 	| b = BOOL; { Val (Bool b) }
