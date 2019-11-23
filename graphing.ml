@@ -9,16 +9,23 @@ let better_int_of_float (f : float) =
   else if f <= (min_int |> float_of_int) then min_int / 2
   else f |> int_of_float
 
-let output x y s = 
-  let window_height = 800 in
-  let window_width = 800 in
-  let incx = window_width / 2 |> float_of_int in 
-  let incy = window_height / 2 |> float_of_int in 
+let window_height = 800 
+let window_width = 800 
+
+let open_output_window () = 
   open_graph "";
   set_window_title "Output";
   resize_window window_width window_height;
   set_color black;
-  moveto (x *. incx |> int_of_float) (y *. incy |> int_of_float);
+  set_text_size 20;
+  ()
+
+let output x y s = 
+  let incx = (window_width / 30) |> float_of_int in 
+  let incy = (window_height / 30) |> float_of_int in 
+  let x' = (x *. incx) |> int_of_float in 
+  let y' = window_height - (((y +. 1.) *. incy) |> int_of_float) in
+  moveto x' y';
   draw_string s;
   ()
 
@@ -29,8 +36,6 @@ let rec graph_func xi xa yi ya x f =
   (* Set up window *)
   let _ = open_graph "" in
   let _ = set_window_title "Graph 2-D Functions" in
-  let window_height = 800 in
-  let window_width = 800 in
   let _ = resize_window window_width window_height in
   let num_ticks = 10 in
   set_color black;

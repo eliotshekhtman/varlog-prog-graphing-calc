@@ -24,6 +24,7 @@ let read_file file =
     entailed *)
 let interp s = 
   try 
+    Graphing.open_output_window ();
     s |> read_file |> parse |> eval_init; ""
   with 
   | End_of_file -> ""

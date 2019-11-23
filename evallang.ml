@@ -31,6 +31,17 @@ module VarLog = struct
   let find_lbl id vl = List.assoc id (snd !vl)
 end
 
+let rec has_goto = function 
+  | DEnd -> false
+  | DDisp (_, d) -> has_goto d
+  | DAssign (_, _, d) -> has_goto d
+  | DIf (_, _, _, d) -> has_goto d
+  | DGoto (_, d) -> true 
+  | DLabel (_, d) -> has_goto d
+  | DMatrixSet (_, _, _, _, d) -> has_goto d
+  | DOutput (_, _, _, d) -> has_goto d
+  | _ -> failwith "Unimplemented"
+
 let rec eval d vl = 
   match d with 
   | DEnd -> ()
@@ -75,8 +86,8 @@ and eval_assign s e d vl =
   VarLog.bind s v vl; eval d vl
 and eval_if e d1 d2 d3 vl =
   match e |> eval_expr (VarLog.expose vl) |> fst with 
-  | Bool true -> eval d1 vl; eval d3 vl
-  | Bool false -> eval d2 vl; eval d3 vl
+  | Bool true -> eval d1 vl; if(d1 |> has_goto |> not) then eval d3 vl
+  | Bool false -> eval d2 vl; if(d2 |> has_goto |> not) then eval d3 vl
   | _ -> failwith "precondition violated: if guard"
 
 (** [string_of_val e] converts [e] to a string.
