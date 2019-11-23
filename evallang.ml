@@ -40,7 +40,18 @@ let rec eval d vl =
   | DLabel (s, d) -> eval d vl 
   | DGoto (s, d) -> eval (VarLog.find_lbl s vl) vl
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
+  | DOutput (x, y, v, d) -> eval_output x y v d vl
   | _ -> failwith "Unimplemented"
+
+and eval_output x y v d vl = 
+  let x' = x |> eval_expr (VarLog.expose vl) |> fst in 
+  let y' = y |> eval_expr (VarLog.expose vl) |> fst in 
+  let v' = v |> eval_expr (VarLog.expose vl) |> fst in 
+  match x', y' with 
+  | Num a, Num b -> begin 
+      Graphing.output a b (v' |> string_of_val); eval d vl
+    end
+  | _ -> failwith "precondition violated: not numerical coordinates"
 
 and eval_matrixset m a b v d vl = 
   let m' = m |> eval_expr (VarLog.expose vl) |> fst in 
@@ -84,6 +95,8 @@ let rec find_lbls vl = function
   | DIf (_, _, _, d) -> find_lbls vl d
   | DGoto (_, d) -> find_lbls vl d 
   | DLabel (s, d) -> VarLog.bind_lbl s d vl; find_lbls vl d
+  | DMatrixSet (_, _, _, _, d) -> find_lbls vl d
+  | DOutput (_, _, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented"
 
 let eval_init d = eval d (find_lbls (VarLog.empty ()) d)

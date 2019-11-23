@@ -19,6 +19,7 @@ let rec run () =
         print_endline "Cannot solve this equation. Either there are infinitely many solutions, or none at all"; run ()
       | exception Division_by_zero ->
         print_endline "Division by 0 exc"; run ()
+      | exception (Failure s) -> print_endline ("Failure: " ^ s); run ()
       | exception _ -> 
         print_endline "Error: invalid input"; run ()
       | s -> print_endline s; run ()

@@ -28,4 +28,5 @@ let interp s =
   with 
   | End_of_file -> ""
   | Sys_error _ -> "Error: invalid input: no text file with given name"
+  | Failure s -> "Failure: " ^ s
   | _ -> "Error: parsing error" 

@@ -9,12 +9,17 @@ let better_int_of_float (f : float) =
   else if f <= (min_int |> float_of_int) then min_int / 2
   else f |> int_of_float
 
-let setup () = 
-  let _ = open_graph "" in
-  let _ = set_window_title "Graph 2-D Functions" in
+let output x y s = 
   let window_height = 800 in
   let window_width = 800 in
-  let _ = resize_window window_width window_height in
+  let incx = window_width / 2 |> float_of_int in 
+  let incy = window_height / 2 |> float_of_int in 
+  open_graph "";
+  set_window_title "Output";
+  resize_window window_width window_height;
+  set_color black;
+  moveto (x *. incx |> int_of_float) (y *. incy |> int_of_float);
+  draw_string s;
   ()
 
 (** [graph_func xi xa yi ya x f] is [unit], but it graphs function f, 
