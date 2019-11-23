@@ -63,10 +63,12 @@ y : RANDINT(0, 30)
 v : matrix[x,y]
 IF v = 0 THEN GOTO continue
 d : RANDINT(0, 4)
-IF ((d = 0) & (x > 0)) THEN matrix[x-1,y] : v
-IF ((d = 1) & (y > 0)) THEN matrix[x,y-1] : v 
-IF ((d = 2) & (x < 29)) THEN matrix[x+1,y] : v
-IF ((d = 3) & (y < 29)) THEN matrix[x,y+1] : v
+IF ((d = 0) & (x > 0)) THEN x : x-1
+IF ((d = 1) & (y > 0)) THEN y : y-1
+IF ((d = 2) & (x < 29)) THEN x : x+1
+IF ((d = 3) & (y < 29)) THEN y : y+1
+matrix[x,y] : v
+OUTPUT(x, y, matrix[x,y])
 GOTO gameLoop
 
 LBL checkEnd
