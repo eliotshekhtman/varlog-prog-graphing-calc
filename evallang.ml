@@ -31,6 +31,17 @@ module VarLog = struct
   let find_lbl id vl = List.assoc id (snd !vl)
 end
 
+let rec has_goto = function 
+  | DEnd -> false
+  | DDisp (_, d) -> has_goto d
+  | DAssign (_, _, d) -> has_goto d
+  | DIf (_, _, _, d) -> has_goto d
+  | DGoto (_, d) -> true 
+  | DLabel (_, d) -> has_goto d
+  | DMatrixSet (_, _, _, _, d) -> has_goto d
+  | DOutput (_, _, _, d) -> has_goto d
+  | _ -> failwith "Unimplemented"
+
 let rec eval d vl = 
   match d with 
   | DEnd -> ()
@@ -40,7 +51,18 @@ let rec eval d vl =
   | DLabel (s, d) -> eval d vl 
   | DGoto (s, d) -> eval (VarLog.find_lbl s vl) vl
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
+  | DOutput (x, y, v, d) -> eval_output x y v d vl
   | _ -> failwith "Unimplemented"
+
+and eval_output x y v d vl = 
+  let x' = x |> eval_expr (VarLog.expose vl) |> fst in 
+  let y' = y |> eval_expr (VarLog.expose vl) |> fst in 
+  let v' = v |> eval_expr (VarLog.expose vl) |> fst in 
+  match x', y' with 
+  | Num a, Num b -> begin 
+      Graphing.output a b (v' |> string_of_val); eval d vl
+    end
+  | _ -> failwith "precondition violated: not numerical coordinates"
 
 and eval_matrixset m a b v d vl = 
   let m' = m |> eval_expr (VarLog.expose vl) |> fst in 
@@ -64,8 +86,8 @@ and eval_assign s e d vl =
   VarLog.bind s v vl; eval d vl
 and eval_if e d1 d2 d3 vl =
   match e |> eval_expr (VarLog.expose vl) |> fst with 
-  | Bool true -> eval d1 vl; eval d3 vl
-  | Bool false -> eval d2 vl; eval d3 vl
+  | Bool true -> eval d1 vl; if(d1 |> has_goto |> not) then eval d3 vl
+  | Bool false -> eval d2 vl; if(d2 |> has_goto |> not) then eval d3 vl
   | _ -> failwith "precondition violated: if guard"
 
 (** [string_of_val e] converts [e] to a string.
@@ -84,6 +106,8 @@ let rec find_lbls vl = function
   | DIf (_, _, _, d) -> find_lbls vl d
   | DGoto (_, d) -> find_lbls vl d 
   | DLabel (s, d) -> VarLog.bind_lbl s d vl; find_lbls vl d
+  | DMatrixSet (_, _, _, _, d) -> find_lbls vl d
+  | DOutput (_, _, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented"
 
 let eval_init d = eval d (find_lbls (VarLog.empty ()) d)

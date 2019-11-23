@@ -26,6 +26,7 @@ rule read =
   | "GETKEY" { GETKEY }
   | "PROMPT" { PROMPT }
   | "OUTPUT" { OUTPUT }
+  | "RANDINT" { RANDINT }
   | "<-" { RARROW }
   | "[" { LBRACKET }
   | "]" { RBRACKET}

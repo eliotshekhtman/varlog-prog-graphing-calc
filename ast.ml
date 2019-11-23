@@ -20,7 +20,7 @@ type bop =
 type boop = 
   | And 
   | Or 
-  | Xor 
+  | Xor
 
 type der = 
   | Der
@@ -65,6 +65,7 @@ type expr =
   | Disp of expr * expr
   | GetKey
   | Prompt
+  | RandInt of expr * expr
 and  value = 
   | Num of float 
   | Bool of bool 

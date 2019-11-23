@@ -225,6 +225,8 @@ let rec eval_expr vl e =
   (* | Function (xs, e1) -> eval_func xs e1 vl *)
   | Boolop (boop, e1, e2) -> eval_boop vl boop e1 e2
   | GetKey -> 
+    (* learned how to do this here: 
+       https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora050.html *)
     let c = Graphics.wait_next_event [Graphics.Key_pressed] in 
     (Str (Char.escaped c.Graphics.key), vl)
   | Prompt -> begin
@@ -234,8 +236,20 @@ let rec eval_expr vl e =
     end
   | MakeMatrix (a,b) -> eval_matrix a b vl 
   | MatrixGet (m, a, b) -> eval_matrixget vl m a b
+  | RandInt (lb, ub) -> eval_randint vl lb ub
   | _ -> failwith "lol right"
 
+and eval_randint vl a b = 
+  let r1 = eval_expr vl a in 
+  let (r2, vl') = eval_expr (snd r1) b in 
+  match fst r1, r2 with 
+  | Num a, Num b -> begin 
+      let lb = a |> int_of_float in 
+      let up = b |> int_of_float in 
+      let v = lb + Random.int (up-lb) in
+      (Num (v |> float_of_int), vl)
+    end
+  | _ -> failwith "precondition violated: not numerical inputs"
 and eval_matrix a b vl = 
   let r1 = eval_expr vl a in
   let r2 = eval_expr (snd r1) b in

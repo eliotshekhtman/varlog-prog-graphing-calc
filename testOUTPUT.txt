@@ -1,0 +1,12 @@
+v : 0 END x : 0 END y : 0
+LBL ystart
+LBL xstart
+OUTPUT(x,y,v)
+v : v+1
+x : x+1
+IF x <= 30 THEN GOTO xstart 
+x : 0
+y : y+1
+IF y <= 30 THEN GOTO ystart
+
+DISP "Done"

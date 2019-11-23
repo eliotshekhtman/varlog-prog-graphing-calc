@@ -1,2 +1,3 @@
 m : MATRIX(3, 3)
-DISP ((m)[3,3])
+m[0,0] : 2
+DISP m
