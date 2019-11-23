@@ -20,8 +20,8 @@ let rec run () =
       | exception Division_by_zero ->
         print_endline "Division by 0 exc"; run ()
       | exception (Failure s) -> print_endline ("Failure: " ^ s); run ()
-      | exception _ -> 
-        print_endline "Error: invalid input"; run () 
+      (* | exception _ -> 
+         print_endline "Error: invalid input"; run ()  *)
       | s -> print_endline s; run ()
     end
 
