@@ -26,6 +26,10 @@ rule read =
   | "GETKEY" { GETKEY }
   | "PROMPT" { PROMPT }
   | "OUTPUT" { OUTPUT }
+  | "<-" { RARROW }
+  | "[" { LBRACKET }
+  | "]" { RBRACKET}
+  | "->" { ARROW }
   | "*" { TIMES }
   | "+" { PLUS }
   | "-" { SUBT }
@@ -73,6 +77,8 @@ rule read =
   | "ELSE" { ELSE }
   | "true" { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
   | "false" { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
+  | "FUNC" {FUNC}
+  | "MATRIX" {MATRIX}
   | endchar { END }
   | word { NAME (Lexing.lexeme lexbuf) }
   | eof { EOF }

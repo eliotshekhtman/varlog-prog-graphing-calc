@@ -152,6 +152,11 @@ let reflect (matrix: float array array) =
   matrix.(1).(2) <- temp3; 
   matrix
 
+(* let make_matrix a b = Array.make_matrix a b 0 *)
+
+
+
+
 let normalized matrix det num= 
   print_string (string_of_float det);
   print_string ("reached this point 1******");
@@ -258,6 +263,37 @@ let print_linear_equation_answer arr num =
       ()
     )
 
+let linear_solver_helper s =
+  match s with
+  |"three" ->  begin
+      print_string linear_prompt;
+      let eq1 = read_line() |> parse_lin_equation3 in
+      print_string "Please input equation 2 in the same format:\n\nequation 2> ";
+      let eq2 = read_line() |> parse_lin_equation3 in
+      print_string "Please input equation 3 in the same format:\n\nequation 3> ";
+      let eq3 = read_line() |> parse_lin_equation3 in
+      let matrix = [|(fst eq1); (fst eq2); (fst eq3)|] in
+      let target_vector = [|(snd eq1);(snd eq2);(snd eq3)|] in
+      let answer = solve_linear_equation matrix target_vector 3 in
+      print_string "1...........";
+      print_linear_equation_answer answer 3;
+      "\nSolved!!!!!!!!!!" 
+    end
+  | "two" -> begin
+      print_string linear_prompt;
+      let eq1 = read_line() |> parse_lin_equation2 in
+      print_string "Please input equation 2 in the same format:\n\nequation 2> ";
+      let eq2 = read_line() |> parse_lin_equation2 in
+      let matrix = [|(fst eq1); (fst eq2);|] in
+      let target_vector = [|(snd eq1);(snd eq2)|] in
+      let answer = solve_linear_equation matrix target_vector 2 in
+      print_string "1...........";
+      print_linear_equation_answer answer 2;
+      "\nSolved!!!!!!!!!!" 
+    end
+  | _-> failwith "Invalid input. Only 3x3 or 2x2 systems are supported"
+
+
 let interp (s : string) : string =
   match s |> parse with 
   | Keyword (k, e) -> begin  
@@ -273,34 +309,5 @@ let interp (s : string) : string =
       (* newton_helper (e |> eval_expr [] |> fst |> (fun v -> match v with Num n -> n | _ -> failwith "Error: invalid input: not a number")) *)
       | Exec -> exec_helper (e |> eval_expr [] |> fst)
     end
-  | Solver s ->begin
-      match s with
-      |"three" ->  begin
-          print_string linear_prompt;
-          let eq1 = read_line() |> parse_lin_equation3 in
-          print_string "Please input equation 2 in the same format:\n\nequation 2> ";
-          let eq2 = read_line() |> parse_lin_equation3 in
-          print_string "Please input equation 3 in the same format:\n\nequation 3> ";
-          let eq3 = read_line() |> parse_lin_equation3 in
-          let matrix = [|(fst eq1); (fst eq2); (fst eq3)|] in
-          let target_vector = [|(snd eq1);(snd eq2);(snd eq3)|] in
-          let answer = solve_linear_equation matrix target_vector 3 in
-          print_string "1...........";
-          print_linear_equation_answer answer 3;
-          "\nSolved!!!!!!!!!!" 
-        end
-      | "two" -> begin
-          print_string linear_prompt;
-          let eq1 = read_line() |> parse_lin_equation2 in
-          print_string "Please input equation 2 in the same format:\n\nequation 2> ";
-          let eq2 = read_line() |> parse_lin_equation2 in
-          let matrix = [|(fst eq1); (fst eq2);|] in
-          let target_vector = [|(snd eq1);(snd eq2)|] in
-          let answer = solve_linear_equation matrix target_vector 2 in
-          print_string "1...........";
-          print_linear_equation_answer answer 2;
-          "\nSolved!!!!!!!!!!" 
-        end
-      | _-> failwith "Invalid input. Only 3x3 or 2x2 systems are supported"
-    end
+  | Solver s -> linear_solver_helper s
   | _ -> raise No_keyword

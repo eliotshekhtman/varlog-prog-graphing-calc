@@ -39,7 +39,21 @@ let rec eval d vl =
   | DIf (e, d1, d2, d3) -> eval_if e d1 d2 d3 vl
   | DLabel (s, d) -> eval d vl 
   | DGoto (s, d) -> eval (VarLog.find_lbl s vl) vl
+  | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
   | _ -> failwith "Unimplemented"
+
+and eval_matrixset m a b v d vl = 
+  let m' = m |> eval_expr (VarLog.expose vl) |> fst in 
+  let a' = a |> eval_expr (VarLog.expose vl) |> fst in
+  let b' = b |> eval_expr (VarLog.expose vl) |> fst in
+  let v' = v |> eval_expr (VarLog.expose vl) |> fst in
+  match m', a', b', v' with 
+  | Matrix m, Num a, Num b, Num v -> begin 
+      if (is_int a && is_int b) then 
+        (m.(a |> int_of_float).(b |> int_of_float) <- v; eval d vl)
+      else failwith "precondition violated: float indeces"
+    end
+  | _ -> failwith "precondition violated: matrix set"
 
 and eval_disp e d vl = 
   let v = e |> eval_expr (VarLog.expose vl) |> fst |> string_of_val in 

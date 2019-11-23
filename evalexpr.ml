@@ -1,4 +1,5 @@
 open Ast 
+open Array
 
 let rec fact n = 
   if n < 0. then failwith "not integer"
@@ -22,6 +23,61 @@ let is_int f =
   if f = f' then true 
   else false
 
+
+let matrix = [| [|1.;2.;3.|];[|0.;1.;5.|];[|5.;6.;0.|] |]
+
+let print_matrix arr = 
+  let printed = ref "" in
+  let row_length = Array.length arr in
+  let col_length = Array.length arr.(0) in
+  let print_matrix_helper arr str = 
+    for i = 0 to row_length - 1 do
+      for j = 0 to col_length - 1 do
+        str := !str ^ " " ^ (arr.(i).(j) |> string_of_float) ;
+      done;
+      str := !str ^ "\n";
+    done;
+    str
+  in 
+  let stringified = printed |> print_matrix_helper arr in
+  !stringified
+
+let scalar_mult a (arr: float array array) : float array array= 
+  for i = 0 to (arr|>length) - 1 do
+    for j = 0 to (arr.(0)|>length) - 1 do
+      arr.(i).(j) <- a *. arr.(i).(j);
+    done;
+  done;
+  arr
+
+
+
+
+
+(* let matrix_mult arr1 arr2 = 
+   let printed = ref "" in
+   let row_length_arr1 = Array.length arr1 in
+   let col_length_arr1 = Array.length arr1.(0) in
+   let row_length_arr2 = Array.length arr2 in
+   let col_length_arr2 = Array.length arr2.(0) in
+
+
+   (*columns in first == rows in second*)
+   if(col_length_arr1 <> row_length_arr2) then failwith "Matrix Mult impossible" 
+   else 
+    let matrix_mult_helper arr  = 
+      for i = 0 to row_length_arr1 - 1 do
+        for j = 0 to col_length_arr2 - 1 do
+
+        done;
+        str := !str ^ "\n";
+      done;
+      str
+    in 
+    let stringified = printed |> print_matrix_helper arr in
+    !stringified *)
+
+
 (** [string_of_val e] converts [e] to a string.
     Requires: [e] is a value. *)
 let string_of_val (v : value) : string =
@@ -31,6 +87,8 @@ let string_of_val (v : value) : string =
     else string_of_float i
   | Bool b -> string_of_bool b
   | Str s -> s
+  | Closure (_, _,_) -> "<closure>"
+  | Matrix arr -> print_matrix arr
 
 
 (** [is_value e] is whether [e] is a value. *)
@@ -145,7 +203,7 @@ let pull_num = function
   | _ -> failwith "precondition violated: not a number"
 
 let rec eval_expr vl e = 
-  match e with 
+  match e with
   | Keyword _ -> failwith "precondition violated: too many keywords"
   | Val v -> (v, vl) 
   | PreString s -> 
@@ -156,6 +214,7 @@ let rec eval_expr vl e =
   | Binop (bop, e1, e2) -> eval_bop vl bop e1 e2 
   | Ternop (top, (e1, e2), e3) -> eval_top vl top e1 e2 e3
   | Derivative (der, e1, e2) -> eval_deriv vl der e1 e2
+  (* | Function (xs, e1) -> eval_func xs e1 vl *)
   | Boolop (boop, e1, e2) -> eval_boop vl boop e1 e2
   | GetKey -> 
     let c = Graphics.wait_next_event [Graphics.Key_pressed] in 
@@ -165,7 +224,31 @@ let rec eval_expr vl e =
       let s = read_line() in
       s |> parse |> eval_expr vl
     end
+  | MakeMatrix (a,b) -> eval_matrix a b vl 
+  | MatrixGet (m, a, b) -> eval_matrixget vl m a b
   | _ -> failwith "lol right"
+
+and eval_matrix a b vl = 
+  let r1 = eval_expr vl a in
+  let r2 = eval_expr (snd r1) b in
+  match fst r1, fst r2 with
+  | Num a, Num b  -> 
+    if (is_int a = false || is_int b = false) then failwith "cannot have float values"
+    else ((Matrix (Array.make_matrix (a|>int_of_float) (b|>int_of_float) 1.)), vl)
+  |_-> failwith "precondition violated: make matrix"
+
+and eval_matrixget vl m a b = 
+  let r1 = eval_expr vl m in 
+  let r2 = eval_expr (snd r1) a in 
+  let (r3, vl') = eval_expr (snd r2) b in
+  match (fst r1), (fst r2), r3 with 
+  | Matrix m, Num a, Num b -> 
+    if is_int a && is_int b then (Num m.(a |> int_of_float).(b |> int_of_float), vl')
+    else failwith "precondition violated: float indeces"
+  | _ -> failwith "precondition violated: matrix get"
+
+(* and eval_func xs e1 vl = 
+   Closure (xs, e1, vl) , vl *)
 and eval_boop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 
   match b, (fst r1) with 
@@ -223,3 +306,45 @@ and eval_deriv vl der e1 e2 =
   match der, (fst r1) with 
   | Der, Num a -> (Num (derive a (e2 |> eval_graph)), (snd r1))
   | _ -> failwith "precondition violated: derivative"
+
+
+(*
+  (**
+   Handles expression evaluation relating to operators (logical and mathematical)
+   as well as function application and variable definitions
+*)
+open Evalexpr 
+
+(** [fact n] returns n! given a float input [n]*)
+val fact: float -> float
+
+(** [parse s] return an Ast.expr tree given a string which containts an expression*)
+val parse: string -> Ast.expr
+
+(** [string_of_val v] converts [e] to a string.
+    Requires: [e] is a value. *)
+val string_of_val: Ast.value -> string 
+
+(**[get_val e] returns the float value stored by [Num] or [Var] values*)
+val get_val: float -> Ast.expr -> float
+
+(** [step e e] takes a single step in the graphing of [e]*)
+val step_graph: float -> Ast.expr -> Ast.expr
+
+(** [eval e] fully graphs [e].*)
+val eval_graph: Ast.expr -> float -> float
+
+(**[integrate n1 n2 acc fn] returns the definite integral of a function [fn]
+   taken over bounds from n1 to n2*)
+val integrate: float -> float -> float -> (float -> float) -> float
+
+(** [derive n1 fn] returns the defnite derivative of [fn] at n1 *)
+val derive: float -> (float -> float) -> float
+
+(** [pull_num v] is the number [i] associated with the value [Num i] *)
+val pull_num: Ast.value -> float
+
+(** [eval_expr vl e]  is [(v, vl')] if <e, vl> ==> <v, vl'> *)
+val eval_expr: (string * Ast.value) list -> Ast.expr -> 
+  Ast.value * (string * Ast.value) list
+*)

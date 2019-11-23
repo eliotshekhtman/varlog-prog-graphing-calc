@@ -1,3 +1,7 @@
+exception SyntaxError
+
+
+type id = string
 type bop = 
   | Add
   | Mult 
@@ -42,12 +46,11 @@ type key =
   | Exec
   (* | Derivative *)
 
-type value = 
-  | Num of float 
-  | Bool of bool 
-  | Str of string
 
 type expr = 
+  | MakeMatrix of expr * expr
+  | MatrixGet of expr * expr * expr
+  | Function of id list * expr
   | Solver of string
   | PreString of string
   | Keyword of key * expr
@@ -62,6 +65,12 @@ type expr =
   | Disp of expr * expr
   | GetKey
   | Prompt
+and  value = 
+  | Num of float 
+  | Bool of bool 
+  | Str of string
+  | Closure of id list * expr * ((string * value) list)
+  | Matrix of float array array
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
 
@@ -73,4 +82,7 @@ type defn =
   | DGoto of string * defn
   | DLabel of string * defn
   | DOutput of expr * expr * expr * defn
+  | DMatrixSet of expr * expr * expr * expr * defn
   | DEnd 
+
+

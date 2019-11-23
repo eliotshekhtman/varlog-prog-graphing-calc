@@ -1,7 +1,15 @@
 %{
 open Ast
-%}
+let has_dups lst =
+  let open List in
+  length lst <> length (sort_uniq Stdlib.compare lst)
 
+%}
+%token MATRIX
+%token RARROW 
+%token RBRACKET
+%token LBRACKET
+%token ARROW
 %token TWOVAR
 %token THREEVAR
 %token SOLVE
@@ -22,6 +30,7 @@ open Ast
 %token <string> NAME
 %token <string> STRING
 %token <bool> BOOL
+/* %token <string> ID STRING */
 %token TIMES
 %token PLUS
 %token SUBT
@@ -58,6 +67,7 @@ open Ast
 %token PROMPT
 %token OUTPUT
 %token EOF
+%token FUNC
 
 %left PLUS
 %left SUBT 
@@ -96,6 +106,10 @@ parse_defn:
   | d = defn; EOF { d }
 	;
 
+ident:
+  | x = NAME
+        { x }
+
 expr:
   | EVAL; e = expr; { Keyword (Eval, e) }
 	| GRAPH; e = expr; { Keyword (Graph, e) }
@@ -103,7 +117,8 @@ expr:
 	| EXEC; e = expr; { Keyword (Exec, e) }
 	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
 		{ Ternop (Integral, (e1 , e2), e3) }
-	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{Derivative (Der, e1, e2)}
+	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN;{ Derivative (Der, e1, e2) }
+	| m = expr; RBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; { MatrixGet (m, e1, e2) }
 	| i = NUM { Val (Num i) }
 	| s = STRING; { PreString s }
 	| b = BOOL; { Val (Bool b) }
@@ -143,12 +158,20 @@ expr:
 	| SOLVE; TWOVAR; {Solver "two"}
 	| GETKEY; { GetKey }
 	| PROMPT; { Prompt }
+	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1,e2)}
+	| FUNC; LPAREN; xs = nonempty_list(ident); RPAREN; ARROW; e = expr
+			{ if has_dups xs
+				then $syntaxerror (* duplicate argument names *)
+				else Function (xs, e) }
 	;
 	
 defn: 
 	| s = NAME; COLON; e = expr; END; d = defn; { DAssign (s, e, d) }
 	| s = NAME; COLON; e = expr; END; { DAssign (s, e, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
+	| m = expr; RBRACKET; e1 = expr; COMMA; e2 = expr; LBRACKET; COLON; e3 = expr; END; d = defn; { DMatrixSet (m, e1, e2, e3, d) }
+	| m = expr; RBRACKET; e1 = expr; COMMA; e2 = expr; LBRACKET; COLON; e3 = expr; END; { DMatrixSet (m, e1, e2, e3, DEnd) }
+	| m = expr; RBRACKET; e1 = expr; COMMA; e2 = expr; LBRACKET; COLON; e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
 	| DISP; e = expr; END; d = defn; { DDisp (e, d) }
 	| DISP; e = expr; END; { DDisp (e, DEnd) }
 	| DISP; e = expr; { DDisp (e, DEnd) }
@@ -180,5 +203,6 @@ short_defn:
 	| DISP; e = expr; { DDisp (e, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
 	| GOTO; s = NAME; { DGoto (s, DEnd) }
+	| m = expr; RBRACKET; e1 = expr; COMMA; e2 = expr; LBRACKET; COLON; e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
 	| LPAREN; d = defn; RPAREN; { d }
 	| END; { DEnd }
