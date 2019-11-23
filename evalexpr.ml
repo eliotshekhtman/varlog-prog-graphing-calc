@@ -25,6 +25,11 @@ let is_int f =
 
 
 let matrix = [| [|1.;2.;3.|];[|0.;1.;5.|];[|5.;6.;0.|] |]
+let identity = [| [|1.;0.;0.|];[|0.;1.;0.|];[|0.;0.;1.|] |]
+
+
+let firstMatrix = [| [|3.;-2.;5.|]; [|3.;0.;-4.|] |]
+let secondMatrix = [| [|2.;3.|]; [|-9.;0.|];[|0.;4.|] |]
 
 let print_matrix arr = 
   let printed = ref "" in
@@ -53,29 +58,32 @@ let scalar_mult a (arr: float array array) : float array array=
 
 
 
+let matrix_mult arr1 arr2 : float array array= 
+  (* let printed = ref "" in *)
+  let r1 = Array.length arr1 in
+  let c1 = Array.length arr1.(0) in
+  let r2 = Array.length arr2 in
+  let c2 = Array.length arr2.(0) in
 
-(* let matrix_mult arr1 arr2 = 
-   let printed = ref "" in
-   let row_length_arr1 = Array.length arr1 in
-   let col_length_arr1 = Array.length arr1.(0) in
-   let row_length_arr2 = Array.length arr2 in
-   let col_length_arr2 = Array.length arr2.(0) in
+
+  (*columns in first == rows in second*)
+  if(c1 <> r2) then failwith "Errir: columns of first matrix not equal to rows of second " 
+  else 
+    let new_matrix = Array.make_matrix r1 c2 0. in
+    for i = 0 to r1-1 do
+      for j = 0 to c2-1 do
+        let sum = ref 0. in
+        for k = 0 to c1-1 do
+          sum := !sum +. arr1.(i).(k) *. arr2.(k).(j);
+          new_matrix.(i).(j) <- !sum;
+        done ;
+      done ;
+    done;
+    new_matrix
 
 
-   (*columns in first == rows in second*)
-   if(col_length_arr1 <> row_length_arr2) then failwith "Matrix Mult impossible" 
-   else 
-    let matrix_mult_helper arr  = 
-      for i = 0 to row_length_arr1 - 1 do
-        for j = 0 to col_length_arr2 - 1 do
 
-        done;
-        str := !str ^ "\n";
-      done;
-      str
-    in 
-    let stringified = printed |> print_matrix_helper arr in
-    !stringified *)
+
 
 
 (** [string_of_val e] converts [e] to a string.
