@@ -1,0 +1,5 @@
+x : RANDINT(1, 3)
+y : RANDINT(1, 3)
+DISP x
+DISP y
+DISP (RANDINT(1, 3))

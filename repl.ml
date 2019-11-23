@@ -21,7 +21,7 @@ let rec run () =
         print_endline "Division by 0 exc"; run ()
       | exception (Failure s) -> print_endline ("Failure: " ^ s); run ()
       | exception _ -> 
-        print_endline "Error: invalid input"; run ()
+        print_endline "Error: invalid input"; run () 
       | s -> print_endline s; run ()
     end
 

@@ -196,7 +196,7 @@ let not_val v =
   | _ -> failwith "precondition violated: not bool"
 
 let substitute vl s = 
-  try List.assoc s vl with _ -> failwith "precondition violated: unbound var"
+  try List.assoc s vl with _ -> failwith ("precondition violated: unbound var " ^ s)
 
 let pull_num = function 
   | Num n -> n 
@@ -237,8 +237,8 @@ and eval_randint vl a b =
   match fst r1, r2 with 
   | Num a, Num b -> begin 
       let lb = a |> int_of_float in 
-      let up = b |> int_of_float in 
-      let v = lb + Random.int (up-lb) in
+      let ub = b |> int_of_float in 
+      let v = lb + Random.int (ub-lb) in
       (Num (v |> float_of_int), vl)
     end
   | _ -> failwith "precondition violated: not numerical inputs"
@@ -248,7 +248,7 @@ and eval_matrix a b vl =
   match fst r1, fst r2 with
   | Num a, Num b  -> 
     if (is_int a = false || is_int b = false) then failwith "cannot have float values"
-    else ((Matrix (Array.make_matrix (a|>int_of_float) (b|>int_of_float) 1.)), vl)
+    else ((Matrix (Array.make_matrix (a|>int_of_float) (b|>int_of_float) 0.)), vl)
   |_-> failwith "precondition violated: make matrix"
 
 and eval_matrixget vl m a b = 

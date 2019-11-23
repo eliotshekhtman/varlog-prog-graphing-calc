@@ -1,12 +1,89 @@
 matrix : MATRIX(30,30)
 DISP "Initial count of each"
+
 DISP "a"
-a : PROMPT
+n : PROMPT
+LBL setupA
+x : RANDINT(0, 30)
+y : RANDINT(0, 30)
+matrix[x,y] : 1
+n : n-1
+IF n > 0 THEN GOTO setupA
+
 DISP "b"
-b : PROMPT 
+n : PROMPT 
+LBL setupB
+x : RANDINT(0, 30)
+y : RANDINT(0, 30)
+matrix[x,y] : 2
+n : n-1
+IF n > 0 THEN GOTO setupB
+
 DISP "c"
-c : PROMPT
+n : PROMPT
+LBL setupC
+x : RANDINT(0, 30)
+y : RANDINT(0, 30)
+matrix[x,y] : 3
+n : n-1
+IF n > 0 THEN GOTO setupC
+
 DISP "d"
-d : PROMPT 
+n : PROMPT 
+LBL setupD
+x : RANDINT(0, 30)
+y : RANDINT(0, 30)
+matrix[x,y] : 4
+n : n-1
+IF n > 0 THEN GOTO setupD
+
 DISP "e"
-e : PROMPT 
+n : PROMPT 
+LBL setupE
+x : RANDINT(0, 30)
+y : RANDINT(0, 30)
+matrix[x,y] : 5
+n : n-1
+IF n > 0 THEN GOTO setupE
+
+x : 0 END y : 0
+LBL dispMapY
+LBL dispMapX
+IF matrix[x,y] != 0 THEN OUTPUT(x, y, matrix[x,y])
+x : x+1
+IF x < 30 THEN GOTO dispMapX 
+x : 0 END y : y+1
+IF y < 30 THEN GOTO dispMapY 
+
+LBL gameLoop 
+GOTO checkEnd
+LBL continue
+x : RANDINT(0, 30)
+y : RANDINT(0, 30)
+v : matrix[x,y]
+IF v = 0 THEN GOTO continue
+d : RANDINT(0, 4)
+IF ((d = 0) & (x > 0)) THEN matrix[x-1,y] : v
+IF ((d = 1) & (y > 0)) THEN matrix[x,y-1] : v 
+IF ((d = 2) & (x < 29)) THEN matrix[x+1,y] : v
+IF ((d = 3) & (y < 29)) THEN matrix[x,y+1] : v
+GOTO gameLoop
+
+LBL checkEnd
+x : 0 END y : 0 END v : 0
+LBL checkEndY
+LBL checkEndX
+IF ((v != 0) & (matrix[x,y] != 0) & (matrix[x,y] != v)) THEN GOTO continue 
+v : matrix[x,y]
+x : x+1
+IF x < 30 THEN GOTO checkEndX 
+x : 0 END y : y+1
+IF y < 30 THEN GOTO checkEndY
+GOTO end
+
+LBL end
+DISP x 
+DISP y 
+DISP v
+DISP matrix[x,y]
+DISP "Game over"

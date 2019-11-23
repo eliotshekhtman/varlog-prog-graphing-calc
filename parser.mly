@@ -207,5 +207,6 @@ short_defn:
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
 	| GOTO; s = NAME; { DGoto (s, DEnd) }
 	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }
 	| LPAREN; d = defn; RPAREN; { d }
 	| END; { DEnd }

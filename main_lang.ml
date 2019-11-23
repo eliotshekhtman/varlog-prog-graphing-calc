@@ -30,4 +30,5 @@ let interp s =
   | End_of_file -> ""
   | Sys_error _ -> "Error: invalid input: no text file with given name"
   | Failure s -> "Failure: " ^ s
-  | _ -> "Error: parsing error" 
+  | Stack_overflow -> "Error: Stack Overflow"
+  | _ -> "Error: parsing error"
