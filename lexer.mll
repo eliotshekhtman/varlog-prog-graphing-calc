@@ -20,6 +20,7 @@ rule read =
   | "NEWTON" { NEWTON }
   | "SOLVE" {SOLVE}
   | "EXEC" { EXEC }
+  | "SETSCALE" { SETSCALE }
   | "INTEGRAL" {INTEGRAL}
   | "DERIVATIVE" {DERIVATIVE}
   | "DISP" { DISP }

@@ -48,6 +48,7 @@ type key =
 
 
 type expr = 
+  | SetScale
   | MakeMatrix of expr * expr
   | MatrixGet of expr * expr * expr
   | Function of id list * expr

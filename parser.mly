@@ -17,6 +17,7 @@ let has_dups lst =
 %token GRAPH
 %token NEWTON
 %token EXEC
+%token SETSCALE
 %token INTEGRAL
 %token DERIVATIVE
 %token RANDINT
@@ -116,6 +117,7 @@ expr:
 	| GRAPH; e = expr; { Keyword (Graph, e) }
 	| NEWTON; e = expr; { Keyword (Newton, e) }
 	| EXEC; e = expr; { Keyword (Exec, e) }
+	| SETSCALE; { SetScale }
 	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
 		{ Ternop (Integral, (e1 , e2), e3) }
 	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { Derivative (Der, e1, e2) }

@@ -26,6 +26,11 @@ let output x y s =
   let x' = (x *. incx) |> int_of_float in 
   let y' = window_height - (((y +. 1.) *. incy) |> int_of_float) in
   moveto x' y';
+  set_color white;
+  let ix = (incx |> int_of_float) - 1 in
+  let iy = (incy |> int_of_float) - 1 in 
+  fill_rect x' y' ix iy;
+  set_color black;
   draw_string s;
   ()
 

@@ -268,9 +268,11 @@ let linear_solver_helper s =
   |"three" ->  begin
       print_string linear_prompt;
       let eq1 = read_line() |> parse_lin_equation3 in
-      print_string "Please input equation 2 in the same format:\n\nequation 2> ";
+      print_string 
+        "Please input equation 2 in the same format:\n\nequation 2> ";
       let eq2 = read_line() |> parse_lin_equation3 in
-      print_string "Please input equation 3 in the same format:\n\nequation 3> ";
+      print_string 
+        "Please input equation 3 in the same format:\n\nequation 3> ";
       let eq3 = read_line() |> parse_lin_equation3 in
       let matrix = [|(fst eq1); (fst eq2); (fst eq3)|] in
       let target_vector = [|(snd eq1);(snd eq2);(snd eq3)|] in
@@ -282,17 +284,40 @@ let linear_solver_helper s =
   | "two" -> begin
       print_string linear_prompt;
       let eq1 = read_line() |> parse_lin_equation2 in
-      print_string "Please input equation 2 in the same format:\n\nequation 2> ";
+      print_string 
+        "Please input equation 2 in the same format:\n\nequation 2> ";
       let eq2 = read_line() |> parse_lin_equation2 in
       let matrix = [|(fst eq1); (fst eq2);|] in
       let target_vector = [|(snd eq1);(snd eq2)|] in
       let answer = solve_linear_equation matrix target_vector 2 in
       print_string "1...........";
       print_linear_equation_answer answer 2;
-      "\nSolved!!!!!!!!!!" 
+      "\nSolved!" 
     end
   | _-> failwith "Invalid input. Only 3x3 or 2x2 systems are supported"
 
+module Coords = struct
+  type t = 
+    { mutable x_min : float; 
+      mutable x_max : float; 
+      mutable y_min : float; 
+      mutable y_max : float } 
+
+  let empty : t = 
+    { x_min = (~-.10.); x_max = 10.; y_min = (~-.10.); y_max = 10. }
+
+  let update_coords old_c xi xa yi ya = 
+    old_c.x_min <- xi; old_c.x_max <- xa; 
+    old_c.y_min <- yi; old_c.y_max <- ya; ()
+
+end
+
+let set_scale coords = 
+  let xmin = print_string "SET MIN X> "; read_line () |> float_of_string in
+  let xmax = print_string "SET MAX X> "; read_line () |> float_of_string in
+  let ymin = print_string "SET MIN Y> "; read_line () |> float_of_string in
+  let ymax = print_string "SET MAX Y> "; read_line () |> float_of_string in
+  Coords.update_coords coords xmin xmax ymin ymax; ()
 
 let interp (s : string) : string =
   match s |> parse with 
@@ -300,14 +325,12 @@ let interp (s : string) : string =
       match k with
       | Eval -> e |> eval_expr [] |> fst |> string_of_val
       | Graph ->
-        let x_min = print_string "SET MIN X> "; read_line () |> float_of_string in
-        let x_max = print_string "SET MAX X> "; read_line () |> float_of_string in
-        let y_min = print_string "SET MIN Y> "; read_line () |> float_of_string in
-        let y_max = print_string "SET MAX Y> "; read_line () |> float_of_string in
-        graph_func x_min x_max y_min y_max 0 (e |> eval_graph); "Graphed"
+        let em = Coords.empty in 
+        graph_func em.x_min em.x_max em.y_min em.y_max 0 (e |> eval_graph); 
+        "Graphed"
       | Newton -> newton_helper e
-      (* newton_helper (e |> eval_expr [] |> fst |> (fun v -> match v with Num n -> n | _ -> failwith "Error: invalid input: not a number")) *)
       | Exec -> exec_helper (e |> eval_expr [] |> fst)
     end
   | Solver s -> linear_solver_helper s
+  | SetScale -> set_scale Coords.empty; ""
   | _ -> raise No_keyword
