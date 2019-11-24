@@ -279,7 +279,7 @@ let linear_solver_helper s =
       let answer = solve_linear_equation matrix target_vector 3 in
       print_string "1...........";
       print_linear_equation_answer answer 3;
-      "\nSolved!!!!!!!!!!" 
+      "\nSolved!" 
     end
   | "two" -> begin
       print_string linear_prompt;
