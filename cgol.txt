@@ -35,8 +35,9 @@ x : PROMPT
 y : PROMPT 
 ma[x,y] : 1
 DISP "Another y n"
+y : 1 END n : 0
 n : PROMPT
-IF n = "y" THEN GOTO initFill 
+IF n = 1 THEN GOTO initFill 
 
 GOSUB DispMap
 
