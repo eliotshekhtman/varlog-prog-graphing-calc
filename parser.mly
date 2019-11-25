@@ -172,6 +172,9 @@ expr:
 	;
 	
 defn: 
+  | s = NAME; COLON; PROMPT; END; d = defn; { DPrompt (s, d) }
+	| s = NAME; COLON; PROMPT; END; { DPrompt (s, DEnd) }
+	| s = NAME; COLON; PROMPT; { DPrompt (s, DEnd) }
 	| s = NAME; COLON; e = expr; END; d = defn; { DAssign (s, e, d) }
 	| s = NAME; COLON; e = expr; END; { DAssign (s, e, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
@@ -215,6 +218,8 @@ defn:
 
 short_defn:
 	| DISP; e = expr; { DDisp (e, DEnd) }
+	| s = NAME; COLON; PROMPT; END; { DPrompt (s, DEnd) }
+	| s = NAME; COLON; PROMPT; { DPrompt (s, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
 	| GOTOSUB; s = NAME; { DGotoSub (s, DEnd) }
 	| GOTO; s = NAME; { DGoto (s, DEnd) }

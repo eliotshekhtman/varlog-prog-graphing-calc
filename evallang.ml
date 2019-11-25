@@ -36,6 +36,7 @@ let rec has_goto = function
   | DReturn d -> has_goto d
   | DDisp (_, d) -> has_goto d
   | DAssign (_, _, d) -> has_goto d
+  | DPrompt (_, d) -> has_goto d
   | DIf (_, _, _, d) -> has_goto d
   | DGoto (_, d) -> true 
   | DGotoSub (_, d) -> has_goto d
@@ -50,6 +51,7 @@ let rec eval d vl =
   | DReturn d -> ()
   | DDisp (e, d) -> eval_disp e d vl 
   | DAssign (s, e, d) -> eval_assign s e d vl
+  | DPrompt (s, d) -> eval_prompt s d vl
   | DIf (e, d1, d2, d3) -> eval_if e d1 d2 d3 vl
   | DLabel (s, d) -> eval d vl 
   | DGoto (s, d) -> eval (VarLog.find_lbl s vl) vl
@@ -85,9 +87,18 @@ and eval_disp e d vl =
   let v = e |> eval_expr (VarLog.expose vl) |> fst |> string_of_val in 
   print_endline v;
   eval d vl
+
+and eval_prompt s d vl = 
+  print_string (s ^ " >> ");
+  let e = read_line () |> parse in
+  eval_assign s e d vl
+
 and eval_assign s e d vl =
   let v = e |> eval_expr (VarLog.expose vl) |> fst in 
-  VarLog.bind s v vl; eval d vl
+  match v with 
+  | Matrix m -> 
+    VarLog.bind s (Matrix (Array.map Array.copy m)) vl; eval d vl
+  | _ -> VarLog.bind s v vl; eval d vl
 and eval_if e d1 d2 d3 vl =
   match e |> eval_expr (VarLog.expose vl) |> fst with 
   | Bool true -> eval d1 vl; if(d1 |> has_goto |> not) then eval d3 vl
@@ -108,6 +119,7 @@ let rec find_lbls vl = function
   | DReturn d -> find_lbls vl d
   | DDisp (_, d) -> find_lbls vl d 
   | DAssign (_, _, d) -> find_lbls vl d 
+  | DPrompt (_, d) -> find_lbls vl d
   | DIf (_, _, _, d) -> find_lbls vl d
   | DGoto (_, d) -> find_lbls vl d 
   | DGotoSub (_, d) -> find_lbls vl d

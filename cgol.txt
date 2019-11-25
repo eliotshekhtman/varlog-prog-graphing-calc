@@ -1,0 +1,63 @@
+GOTO init 
+
+LBL NeighborCount 
+n : 0
+IF ((x > 0) & (ma[x-1,y] != 0)) THEN n : n+1
+IF ((y > 0) & (ma[x,y-1] != 0)) THEN n : n+1
+IF ((x < 29) & (ma[x+1,y] != 0)) THEN n : n+1
+IF ((y < 29) & (ma[x,y+1] != 0)) THEN n : n+1
+IF (((x > 0) & (y > 0)) & (ma[x-1,y-1] != 0)) THEN n : n+1
+IF (((x > 0) & (y < 29)) & (ma[x-1,y+1] != 0)) THEN n : n+1
+IF (((x < 29) & (y > 0)) & (ma[x+1,y-1] != 0)) THEN n : n+1
+IF (((x < 29) & (y < 29)) & (ma[x+1,y+1] != 0)) THEN n : n+1
+
+RETURN
+
+LBL DispMap
+DISP "Displaying map"
+x : 0 END y : 0
+LBL dispMapY
+LBL dispMapX
+IF ma[x,y] != 0 THEN OUTPUT(x,y,"O")
+x : x+1
+IF x < 30 THEN GOTO dispMapX 
+x : 0 END y : y+1
+IF y < 30 THEN GOTO dispMapY 
+RETURN
+
+LBL init 
+steps : 0
+ma : MATRIX(30,30)
+mb : MATRIX(30,30)
+
+LBL initFill
+x : PROMPT
+y : PROMPT 
+ma[x,y] : 1
+DISP "Another y n"
+n : PROMPT
+IF n = "y" THEN GOTO initFill 
+
+GOSUB DispMap
+
+LBL gameLoop 
+DISP ("Steps " + steps)
+steps : steps+1
+
+x : 0 END y : 0
+LBL loopY
+LBL loopX
+GOSUB NeighborCount
+IF ((ma[x,y] = 1) & (((n = 2) | (n = 3)))) | ((ma[x,y] = 0) & (n = 3)) THEN (mb[x,y] : 1 END OUTPUT(x,y,"O"))
+ELSE OUTPUT(x,y," ")
+x : x+1
+IF x < 30 THEN GOTO loopX 
+x : 0 END y : y+1
+IF y < 30 THEN GOTO loopY 
+
+ma : mb 
+mb : MATRIX(30,30)
+
+GOTO gameLoop
+
+DISP "Done"

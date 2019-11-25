@@ -77,6 +77,7 @@ and  value =
      | If of expr * expr * expr *)
 
 type defn = 
+  | DPrompt of string * defn
   | DBind of string * expr * defn 
   | DAssign of string * expr * defn
   | DIf of expr * defn * defn * defn
