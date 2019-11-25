@@ -64,6 +64,8 @@ let has_dups lst =
 %token THEN 
 %token ELSE
 %token GOTO 
+%token GOTOSUB
+%token RETURN
 %token LBL
 %token GETKEY
 %token PROMPT
@@ -192,14 +194,21 @@ defn:
 	| IF; e = expr; THEN; d = short_defn; END; { DIf (e, d, DEnd, DEnd) }
 	| IF; e = expr; THEN; d = short_defn; { DIf (e, d, DEnd, DEnd) }
 	| GOTO; s = NAME; END; d = defn; { DGoto (s, d) }
+	| GOTOSUB; s = NAME; END; d = defn; { DGotoSub (s, d) }
 	| LBL; s = NAME; END; d = defn; { DLabel (s, d) }
 	| GOTO; s = NAME; END; { DGoto (s, DEnd) }
 	| GOTO; s = NAME; { DGoto (s, DEnd) }
+	| GOTOSUB; s = NAME; END; { DGotoSub (s, DEnd) }
+	| GOTOSUB; s = NAME; { DGotoSub (s, DEnd) }
 	| LBL; s = NAME; END; { DLabel (s, DEnd) }
 	| LBL; s = NAME; { DLabel (s, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, d) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; END; { DOutput (e1, e2, e3, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }
+	| RETURN; END; d = defn; { DReturn d }
+	| RETURN; d = defn; { DReturn d }
+	| RETURN; END; { DReturn DEnd }
+	| RETURN; { DReturn DEnd }
 	| END; d = defn; { d }
 	| d = defn; END; { d }
   | END; { DEnd }
@@ -207,6 +216,7 @@ defn:
 short_defn:
 	| DISP; e = expr; { DDisp (e, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
+	| GOTOSUB; s = NAME; { DGotoSub (s, DEnd) }
 	| GOTO; s = NAME; { DGoto (s, DEnd) }
 	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }

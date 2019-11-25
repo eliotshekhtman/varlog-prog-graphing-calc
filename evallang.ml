@@ -33,10 +33,12 @@ end
 
 let rec has_goto = function 
   | DEnd -> false
+  | DReturn d -> has_goto d
   | DDisp (_, d) -> has_goto d
   | DAssign (_, _, d) -> has_goto d
   | DIf (_, _, _, d) -> has_goto d
   | DGoto (_, d) -> true 
+  | DGotoSub (_, d) -> has_goto d
   | DLabel (_, d) -> has_goto d
   | DMatrixSet (_, _, _, _, d) -> has_goto d
   | DOutput (_, _, _, d) -> has_goto d
@@ -45,11 +47,13 @@ let rec has_goto = function
 let rec eval d vl = 
   match d with 
   | DEnd -> ()
+  | DReturn d -> ()
   | DDisp (e, d) -> eval_disp e d vl 
   | DAssign (s, e, d) -> eval_assign s e d vl
   | DIf (e, d1, d2, d3) -> eval_if e d1 d2 d3 vl
   | DLabel (s, d) -> eval d vl 
   | DGoto (s, d) -> eval (VarLog.find_lbl s vl) vl
+  | DGotoSub (s, d) -> eval (VarLog.find_lbl s vl) vl; eval d vl
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
   | DOutput (x, y, v, d) -> eval_output x y v d vl
   | _ -> failwith "Unimplemented"
@@ -101,10 +105,12 @@ let string_of_val (e : expr) : string =
 
 let rec find_lbls vl = function 
   | DEnd -> vl 
+  | DReturn d -> find_lbls vl d
   | DDisp (_, d) -> find_lbls vl d 
   | DAssign (_, _, d) -> find_lbls vl d 
   | DIf (_, _, _, d) -> find_lbls vl d
   | DGoto (_, d) -> find_lbls vl d 
+  | DGotoSub (_, d) -> find_lbls vl d
   | DLabel (s, d) -> VarLog.bind_lbl s d vl; find_lbls vl d
   | DMatrixSet (_, _, _, _, d) -> find_lbls vl d
   | DOutput (_, _, _, d) -> find_lbls vl d

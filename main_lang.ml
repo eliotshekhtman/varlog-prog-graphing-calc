@@ -31,5 +31,5 @@ let interp s =
   | Sys_error _ -> "Error: invalid input: no text file with given name"
   | Failure s -> "Failure: " ^ s
   | Stack_overflow -> "Error: Stack Overflow"
-  | Invalid_argument("index out of bounds") -> "Error: index out of bounds"
-(* | _ -> "Error: parsing error" *)
+  | Invalid_argument s -> "Error: " ^ s
+  | _ -> "Error: parsing error" 

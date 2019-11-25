@@ -71,6 +71,8 @@ rule read =
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
   | "VAR" { VAR }
   | ":" { COLON }
+  | "GOSUB" { GOTOSUB }
+  | "RETURN" { RETURN }
   | "GOTO" { GOTO }
   | "LBL" { LBL }
   | "END" { END }

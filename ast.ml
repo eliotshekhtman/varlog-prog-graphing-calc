@@ -82,9 +82,11 @@ type defn =
   | DIf of expr * defn * defn * defn
   | DDisp of expr * defn 
   | DGoto of string * defn
+  | DGotoSub of string * defn
   | DLabel of string * defn
   | DOutput of expr * expr * expr * defn
   | DMatrixSet of expr * expr * expr * expr * defn
+  | DReturn of defn
   | DEnd 
 
 

@@ -1,9 +1,10 @@
-GOTO a
+GOTO start 
 
-IF 1=1 THEN (DISP 1+1
-GOTO b)
+LBL DispNum
+DISP "didit"
+RETURN
 
-LBL a
-DISP "a"
-LBL b
-DISP "b"
+LBL start
+GOSUB DispNum 
+
+DISP "Done"
