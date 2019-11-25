@@ -73,6 +73,10 @@ let has_dups lst =
 %token EOF
 %token FUNC
 
+%left AND 
+%left OR
+%left NAND 
+%left NOR
 %left PLUS
 %left SUBT 
 %left TIMES  
@@ -86,10 +90,6 @@ let has_dups lst =
 %left GEQ
 %left LT
 %left GT
-%left AND 
-%left OR
-%left NAND 
-%left NOR
 %right SIN 
 %right COS 
 %right TAN

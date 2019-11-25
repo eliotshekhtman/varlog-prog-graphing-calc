@@ -25,21 +25,65 @@ x : 0 END y : y+1
 IF y < 30 THEN GOTO dispMapY 
 RETURN
 
+LBL RPentomino
+ma[10,10] : 1
+ma[11,10] : 1
+ma[11,9] : 1
+ma[12,9] : 1
+ma[11,11] : 1
+RETURN
+
+LBL Pulsar
+ma[5,7] : 1 END ma[5,8] : 1 END ma[5,9] : 1
+ma[10,7] : 1 END ma[10,8] : 1 END ma[10,9] : 1
+ma[12,7] : 1 END ma[12,8] : 1 END ma[12,9] : 1
+ma[17,7] : 1 END ma[17,8] : 1 END ma[17,9] : 1
+
+ma[5,13] : 1 END ma[5,14] : 1 END ma[5,15] : 1
+ma[10,13] : 1 END ma[10,14] : 1 END ma[10,15] : 1
+ma[12,13] : 1 END ma[12,14] : 1 END ma[12,15] : 1
+ma[17,13] : 1 END ma[17,14] : 1 END ma[17,15] : 1
+
+ma[7,5] : 1 END ma[8,5] : 1 END ma[9,5] : 1
+ma[7,10] : 1 END ma[8,10] : 1 END ma[9,10] : 1
+ma[7,12] : 1 END ma[8,12] : 1 END ma[9,12] : 1
+ma[7,17] : 1 END ma[8,17] : 1 END ma[9,17] : 1
+
+ma[13,5] : 1 END ma[14,5] : 1 END ma[15,5] : 1
+ma[13,10] : 1 END ma[14,10] : 1 END ma[15,10] : 1
+ma[13,12] : 1 END ma[14,12] : 1 END ma[15,12] : 1
+ma[13,17] : 1 END ma[14,17] : 1 END ma[15,17] : 1
+RETURN
+
+LBL ManualInsert
+x : PROMPT
+y : PROMPT 
+ma[x,y] : 1
+OUTPUT(x,y,"O")
+DISP "Another y n"
+y : 1 END n : 0
+n : PROMPT
+IF n = 1 THEN GOTO ManualInsert
+RETURN 
+
+LBL Preset
+DISP "Which preset RPent Pulsar"
+RPent : 2 END Pulsar : 1 END n : 0
+n : PROMPT 
+IF n = 2 THEN GOSUB RPentomino
+IF n = 1 THEN GOSUB Pulsar 
+IF n != 1 & n != 2 THEN GOSUB ManualInsert
+RETURN
+
 LBL init 
 steps : 0
 ma : MATRIX(30,30)
 mb : MATRIX(30,30)
 
-LBL initFill
-x : PROMPT
-y : PROMPT 
-ma[x,y] : 1
-DISP "Another y n"
-y : 1 END n : 0
-n : PROMPT
-IF n = 1 THEN GOTO initFill 
-
-GOSUB DispMap
+DISP "Manual or preset 1 2"
+n : PROMPT 
+IF n = 1 THEN GOSUB ManualInsert
+IF n = 2 THEN GOSUB Preset
 
 LBL gameLoop 
 DISP ("Steps " + steps)
