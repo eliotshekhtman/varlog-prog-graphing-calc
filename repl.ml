@@ -7,7 +7,9 @@ open ANSITerminal
 let rec run () =
   Stdlib.print_string "> "; 
   match read_line () with
-  | exception (Graphics.Graphic_failure _) -> print_endline ""; print_endline "Quitting"
+  | exception (Graphics.Graphic_failure _) -> 
+    print_endline ""; 
+    print_endline "Quitting"
   | "" -> run ()
   | "QUIT" -> print_endline "Quitting"
   | "SET_SCALE" -> begin print_endline "x" end
@@ -16,7 +18,7 @@ let rec run () =
       match interp s with 
       | exception No_keyword -> print_endline "Error: no keyword"; run ()
       | exception Main.DeterminantZero  ->
-        print_endline "Cannot solve this equation. Either there are infinitely many solutions, or none at all"; run ()
+        print_endline "Can't solve: infinite solutions or none"; run ()
       | exception Division_by_zero ->
         print_endline "Division by 0 exc"; run ()
       | exception (Failure s) -> print_endline ("Failure: " ^ s); run ()

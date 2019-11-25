@@ -67,7 +67,8 @@ let matrix_mult arr1 arr2 : float array array=
 
 
   (*columns in first == rows in second*)
-  if(c1 <> r2) then failwith "Errir: columns of first matrix not equal to rows of second " 
+  if(c1 <> r2) then 
+    failwith "Error: columns of first matrix not equal to rows of second " 
   else 
     let new_matrix = Array.make_matrix r1 c2 0. in
     for i = 0 to r1-1 do
@@ -117,7 +118,8 @@ let rec step_graph v = function
   | Var _ -> failwith "precondition violated: variable"
   (* | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
      step_top top e1 e2 e3
-     | Ternop (top, (e1,e2), e3) when is_value e1 -> Ternop(top, (e1, step e2), e3)
+     | Ternop (top, (e1,e2), e3) when is_value e1 -> 
+     Ternop(top, (e1, step e2), e3)
      | Ternop (top, (e1,e2), e3)-> Ternop(top, (step e1, e2), e3) *)
   | Binop (bop, e1, e2) when is_value_graph e1 && is_value_graph e2 -> 
     step_bop v bop e1 e2
@@ -204,7 +206,8 @@ let not_val v =
   | _ -> failwith "precondition violated: not bool"
 
 let substitute vl s = 
-  try List.assoc s vl with _ -> failwith ("precondition violated: unbound var " ^ s)
+  try List.assoc s vl with _ -> 
+    failwith ("precondition violated: unbound var " ^ s)
 
 let pull_num = function 
   | Num n -> n 
@@ -255,8 +258,10 @@ and eval_matrix a b vl =
   let r2 = eval_expr (snd r1) b in
   match fst r1, fst r2 with
   | Num a, Num b  -> 
-    if (is_int a = false || is_int b = false) then failwith "cannot have float values"
-    else ((Matrix (Array.make_matrix (a|>int_of_float) (b|>int_of_float) 0.)), vl)
+    if (is_int a = false || is_int b = false) then 
+      failwith "cannot have float values"
+    else 
+      ((Matrix (Array.make_matrix (a|>int_of_float) (b|>int_of_float) 0.)), vl)
   |_-> failwith "precondition violated: make matrix"
 
 and eval_matrixget vl m a b = 
@@ -265,7 +270,8 @@ and eval_matrixget vl m a b =
   let (r3, vl') = eval_expr (snd r2) b in
   match (fst r1), (fst r2), r3 with 
   | Matrix m, Num a, Num b -> 
-    if is_int a && is_int b then (Num m.(a |> int_of_float).(b |> int_of_float), vl')
+    if is_int a && is_int b then 
+      (Num m.(a |> int_of_float).(b |> int_of_float), vl')
     else failwith "precondition violated: float indeces"
   | _ -> failwith "precondition violated: matrix get"
 
@@ -321,7 +327,8 @@ and eval_top vl top e1 e2 e3 =
   let r1 = eval_expr vl e1 in 
   let r2 = eval_expr (snd r1) e2 in 
   match top, (fst r1), (fst r2) with 
-  | Integral, Num a, Num b -> (Num (integrate a b 0. (e3 |> eval_graph)), (snd r2))
+  | Integral, Num a, Num b -> 
+    (Num (integrate a b 0. (e3 |> eval_graph)), (snd r2))
   | _ -> failwith "precondition violated: top"
 and eval_deriv vl der e1 e2 = 
   let r1 = eval_expr vl e1 in 
@@ -332,7 +339,8 @@ and eval_deriv vl der e1 e2 =
 
 (*
   (**
-   Handles expression evaluation relating to operators (logical and mathematical)
+   Handles expression evaluation relating to operators 
+   (logical and mathematical)
    as well as function application and variable definitions
 *)
 open Evalexpr 
@@ -340,7 +348,8 @@ open Evalexpr
 (** [fact n] returns n! given a float input [n]*)
 val fact: float -> float
 
-(** [parse s] return an Ast.expr tree given a string which containts an expression*)
+(** [parse s] return an Ast.expr tree given a string which containts an 
+expression*)
 val parse: string -> Ast.expr
 
 (** [string_of_val v] converts [e] to a string.

@@ -134,10 +134,13 @@ let determined_matrix3 (matrix:float array array ) =
   let b9 = matrix.(0).(1) in
   let c9 = matrix.(1).(0) in
   let det9 = find_det a9 d9 b9 c9 in
-  let det = (matrix.(0).(0)*.det1) +. (matrix.(0).(1) *. det2) +. (matrix.(0).(2)*.det3) in
+  let det = 
+    (matrix.(0).(0)*.det1) +. (matrix.(0).(1) *. det2) +. (matrix.(0).(2)*.det3)
+  in
   if det = 0. then raise DeterminantZero
   else 
-    let new_matrix = ([|[|det1;det2;det3;|]; [|det4;det5;det6;|];[|det7;det8;det9;|]|], det) in
+    let new_matrix = ([|[|det1;det2;det3;|]; 
+                        [|det4;det5;det6;|];[|det7;det8;det9;|]|], det) in
     new_matrix
 
 let reflect (matrix: float array array) =
@@ -195,7 +198,8 @@ let inversed (matrix: float array array) num =
     final 
 
 
-let solve_linear_equation (matrix: float array array) (vector: float array) num = 
+let solve_linear_equation 
+    (matrix: float array array) (vector: float array) num = 
   let inverse_matrix = inversed matrix num in
   let answer_vector = if num = 3 then [|0.;0.;0.|] else [|0.;0.|] in
   for i = 0 to num-1 do
@@ -213,9 +217,11 @@ let exec_helper v =
   | _ -> "Error: invalid input: requires a string filename input"
 
 
-let linear_prompt = "Please input the first equation of your system of equations. Each equation should be written
-  (there is a max of 3 unknowns allowed) in this form:\n 
-  (5+3), 0, (-4*1), (4/2) \n where this corresponds to the equation 8x + 0y -4z = 2\n\nequation 1>"
+let linear_prompt = "Please input the first equation of your system of " ^ 
+                    "equations. Each equation should be written " ^ 
+                    "(there is a max of 3 unknowns allowed) in this form:\n " ^
+                    "(5+3), 0, (-4*1), (4/2) \n where this corresponds to the" ^ 
+                    " equation 8x + 0y -4z = 2\n\nequation 1>"
 
 (* let rec rmv_empty_elements arr new_arr= 
    match arr with
