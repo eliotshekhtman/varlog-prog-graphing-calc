@@ -126,10 +126,13 @@ expr:
 	| NEWTON; e = expr; { Keyword (Newton, e) }
 	| EXEC; e = expr; { Keyword (Exec, e) }
 	| SETSCALE; { SetScale }
-	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
+	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; 
+	  e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
 		{ Ternop (Integral, (e1 , e2), e3) }
-	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { Derivative (Der, e1, e2) }
-	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; { MatrixGet (m, e1, e2) }
+	| DERIVATIVE; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; 
+	  { Derivative (Der, e1, e2) }
+	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; 
+	  { MatrixGet (m, e1, e2) }
 	| RANDINT; LPAREN e1 = expr; COMMA; e2 = expr; RPAREN; { RandInt (e1, e2) }
 	| i = NUM { Val (Num i) }
 	| s = STRING; { PreString s }
@@ -187,22 +190,35 @@ defn:
 	| s = NAME; COLON; e = expr; END; d = defn; { DAssign (s, e, d) }
 	| s = NAME; COLON; e = expr; END; { DAssign (s, e, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
-	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; e3 = expr; END; d = defn; { DMatrixSet (m, e1, e2, e3, d) }
-	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; e3 = expr; END; { DMatrixSet (m, e1, e2, e3, DEnd) }
-	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
+	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; 
+	  e3 = expr; END; d = defn; { DMatrixSet (m, e1, e2, e3, d) }
+	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; 
+	  e3 = expr; END; { DMatrixSet (m, e1, e2, e3, DEnd) }
+	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; 
+	  e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
 	| DISP; e = expr; END; d = defn; { DDisp (e, d) }
 	| DISP; e = expr; END; { DDisp (e, DEnd) }
 	| DISP; e = expr; { DDisp (e, DEnd) }
-	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; END; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; END; d2 = defn; { DIf (e, d1, DEnd, d2) }
+	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; 
+	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; END; THEN; END; d1 = short_defn; END; ELSE; END; 
+	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; 
+	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; 
+	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; 
+	  d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; 
+	  d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; ELSE; 
+	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; 
+	  d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; 
+	  d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; END; 
+	  d2 = defn; { DIf (e, d1, DEnd, d2) }
 	| IF; e = expr; THEN; d = short_defn; END; { DIf (e, d, DEnd, DEnd) }
 	| IF; e = expr; THEN; d = short_defn; { DIf (e, d, DEnd, DEnd) }
 	| GOTO; s = NAME; END; d = defn; { DGoto (s, d) }
@@ -214,9 +230,12 @@ defn:
 	| GOTOSUB; s = NAME; { DGotoSub (s, DEnd) }
 	| LBL; s = NAME; END; { DLabel (s, DEnd) }
 	| LBL; s = NAME; { DLabel (s, DEnd) }
-	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, d) }
-	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; END; { DOutput (e1, e2, e3, DEnd) }
-	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
+	  e3 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, d) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
+	  e3 = expr; RPAREN; END; { DOutput (e1, e2, e3, DEnd) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
+	  e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }
 	| RETURN; END; d = defn; { DReturn d }
 	| RETURN; d = defn; { DReturn d }
 	| RETURN; END; { DReturn DEnd }
@@ -233,8 +252,10 @@ short_defn:
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
 	| GOTOSUB; s = NAME; { DGotoSub (s, DEnd) }
 	| GOTO; s = NAME; { DGoto (s, DEnd) }
-	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
-	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }
+	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; 
+	  e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; 
+	  { DOutput (e1, e2, e3, DEnd) }
 	| RETURN; { DReturn DEnd }
 	| LPAREN; d = defn; RPAREN; { d }
 	| END; { DEnd }
