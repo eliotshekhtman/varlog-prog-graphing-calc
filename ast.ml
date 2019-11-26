@@ -91,4 +91,6 @@ type defn =
   | DGraph of expr * defn
   | DEnd 
 
-
+type phrase = 
+  | Expr of expr 
+  | Defn of defn

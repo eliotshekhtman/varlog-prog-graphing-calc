@@ -9,6 +9,12 @@ open Stdlib
 exception No_keyword
 exception DeterminantZero
 
+(** [parse s] parses [s] into an AST. *)
+let parse_phrase (s : string) : phrase =
+  let lexbuf = Lexing.from_string s in
+  let ast = Parser.parse_phrase Lexer.read lexbuf in
+  ast
+
 (** [close_int f] is the nearest integer, as a float, to [f] if [f] is
     less than 10^(-7) away from an integer; else, it's just [f] *)
 let close_int (f : float) = 
@@ -326,17 +332,23 @@ let set_scale coords =
   Coords.update_coords coords xmin xmax ymin ymax; ()
 
 let interp (s : string) : string =
-  match s |> parse with 
-  | Keyword (k, e) -> begin  
-      match k with
-      | Eval -> e |> eval_expr [] |> fst |> string_of_val
-      | Graph ->
-        let em = Coords.empty in 
-        Graphing.graph em.x_min em.x_max em.y_min em.y_max (e |> eval_graph); 
-        "Graphed"
-      | Newton -> newton_helper e
-      | Exec -> exec_helper (e |> eval_expr [] |> fst)
+  match s |> parse_phrase with 
+  | Expr e -> begin 
+      match s |> Evalexpr.parse with 
+      | Keyword (k, e) -> begin  
+          match k with
+          | Eval -> e |> eval_expr [] |> fst |> string_of_val
+          | Graph ->
+            let em = Coords.empty in 
+            Graphing.graph em.x_min em.x_max em.y_min em.y_max (e |> eval_graph); 
+            "Graphed"
+          | Newton -> newton_helper e
+          | Exec -> exec_helper (e |> eval_expr [] |> fst)
+        end
+      | Solver s -> linear_solver_helper s
+      | SetScale -> set_scale Coords.empty; ""
+      | _ -> raise No_keyword
+    end 
+  | Defn d -> begin 
+      s |> Main_lang.parse |> Evallang.eval_init; ""
     end
-  | Solver s -> linear_solver_helper s
-  | SetScale -> set_scale Coords.empty; ""
-  | _ -> raise No_keyword

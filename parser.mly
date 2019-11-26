@@ -97,10 +97,16 @@ let has_dups lst =
 %right ARCCOS
 %right ARCTAN
 
+%start <Ast.phrase> parse_phrase
 %start <Ast.expr> parse_expr 
 %start <Ast.defn> parse_defn
 
 %%
+
+parse_phrase:
+  | e = expr; EOF { Expr e }
+	| d = defn; EOF { Defn d }
+	;
 
 parse_expr:
 	| e = expr; EOF { e }
