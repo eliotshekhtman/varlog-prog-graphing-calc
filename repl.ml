@@ -3,7 +3,6 @@ open Graphing
 open Printexc
 open ANSITerminal
 
-(** [run ()] is the actual running repl loop of the program *)
 let rec run () =
   Stdlib.print_string "> "; 
   match read_line () with
@@ -27,7 +26,6 @@ let rec run () =
       | s -> print_endline s; run ()
     end
 
-(** [flex ()] displays the intro description text when make repl is run *)
 let flex () = 
   print_endline "------------ V/\\RL0G -------------";
   print_endline "[EVAL e] to evaluate an expression";
