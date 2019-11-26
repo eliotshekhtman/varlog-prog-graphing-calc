@@ -32,4 +32,4 @@ let interp s =
   | Failure s -> "Failure: " ^ s
   | Stack_overflow -> "Error: Stack Overflow"
   | Invalid_argument s -> "Error: " ^ s
-(*| _ -> "Error: parsing error" *)
+  | _ -> "Error: parsing error" 
