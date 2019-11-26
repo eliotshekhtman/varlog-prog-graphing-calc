@@ -88,6 +88,7 @@ type defn =
   | DOutput of expr * expr * expr * defn
   | DMatrixSet of expr * expr * expr * expr * defn
   | DReturn of defn
+  | DGraph of expr * defn
   | DEnd 
 
 

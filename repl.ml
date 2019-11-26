@@ -44,6 +44,6 @@ let flex () =
     a default open graph window from the start so it'd make sense that 
     closing it would end the program *)
 let () = 
-  graph_func (-10.) 10. (-10.) 10. 0 (fun x -> 100000.);
+  graph (-10.) 10. (-10.) 10. (fun x -> 100000.);
   flex ();
   run ()

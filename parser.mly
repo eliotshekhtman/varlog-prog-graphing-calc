@@ -172,6 +172,9 @@ expr:
 	;
 	
 defn: 
+  | GRAPH; e = expr; END; d = defn; { DGraph (e, d) }
+	| GRAPH; e = expr; END; { DGraph (e, DEnd) }
+	| GRAPH; e = expr; { DGraph (e, DEnd) }
   | s = NAME; COLON; PROMPT; END; d = defn; { DPrompt (s, d) }
 	| s = NAME; COLON; PROMPT; END; { DPrompt (s, DEnd) }
 	| s = NAME; COLON; PROMPT; { DPrompt (s, DEnd) }
@@ -217,6 +220,7 @@ defn:
   | END; { DEnd }
 
 short_defn:
+  | GRAPH; e = expr; { DGraph (e, DEnd) }
 	| DISP; e = expr; { DDisp (e, DEnd) }
 	| s = NAME; COLON; PROMPT; END; { DPrompt (s, DEnd) }
 	| s = NAME; COLON; PROMPT; { DPrompt (s, DEnd) }

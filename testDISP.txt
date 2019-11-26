@@ -9,3 +9,5 @@ IF true THEN DISP "Was true"
 
 IF false THEN DISP "Was true x2"
 ELSE DISP "Was false"
+
+GRAPH x^2

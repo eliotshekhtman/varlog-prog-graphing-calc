@@ -34,6 +34,7 @@ end
 let rec has_goto = function 
   | DEnd -> false
   | DReturn d -> true
+  | DGraph (_, d) -> has_goto d
   | DDisp (_, d) -> has_goto d
   | DAssign (_, _, d) -> has_goto d
   | DPrompt (_, d) -> has_goto d
@@ -49,6 +50,7 @@ let rec eval d vl =
   match d with 
   | DEnd -> ()
   | DReturn d -> ()
+  | DGraph (e, d) -> eval_dgraph e d vl
   | DDisp (e, d) -> eval_disp e d vl 
   | DAssign (s, e, d) -> eval_assign s e d vl
   | DPrompt (s, d) -> eval_prompt s d vl
@@ -59,6 +61,11 @@ let rec eval d vl =
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
   | DOutput (x, y, v, d) -> eval_output x y v d vl
   | _ -> failwith "Unimplemented"
+
+and eval_dgraph e d vl = 
+  let f = e |> eval_graph in 
+  Graphing.graph_func (-10.) (10.) (-10.) (10.) 0 Graphics.black f;
+  eval d vl
 
 and eval_output x y v d vl = 
   let x' = x |> eval_expr (VarLog.expose vl) |> fst in 
@@ -118,6 +125,7 @@ let rec find_lbls vl = function
   | DEnd -> vl 
   | DReturn d -> find_lbls vl d
   | DDisp (_, d) -> find_lbls vl d 
+  | DGraph (_, d) -> find_lbls vl d
   | DAssign (_, _, d) -> find_lbls vl d 
   | DPrompt (_, d) -> find_lbls vl d
   | DIf (_, _, _, d) -> find_lbls vl d

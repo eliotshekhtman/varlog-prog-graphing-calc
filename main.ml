@@ -332,7 +332,7 @@ let interp (s : string) : string =
       | Eval -> e |> eval_expr [] |> fst |> string_of_val
       | Graph ->
         let em = Coords.empty in 
-        graph_func em.x_min em.x_max em.y_min em.y_max 0 (e |> eval_graph); 
+        Graphing.graph em.x_min em.x_max em.y_min em.y_max (e |> eval_graph); 
         "Graphed"
       | Newton -> newton_helper e
       | Exec -> exec_helper (e |> eval_expr [] |> fst)
