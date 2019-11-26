@@ -108,6 +108,17 @@ let eval_tests = [
   make_exec_test "goto" "" "testGOTO";
   make_exec_test "random" "" "testRANDOM";
   make_exec_test "goto2" "" "testWHILE";
+
+  (* We are not testing I/O expressions/etc ([GETKEY], [PROMPT], etc), 
+     as they would interrupt the flow of the testing: 
+     as such, we take the proper working of our repl tests and 
+     execution of our text files which use them as proof of their 
+     proper behavior.  This includes graphing, the solvers (Newton 
+     and linear), and complex script files.  We only test small 
+     scripts to ensure that they compile, but can't test their actual
+     side effects, except by analysis.  We assume that their compilation,
+     combined with our inspection, will ensure their scalability into 
+     larger examples. *)
 ]
 
 let tests = [
