@@ -95,6 +95,8 @@ let eval_tests = [
   make_eval_test "nxor2 tf" "false" "true NXOR false";
   make_eval_test "nxor3 ft" "false" "false NXOR true";
   make_eval_test "nxor4 ff" "true" "false NXOR false";
+  make_eval_test "rint1 lt" "true" "RANDINT(0,4) < 4";
+  make_eval_test "rint2 gt" "true" "RANDINT(0,4) > -1";
 
 ]
 
