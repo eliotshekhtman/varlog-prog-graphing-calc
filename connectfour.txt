@@ -11,6 +11,11 @@ IF matrix[x,y+1] = 0 THEN (
 )
 RETURN
 
+LBL GetWinner
+IF matrix[x,y] = 1 THEN end : end + "O"
+IF matrix[x,y] = 2 THEN end : end + "X"
+RETURN
+
 LBL CheckFail 
 x : 0 END y : 0
 LBL checkFailY
@@ -29,6 +34,7 @@ LBL checkHorzY
 LBL checkHorzX
 IF matrix[x,y] != 0 & matrix[x,y] = matrix[x+1,y] & matrix[x+1,y] = matrix[x+2,y] & matrix[x+2,y] = matrix[x+3,y] THEN (
   end : "Horizontal win condition "
+  GOSUB GetWinner
   RETURN
 )
 x : x+1
@@ -43,6 +49,7 @@ LBL checkVertY
 LBL checkVertX
 IF matrix[x,y] != 0 & matrix[x,y] = matrix[x,y+1] & matrix[x,y+1] = matrix[x,y+2] & matrix[x,y+2] = matrix[x,y+3] THEN (
   end : "Vertical win condition " 
+  GOSUB GetWinner
   RETURN 
 )
 x : x+1
@@ -51,10 +58,42 @@ x : 0 END y : y+1
 IF y < 4 THEN GOTO checkVertY
 RETURN
 
+LBL CheckDiagA
+x : 0 END y : 0
+LBL CheckDiagAY
+LBL CheckDiagAX
+IF matrix[x,y] != 0 & matrix[x,y] = matrix[x+1,y+1] & matrix[x+1,y+1] = matrix[x+2,y+2] & matrix[x+2,y+2] = matrix[x+3,y+3] THEN (
+  end : "Diagonal win condition "
+  GOSUB GetWinner
+  RETURN
+)
+x : x+1 END
+IF x < 4 THEN GOTO CheckDiagAX
+x : 0 END y : y+1
+IF y < 4 THEN GOTO CheckDiagAY
+RETURN
+
+LBL CheckDiagB
+x : 6 END y : 0
+LBL CheckDiagBY
+LBL CheckDiagBX
+IF matrix[x,y] != 0 & matrix[x,y] = matrix[x-1,y+1] & matrix[x-1,y+1] = matrix[x-2,y+2] & matrix[x-2,y+2] = matrix[x-3,y+3] THEN (
+  end : "Diagonal win condition "
+  GOSUB GetWinner
+  RETURN
+)
+x : x-1 END
+IF x > 2 THEN GOTO CheckDiagBX
+x : 6 END y : y+1
+IF y < 4 THEN GOTO CheckDiagBY
+RETURN
+
 LBL CheckEnd
 GOSUB CheckFail
 GOSUB CheckHorz
 GOSUB CheckVert
+GOSUB CheckDiagA 
+GOSUB CheckDiagB
 RETURN
 
 LBL init
@@ -66,15 +105,16 @@ LBL gameLoop
 inp : GETKEY
 slot : -1
 IF inp = "1" THEN slot : 0
-IF inp = "2" THEN slot : 1
-IF inp = "3" THEN slot : 2
-IF inp = "4" THEN slot : 3
-IF inp = "5" THEN slot : 4
-IF inp = "6" THEN slot : 5
-IF inp = "7" THEN slot : 6
+ELSE (IF inp = "2" THEN slot : 1
+ELSE (IF inp = "3" THEN slot : 2
+ELSE (IF inp = "4" THEN slot : 3
+ELSE (IF inp = "5" THEN slot : 4
+ELSE (IF inp = "6" THEN slot : 5
+ELSE (IF inp = "7" THEN slot : 6
+ELSE (OUTPUT(0,20, "Invalid move: not on board") END GOTO gameLoop)))))))
 x : slot 
 GOSUB DripDown
-IF y = -1 THEN OUTPUT(0,20, "Invalid move column filled")
+IF y = -1 THEN OUTPUT(0,20, "Invalid move: column filled")
 ELSE (
   OUTPUT(0,20," ") END OUTPUT(1,20," ")
   OUTPUT(2,20," ") END OUTPUT(3,20," ")
@@ -91,4 +131,4 @@ ELSE (
 GOSUB CheckEnd
 IF end = " " THEN GOTO gameLoop
 
-DISP "Game over " + end
+DISP "Game over: " + end
