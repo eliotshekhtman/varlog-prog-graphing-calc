@@ -77,6 +77,14 @@ let has_dups lst =
 %left OR
 %left NAND 
 %left NOR
+%left XOR 
+%left NXOR
+%left EQ
+%left NEQ
+%left LEQ
+%left GEQ
+%left LT
+%left GT
 %left PLUS
 %left SUBT 
 %left TIMES  
@@ -84,12 +92,6 @@ let has_dups lst =
 %left COMB 
 %left PERM
 %left POW
-%left EQ
-%left NEQ
-%left LEQ
-%left GEQ
-%left LT
-%left GT
 %right SIN 
 %right COS 
 %right TAN
