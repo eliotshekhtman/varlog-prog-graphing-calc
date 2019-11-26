@@ -5,7 +5,6 @@ let rec fact n =
   if n < 0. then failwith "not integer"
   else if n = 0. then 1. else n *. fact (n -. 1.)
 
-(** [is_value e] is whether [e] is a value. *)
 let is_value : expr -> bool = function
   | Val _ -> true
   | Var _ -> failwith "precondition violated: variable"
@@ -55,9 +54,6 @@ let scalar_mult a (arr: float array array) : float array array=
   done;
   arr
 
-
-
-
 let matrix_mult arr1 arr2 : float array array= 
   (* let printed = ref "" in *)
   let r1 = Array.length arr1 in
@@ -82,13 +78,6 @@ let matrix_mult arr1 arr2 : float array array=
     done;
     new_matrix
 
-
-
-
-
-
-(** [string_of_val e] converts [e] to a string.
-    Requires: [e] is a value. *)
 let string_of_val (v : value) : string =
   match v with
   | Num i -> 
@@ -99,8 +88,6 @@ let string_of_val (v : value) : string =
   | Closure (_, _,_) -> "<closure>"
   | Matrix arr -> print_matrix arr
 
-
-(** [is_value e] is whether [e] is a value. *)
 let is_value_graph : expr -> bool = function
   | Val _ -> true
   | Var "x" -> true
@@ -111,7 +98,6 @@ let get_val v = function
   | Var "x" -> v 
   | _ -> failwith "precondition violated"
 
-(** [step e] takes a single step in the graphing of [e]*)
 let rec step_graph v = function
   | Keyword _ -> failwith "precondition violated: too many keywords"
   | Val _ -> failwith "Does not step"
@@ -131,8 +117,6 @@ let rec step_graph v = function
   | Uniop (uop, e) -> Uniop (uop, step_graph v e)
   | _ -> failwith "unimplemented"
 
-(** [step_bop bop v1 v2] implements the primitive operation
-    [v1 bop v2].  Requires: [v1] and [v2] are both values. *)
 and step_bop v bop e1 e2 = match bop with
   | Add -> Val (Num ((get_val v e1) +. (get_val v e2)))
   | Mult -> Val (Num ((get_val v e1) *. (get_val v e2)))
@@ -141,8 +125,6 @@ and step_bop v bop e1 e2 = match bop with
   | Pow -> Val (Num ((get_val v e1) ** (get_val v e2)))
   | _ -> failwith "precondition violated: bop"
 
-(** [step_bop uop v] implements the primitive operation
-    [uop v].  Requires: [v] is a value. *)
 and step_uop v uop e = match uop with
   | Fact -> Val (Num (fact (get_val v e)))
   | Sin -> Val (Num (sin (get_val v e)))
@@ -153,14 +135,11 @@ and step_uop v uop e = match uop with
   | ArcSin -> Val (Num (asin (get_val v e)))
   | _ -> failwith "precondition violated: uop"
 
-
-(** [eval e] fully graphs [e].*)
 let rec eval_graph (e : expr) (v : float) : float = 
   match e with
   | Val (Num n) -> n
   | Var "x" -> v
   | _ -> eval_graph (e |> step_graph v) v
-
 
 let rec integrate a b acc fn = 
   if(a >= b) then acc 
@@ -275,8 +254,6 @@ and eval_matrixget vl m a b =
     else failwith "precondition violated: float indeces"
   | _ -> failwith "precondition violated: matrix get"
 
-(* and eval_func xs e1 vl = 
-   Closure (xs, e1, vl) , vl *)
 and eval_boop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 
   match b, (fst r1) with 
