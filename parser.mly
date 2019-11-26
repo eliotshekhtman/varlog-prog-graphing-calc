@@ -21,6 +21,7 @@ let has_dups lst =
 %token INTEGRAL
 %token DERIVATIVE
 %token RANDINT
+%token LINE
 %token SIN
 %token COS
 %token TAN
@@ -238,6 +239,12 @@ defn:
 	  e3 = expr; RPAREN; END; { DOutput (e1, e2, e3, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
 	  e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }
+	| LINE LPAREN e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; COMMA; e4 = expr;
+	  RPAREN; END; d = defn; { DLine (e1, e2, e3, e4, d) }
+	| LINE LPAREN e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; COMMA; e4 = expr;
+	  RPAREN; END; { DLine (e1, e2, e3, e4, DEnd) }
+	| LINE LPAREN e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; COMMA; e4 = expr;
+	  RPAREN; { DLine (e1, e2, e3, e4, DEnd) }
 	| RETURN; END; d = defn; { DReturn d }
 	| RETURN; d = defn; { DReturn d }
 	| RETURN; END; { DReturn DEnd }

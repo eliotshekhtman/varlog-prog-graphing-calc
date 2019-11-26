@@ -29,6 +29,7 @@ rule read =
   | "PROMPT" { PROMPT }
   | "OUTPUT" { OUTPUT }
   | "RANDINT" { RANDINT }
+  | "LINE" { LINE }
   | "<-" { RARROW }
   | "[" { LBRACKET }
   | "]" { RBRACKET}

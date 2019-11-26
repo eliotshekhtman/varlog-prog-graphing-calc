@@ -3,7 +3,6 @@ GOTO init
 LBL DripDown
 y : -1
 LBL drop 
-DISP ("Dripping " + x + " " + y)
 IF y = 6 THEN RETURN 
 IF matrix[x,y+1] = 0 THEN (
   y : y+1
@@ -14,6 +13,16 @@ RETURN
 LBL GetWinner
 IF matrix[x,y] = 1 THEN end : end + "O"
 IF matrix[x,y] = 2 THEN end : end + "X"
+RETURN
+
+LBL DrawGrid
+LINE(0,1,7,1) END LINE(1,0,1,7)
+LINE(0,2,7,2) END LINE(2,0,2,7)
+LINE(0,3,7,3) END LINE(3,0,3,7)
+LINE(0,4,7,4) END LINE(4,0,4,7)
+LINE(0,5,7,5) END LINE(5,0,5,7)
+LINE(0,6,7,6) END LINE(6,0,6,7)
+LINE(0,7,7,7) END LINE(7,0,7,7)
 RETURN
 
 LBL CheckFail 
@@ -101,6 +110,8 @@ turn : 0
 matrix : MATRIX(7,7)
 end : " "
 
+GOSUB DrawGrid
+
 LBL gameLoop
 inp : GETKEY
 slot : -1
@@ -111,7 +122,8 @@ ELSE (IF inp = "4" THEN slot : 3
 ELSE (IF inp = "5" THEN slot : 4
 ELSE (IF inp = "6" THEN slot : 5
 ELSE (IF inp = "7" THEN slot : 6
-ELSE (OUTPUT(0,20, "Invalid move: not on board") END GOTO gameLoop)))))))
+ELSE (IF inp = "\027" THEN (end : "quit" END GOTO endGame)
+ELSE (OUTPUT(0,20, "Invalid move: not on board") END GOTO gameLoop))))))))
 x : slot 
 GOSUB DripDown
 IF y = -1 THEN OUTPUT(0,20, "Invalid move: column filled")
@@ -119,6 +131,7 @@ ELSE (
   OUTPUT(0,20," ") END OUTPUT(1,20," ")
   OUTPUT(2,20," ") END OUTPUT(3,20," ")
   OUTPUT(4,20," ") END OUTPUT(5,20," ")
+  OUTPUT(6,20," ") END OUTPUT(7,20," ")
   turn : turn + 1
   matrix[x,y] : turn
   IF turn = 1 THEN OUTPUT(x,y,"O")
@@ -127,8 +140,9 @@ ELSE (
     OUTPUT(x,y,"X")
   )
 )
-
+GOSUB DrawGrid
 GOSUB CheckEnd
 IF end = " " THEN GOTO gameLoop
 
-DISP "Game over: " + end
+LBL endGame
+OUTPUT(0,20, "Game over: " + end)

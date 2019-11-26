@@ -89,6 +89,7 @@ type defn =
   | DMatrixSet of expr * expr * expr * expr * defn
   | DReturn of defn
   | DGraph of expr * defn
+  | DLine of expr * expr * expr * expr * defn
   | DEnd 
 
 type phrase = 
