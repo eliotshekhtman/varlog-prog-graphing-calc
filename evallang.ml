@@ -33,7 +33,7 @@ end
 
 let rec has_goto = function 
   | DEnd -> false
-  | DReturn d -> has_goto d
+  | DReturn d -> true
   | DDisp (_, d) -> has_goto d
   | DAssign (_, _, d) -> has_goto d
   | DPrompt (_, d) -> has_goto d
