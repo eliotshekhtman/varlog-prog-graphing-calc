@@ -34,6 +34,11 @@ let flex () =
   print_endline "[GRAPH f] to graph a function";
   print_endline "  (implicitly set to y)";
   print_endline "  Do not close the graphing window";
+  print_endline "[SETSCALE] to change the scaling";
+  print_endline "  of future graphs";
+  print_endline "[SOLVE (2x2 or 3x3)] to evaluate a";
+  print_endline "  system of 2 or 3 linear eqs of";
+  print_endline "  2 or 3 variables, respectively";
   print_endline "[NEWTON f] to evaluate a function";
   print_endline "  of 1 variable, using guesses";
   print_endline "[EXEC fn] to execute a text file;";
