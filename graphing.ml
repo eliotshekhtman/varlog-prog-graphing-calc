@@ -34,9 +34,6 @@ let output x y s =
   draw_string s;
   ()
 
-(** [graph_func xi xa yi ya x f] is [unit], but it graphs function f, 
-    starting at pixel [x], with bounds min x = [xi], max x = [xa],
-    min y = [yi], max y = [ya]. *)
 let rec graph_func xi xa yi ya x f =
   (* Set up window *)
   let _ = open_graph "" in
