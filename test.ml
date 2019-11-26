@@ -2,10 +2,15 @@ open OUnit2
 open Ast
 open Main
 
-(** [make_i n i s] makes an OUnit test named [n] that expects
-    [s] to evalute to [Int i]. *)
+(** [make_eval_test n i s] makes an OUnit test named [n] that expects
+    [s] to evalute to [String i]. *)
 let make_eval_test n i s =
   n >:: (fun _ -> assert_equal i (interp ("EVAL " ^ s)))
+
+(** [make_exec_test n i s] makes an OUnit test named [n] that 
+    expects file [s] to evaluate to [String i] *)
+let make_exec_test n i s = 
+  n >:: (fun _ -> assert_equal i (interp ({|EXEC "|} ^ s ^ {|"|})))
 
 let eval_tests = [
   make_eval_test "integer" "22" "22";
@@ -98,6 +103,11 @@ let eval_tests = [
   make_eval_test "rint1 lt" "true" "RANDINT(0,4) < 4";
   make_eval_test "rint2 gt" "true" "RANDINT(0,4) > -1";
 
+  make_exec_test "disp" "" "testDISP";
+  make_exec_test "matrix" "" "testMATRIX";
+  make_exec_test "goto" "" "testGOTO";
+  make_exec_test "random" "" "testRANDOM";
+  make_exec_test "goto2" "" "testWHILE";
 ]
 
 let tests = [
