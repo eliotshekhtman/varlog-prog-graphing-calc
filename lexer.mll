@@ -8,7 +8,8 @@ let lletter = ['a'-'z']
 let uletter = ['A'-'Z']
 let float = digit+ '.'? digit*
 let word = (uletter | lletter)+
-let string = '"' (word | digit | white)+ '"'
+let symbol = ('!' | ['*'-'&'] | ['('-'/'] | [':'-'@'] | ['['-'_'] | ['{'-'~'])+
+let string = '"' (word | digit | white | symbol)+ '"'
 let endchar = '\n'*
 
 rule read =
