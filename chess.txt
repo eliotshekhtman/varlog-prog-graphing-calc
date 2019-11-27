@@ -1,0 +1,54 @@
+GOTO init
+
+LBL DrawGrid
+LINE(xo,yo,8+xo,yo) END LINE(yo,xo,yo,8+xo)
+LINE(xo,1+yo,8+xo,1+yo) END LINE(1+xo,yo,1+xo,8+yo)
+LINE(xo,2+yo,8+xo,2+yo) END LINE(2+xo,yo,2+xo,8+yo)
+LINE(xo,3+yo,8+xo,3+yo) END LINE(3+xo,yo,3+xo,8+yo)
+LINE(xo,4+yo,8+xo,4+yo) END LINE(4+xo,yo,4+xo,8+yo)
+LINE(xo,6+yo,8+xo,6+yo) END LINE(6+xo,yo,6+xo,8+yo)
+LINE(xo,5+yo,8+xo,5+yo) END LINE(5+xo,yo,5+xo,8+yo)
+LINE(xo,7+yo,8+xo,7+yo) END LINE(7+xo,yo,7+xo,8+yo)
+LINE(xo,8+yo,8+xo,8+yo) END LINE(8+xo,yo,8+xo,8+yo)
+RETURN
+
+LBL SetupBoard
+board[0,0] : 14 END board[0,1] : 12 END board[0,2] : 13 END board[0,3] : 16
+board[0,4] : 15 END board[0,5] : 13 END board[0,6] : 12 END board[0,7] : 14
+
+board[1,0] : 11 END board[1,1] : 11 END board[1,2] : 11 END board[1,3] : 11
+board[1,4] : 11 END board[1,5] : 11 END board[1,6] : 11 END board[1,7] : 11
+
+board[7,0] : 4 END board[7,1] : 2 END board[7,2] : 3 END board[7,3] : 5
+board[7,4] : 6 END board[7,5] : 3 END board[7,6] : 2 END board[7,7] : 4
+
+board[6,0] : 1 END board[6,1] : 1 END board[6,2] : 1 END board[6,3] : 1
+board[6,4] : 1 END board[6,5] : 1 END board[6,6] : 1 END board[6,7] : 1
+RETURN
+
+LBL DrawBoard
+x : 0 END y : 0
+LBL drawBoardY
+LBL drawBoardX
+IF board[x,y] = 1 THEN OUTPUT(x+xo,y+yo,"WP")
+IF board[x,y] = 2 THEN OUTPUT(x+xo,y+yo,"WKn")
+IF board[x,y] = 3 THEN OUTPUT(x+xo,y+yo,"WB")
+IF board[x,y] = 4 THEN OUTPUT(x+xo,y+yo,"WR")
+IF board[x,y] = 5 THEN OUTPUT(x+xo,y+yo,"WQ")
+IF board[x,y] = 6 THEN OUTPUT(x+xo,y+yo,"WKg")
+IF board[x,y] = 11 THEN OUTPUT(x+xo,y+yo,"BP")
+IF board[x,y] = 12 THEN OUTPUT(x+xo,y+yo,"BKn")
+IF board[x,y] = 13 THEN OUTPUT(x+xo,y+yo,"BB")
+IF board[x,y] = 14 THEN OUTPUT(x+xo,y+yo,"BR")
+IF board[x,y] = 15 THEN OUTPUT(x+xo,y+yo,"BQ")
+IF board[x,y] = 16 THEN OUTPUT(x+xo,y+yo,"BKg")
+x : x+1
+IF x < 8 THEN GOTO drawBoardX
+x : 0 END y : y+1
+IF y < 8 THEN GOTO drawBoardY
+RETURN
+
+LBL init 
+xo : 11 END yo : 11 END x : 0 END y : 0
+board : MATRIX(8,8) END GOSUB SetupBoard
+GOSUB DrawBoard END GOSUB DrawGrid
