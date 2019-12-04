@@ -46,6 +46,7 @@ let rec has_goto = function
   | DOutput (_, _, _, d) -> has_goto d
   | DLine (_, _, _, _, d) -> has_goto d
   | DFunction (_, _, d) -> has_goto d
+  | DDefStruct (_, _, _, d) -> has_goto d
   | _ -> failwith "Unimplemented"
 
 let rec eval d vl = 
@@ -60,14 +61,21 @@ let rec eval d vl =
   | DIf (e, d1, d2, d3) -> eval_if e d1 d2 d3 vl
   | DLabel (s, d) -> eval d vl 
   | DGoto (s, d) -> eval (VarLog.find_lbl s vl) vl
-  | DGotoSub (s, d) -> eval (VarLog.find_lbl s vl) vl; eval d vl
+  | DGotoSub (s, d) -> eval (VarLog.find_lbl s vl) vl; eval d vl (* NOTE: probably have to edit this, goto, and if so that return will actually return and not continue evaluating *)
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
   | DOutput (x, y, v, d) -> eval_output x y v d vl
   | DLine (x1, y1, x2, y2, d) -> eval_line x1 y1 x2 y2 d vl
   | DFunction (name, args, body) -> 
     VarLog.bind name (eval_func args body vl) vl;
     (Null, VarLog.expose vl)
+  | DDefStruct (name, cargs, body, d) -> 
+    eval_struct name cargs body d vl
   | _ -> failwith "Unimplemented"
+
+and eval_struct name cargs body d vl = 
+  let s = Struct (cargs, body) in 
+  VarLog.bind name s vl;
+  eval d vl
 
 and eval_func args body vl = 
   Closure (args, body, (VarLog.expose vl))
@@ -161,6 +169,7 @@ let rec find_lbls vl = function
   | DOutput (_, _, _, d) -> find_lbls vl d
   | DLine (_, _, _, _, d) -> find_lbls vl d
   | DFunction (_, _, d) -> find_lbls vl d
+  | DDefStruct (_, _, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented"
 
 let eval_init vl d = eval d (find_lbls vl d)

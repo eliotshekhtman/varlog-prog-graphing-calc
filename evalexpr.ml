@@ -90,7 +90,8 @@ let string_of_val (v : value) : string =
   | Closure (_, _,_) -> "<closure>"
   | Matrix arr -> print_matrix arr
   | Null -> ""
-  | Struct _ -> "<struct>"
+  | Struct _ -> "<cstruct>"
+  | StructInstance _ -> "<struct>"
 
 let is_value_graph : expr -> bool = function
   | Val _ -> true
@@ -223,7 +224,26 @@ let rec eval_expr vl e =
   | MakeMatrix (a,b) -> eval_matrix a b vl 
   | MatrixGet (m, a, b) -> eval_matrixget vl m a b
   | RandInt (lb, ub) -> eval_randint vl lb ub
+  | InstantiateStruct (n, xe) -> eval_struct n xe vl
   | _ -> failwith "lol right"
+
+and eval_struct n xe vl = 
+  match substitute vl n with 
+  | Struct (cargs, body) -> begin 
+      if List.length cargs != List.length xe then failwith "precondition violated: wrong # of args in constructor"
+      else
+        let rec eval_xe xe cargs acc = 
+          match xe, cargs with 
+          | [], [] -> acc 
+          | h :: t, a :: t' -> 
+            let r = eval_expr vl h |> fst in 
+            eval_xe t t' ((a, r) :: acc)
+          | _ -> failwith "improper # args checking"
+        in 
+        (StructInstance (eval_xe xe cargs []), vl)
+    end
+  | _ -> failwith "precondition violated: not a struct"
+
 
 and eval_randint vl a b = 
   let r1 = eval_expr vl a in 

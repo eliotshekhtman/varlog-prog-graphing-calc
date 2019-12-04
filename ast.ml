@@ -62,7 +62,8 @@ and value =
   | Str of string
   | Closure of id list * defn * ((string * value) list)
   | Matrix of float array array
-  | Struct of (string * value) list
+  | StructInstance of (string * value) list
+  | Struct of id list * defn
   | Null
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
