@@ -90,8 +90,8 @@ let string_of_val (v : value) : string =
   | Closure (_, _,_) -> "<closure>"
   | Matrix arr -> print_matrix arr
   | Null -> ""
-  | Struct _ -> "<cstruct>"
-  | StructInstance _ -> "<struct>"
+  | Struct _ -> "<struct>"
+  | Built _ -> "<built>"
 
 let is_value_graph : expr -> bool = function
   | Val _ -> true
@@ -240,7 +240,7 @@ and eval_struct n xe vl =
             eval_xe t t' ((a, r) :: acc)
           | _ -> failwith "improper # args checking"
         in 
-        (StructInstance (eval_xe xe cargs []), vl)
+        (Built (eval_xe xe cargs []), vl)
     end
   | _ -> failwith "precondition violated: not a struct"
 
