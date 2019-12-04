@@ -24,29 +24,29 @@ end
 val has_goto: Ast.defn -> bool
 
 val eval: Ast.defn -> ((string * Ast.value) list * (string * Ast.defn) list) ref
-  -> unit
+  -> Ast.value * VarLog.var list
 
 val eval_output: Ast.expr -> Ast.expr -> Ast.expr -> Ast.defn -> 
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> unit
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
 
 val eval_matrixset: Ast.expr -> Ast.expr -> Ast.expr -> Ast.expr -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> unit
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
 
 val eval_disp: Ast.expr -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> unit
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
 
 val eval_prompt: string -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> unit
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
 
 val eval_assign: string -> Ast.expr -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> unit
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
 
 val eval_if: Ast.expr -> Ast.defn -> Ast.defn -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> unit
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
 
 val string_of_val: Ast.expr -> string
 
 val find_lbls: ('a * (string * Ast.defn) list) ref -> Ast.defn -> 
   ('a * (string * Ast.defn) list) ref
 
-val eval_init: Ast.defn -> unit
+val eval_init: VarLog.t -> Ast.defn -> Ast.value * VarLog.var list

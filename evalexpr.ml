@@ -1,6 +1,7 @@
 open Ast 
 open Array
 
+
 let rec fact n = 
   if n < 0. then failwith "not integer"
   else if n = 0. then 1. else n *. fact (n -. 1.)
@@ -46,15 +47,16 @@ let print_matrix arr =
   let stringified = printed |> print_matrix_helper arr in
   !stringified
 
-let scalar_mult a (arr: float array array) : float array array= 
+let scalar_mult a (arr: float array array) : float array array = 
+  let arr' = Array.make_matrix (Array.length arr) (Array.length arr.(0)) 0. in
   for i = 0 to (arr|>length) - 1 do
     for j = 0 to (arr.(0)|>length) - 1 do
-      arr.(i).(j) <- a *. arr.(i).(j);
+      arr'.(i).(j) <- a *. arr.(i).(j);
     done;
   done;
-  arr
+  arr'
 
-let matrix_mult arr1 arr2 : float array array= 
+let matrix_mult arr1 arr2 : float array array = 
   (* let printed = ref "" in *)
   let r1 = Array.length arr1 in
   let c1 = Array.length arr1.(0) in
@@ -87,6 +89,7 @@ let string_of_val (v : value) : string =
   | Str s -> s
   | Closure (_, _,_) -> "<closure>"
   | Matrix arr -> print_matrix arr
+  | Null -> ""
 
 let is_value_graph : expr -> bool = function
   | Val _ -> true
@@ -274,6 +277,9 @@ and eval_bop vl b e1 e2 =
   match b, (fst r1), r2 with 
   | Add, v1, v2 -> (add_helper v1 v2, vl2)
   | Subt, Num a, Num b -> (Num (a -. b), vl2)
+  | Mult, Matrix a, Num b -> (Matrix (scalar_mult b a), vl2)
+  | Mult, Num a, Matrix b -> (Matrix (scalar_mult a b), vl2)
+  | Mult, Matrix a, Matrix b -> (Matrix (matrix_mult a b), vl2)
   | Mult, Num a, Num b -> (Num (a *. b), vl2)
   | Div, Num a, Num b -> (Num (a /. b), vl2)
   | Pow, Num a, Num b -> (Num (a ** b), vl2)

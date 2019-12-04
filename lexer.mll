@@ -83,7 +83,7 @@ rule read =
   | "ELSE" { ELSE }
   | "true" { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
   | "false" { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
-  | "FUNC" {FUNC}
+  | "FUN" {FUN}
   | "MATRIX" {MATRIX}
   | endchar { END }
   | word { NAME (Lexing.lexeme lexbuf) }

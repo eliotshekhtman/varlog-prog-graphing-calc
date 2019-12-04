@@ -72,7 +72,7 @@ let has_dups lst =
 %token PROMPT
 %token OUTPUT
 %token EOF
-%token FUNC
+%token FUN
 
 %left AND 
 %left OR
@@ -177,11 +177,7 @@ expr:
 	| GETKEY; { GetKey }
 	| PROMPT; { Prompt }
 	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1,e2)}
-	| FUNC; LPAREN; xs = nonempty_list(ident); RPAREN; ARROW; e = expr
-			{ if has_dups xs
-				then $syntaxerror (* duplicate argument names *)
-				else Function (xs, e) }
-	;
+
 	
 defn: 
   | GRAPH; e = expr; END; d = defn; { DGraph (e, d) }
@@ -245,13 +241,21 @@ defn:
 	  RPAREN; END; { DLine (e1, e2, e3, e4, DEnd) }
 	| LINE LPAREN e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; COMMA; e4 = expr;
 	  RPAREN; { DLine (e1, e2, e3, e4, DEnd) }
-	| RETURN; END; d = defn; { DReturn d }
-	| RETURN; d = defn; { DReturn d }
-	| RETURN; END; { DReturn DEnd }
-	| RETURN; { DReturn DEnd }
+	| RETURN; e = expr; END; d = defn; { DReturn (e, d) }
+	| RETURN; e = expr; END; { DReturn (e, DEnd) }
+	| RETURN; e = expr; { DReturn (e, DEnd) }
+	| RETURN; END; d = defn; { DReturn (Val Null, d) }
+	| RETURN; d = defn; { DReturn (Val Null, d) }
+	| RETURN; END; { DReturn (Val Null, DEnd) }
+	| RETURN; { DReturn (Val Null, DEnd) }
 	| END; d = defn; { d }
 	| d = defn; END; { d }
   | END; { DEnd }
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; d = defn;
+		{ if has_dups xs
+			then $syntaxerror (* duplicate argument names *)
+			else DFunction (n, xs, d) }
+	;
 
 short_defn:
   | GRAPH; e = expr; { DGraph (e, DEnd) }
@@ -265,6 +269,7 @@ short_defn:
 	  e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; 
 	  { DOutput (e1, e2, e3, DEnd) }
-	| RETURN; { DReturn DEnd }
+	| RETURN; e = expr; { DReturn (e, DEnd) }
+	| RETURN; { DReturn (Val Null, DEnd) }
 	| LPAREN; d = defn; RPAREN; { d }
 	| END; { DEnd }

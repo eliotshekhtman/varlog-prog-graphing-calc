@@ -33,7 +33,7 @@ end
 
 let rec has_goto = function 
   | DEnd -> false
-  | DReturn d -> true
+  | DReturn (e,d) -> true
   | DGraph (_, d) -> has_goto d
   | DDisp (_, d) -> has_goto d
   | DAssign (_, _, d) -> has_goto d
@@ -45,12 +45,14 @@ let rec has_goto = function
   | DMatrixSet (_, _, _, _, d) -> has_goto d
   | DOutput (_, _, _, d) -> has_goto d
   | DLine (_, _, _, _, d) -> has_goto d
+  | DFunction (_, _, d) -> has_goto d
   | _ -> failwith "Unimplemented"
 
 let rec eval d vl = 
   match d with 
-  | DEnd -> ()
-  | DReturn d -> ()
+  | DEnd -> (Null, VarLog.expose vl)
+  | DReturn (e, d) ->  
+    (e |> eval_expr (VarLog.expose vl) |> fst, VarLog.expose vl)
   | DGraph (e, d) -> eval_dgraph e d vl
   | DDisp (e, d) -> eval_disp e d vl 
   | DAssign (s, e, d) -> eval_assign s e d vl
@@ -62,7 +64,13 @@ let rec eval d vl =
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
   | DOutput (x, y, v, d) -> eval_output x y v d vl
   | DLine (x1, y1, x2, y2, d) -> eval_line x1 y1 x2 y2 d vl
+  | DFunction (name, args, body) -> 
+    VarLog.bind name (eval_func args body vl) vl;
+    (Null, VarLog.expose vl)
   | _ -> failwith "Unimplemented"
+
+and eval_func args body vl = 
+  Closure (args, body, (VarLog.expose vl))
 
 and eval_line e1 e2 e3 e4 d vl = 
   let x1 = e1 |> eval_expr (VarLog.expose vl) |> fst in 
@@ -121,8 +129,12 @@ and eval_assign s e d vl =
   | _ -> VarLog.bind s v vl; eval d vl
 and eval_if e d1 d2 d3 vl =
   match e |> eval_expr (VarLog.expose vl) |> fst with 
-  | Bool true -> eval d1 vl; if(d1 |> has_goto |> not) then eval d3 vl
-  | Bool false -> eval d2 vl; if(d2 |> has_goto |> not) then eval d3 vl
+  | Bool true -> 
+    eval d1 vl; 
+    if(d1 |> has_goto |> not) then eval d3 vl else (Null, VarLog.expose vl)
+  | Bool false -> 
+    eval d2 vl; 
+    if(d2 |> has_goto |> not) then eval d3 vl else (Null, VarLog.expose vl)
   | _ -> failwith "precondition violated: if guard"
 
 (** [string_of_val e] converts [e] to a string.
@@ -136,7 +148,7 @@ let string_of_val (e : expr) : string =
 
 let rec find_lbls vl = function 
   | DEnd -> vl 
-  | DReturn d -> find_lbls vl d
+  | DReturn (e,d) -> find_lbls vl d
   | DDisp (_, d) -> find_lbls vl d 
   | DGraph (_, d) -> find_lbls vl d
   | DAssign (_, _, d) -> find_lbls vl d 
@@ -148,6 +160,7 @@ let rec find_lbls vl = function
   | DMatrixSet (_, _, _, _, d) -> find_lbls vl d
   | DOutput (_, _, _, d) -> find_lbls vl d
   | DLine (_, _, _, _, d) -> find_lbls vl d
+  | DFunction (_, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented"
 
-let eval_init d = eval d (find_lbls (VarLog.empty ()) d)
+let eval_init vl d = eval d (find_lbls vl d)

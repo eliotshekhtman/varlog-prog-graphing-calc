@@ -25,7 +25,7 @@ let read_file file =
 let interp s = 
   try 
     Graphing.open_output_window ();
-    s |> read_file |> parse |> eval_init; ""
+    s |> read_file |> parse |> eval_init (VarLog.empty ()); ""
   with 
   | End_of_file -> ""
   | Sys_error _ -> "Error: invalid input: no text file with given name"

@@ -51,7 +51,6 @@ type expr =
   | SetScale
   | MakeMatrix of expr * expr
   | MatrixGet of expr * expr * expr
-  | Function of id list * expr
   | Solver of string
   | PreString of string
   | Keyword of key * expr
@@ -67,16 +66,16 @@ type expr =
   | GetKey
   | Prompt
   | RandInt of expr * expr
-and  value = 
+and value = 
   | Num of float 
   | Bool of bool 
   | Str of string
-  | Closure of id list * expr * ((string * value) list)
+  | Closure of id list * defn * ((string * value) list)
   | Matrix of float array array
+  | Null
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
-
-type defn = 
+and defn = 
   | DPrompt of string * defn
   | DBind of string * expr * defn 
   | DAssign of string * expr * defn
@@ -87,9 +86,10 @@ type defn =
   | DLabel of string * defn
   | DOutput of expr * expr * expr * defn
   | DMatrixSet of expr * expr * expr * expr * defn
-  | DReturn of defn
   | DGraph of expr * defn
   | DLine of expr * expr * expr * expr * defn
+  | DReturn of expr * defn
+  | DFunction of id * id list * defn
   | DEnd 
 
 type phrase = 

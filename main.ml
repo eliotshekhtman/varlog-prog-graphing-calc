@@ -324,6 +324,26 @@ module Coords = struct
 
 end
 
+module State = struct 
+  type t = (Evallang.VarLog.var list) ref
+  let empty : t = ref []
+  let update_state st_old inp = 
+    let st = !st_old in 
+    let rec insert st tup = 
+      match st with 
+      | [] -> [tup]
+      | h :: t -> begin 
+          if (fst h) = (fst tup) then tup :: t 
+          else h :: insert t tup
+        end in 
+    let rec merge st inp = 
+      match inp with 
+      | [] -> st 
+      | h :: t -> merge (insert st h) t
+    in 
+    st_old := merge st inp
+end
+
 let set_scale coords = 
   let xmin = print_string "SET MIN X> "; read_line () |> float_of_string in
   let xmax = print_string "SET MAX X> "; read_line () |> float_of_string in
@@ -337,7 +357,7 @@ let interp (s : string) : string =
       match s |> Evalexpr.parse with 
       | Keyword (k, e) -> begin  
           match k with
-          | Eval -> e |> eval_expr [] |> fst |> string_of_val
+          | Eval -> e |> eval_expr !State.empty |> fst |> string_of_val
           | Graph ->
             let em = Coords.empty in 
             Graphing.graph em.x_min em.x_max em.y_min em.y_max (e |> eval_graph); 
@@ -350,5 +370,7 @@ let interp (s : string) : string =
       | _ -> raise No_keyword
     end 
   | Defn d -> begin 
-      s |> Main_lang.parse |> Evallang.eval_init; ""
+      let vl' = ref (!State.empty, []) in
+      let res = s |> Main_lang.parse |> Evallang.eval_init vl' in 
+      State.update_state State.empty (snd res); (fst res) |> string_of_val
     end
