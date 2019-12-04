@@ -10,10 +10,12 @@ let float = digit+ '.'? digit*
 let word = (uletter | lletter)+
 let symbol = ('!' | ['*'-'&'] | ['('-'/'] | [':'-'@'] | ['['-'_'] | ['{'-'~'])+
 let string = '"' (word | digit | white | symbol)+ '"'
+let comment = '`' (word | digit | white | symbol)* '`'
 let endchar = '\n'*
 
 rule read =
   parse 
+  | comment { END }
   | string { STRING (Lexing.lexeme lexbuf) }
   | white { read lexbuf }
   | "EVAL" { EVAL }
