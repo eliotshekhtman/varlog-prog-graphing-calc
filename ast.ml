@@ -56,6 +56,7 @@ type expr =
   | Prompt
   | RandInt of expr * expr
   | InstantiateStruct of string * expr list
+  | StructGet of string * string
 and value = 
   | Num of float 
   | Bool of bool 
@@ -83,6 +84,8 @@ and defn =
   | DReturn of expr * defn
   | DFunction of id * id list * defn
   | DDefStruct of id * id list * defn * defn
+  | DInstantiateStruct of string * string * expr list * defn
+  | DStructSet of string * string * expr * defn
   | DEnd 
 
 type phrase = 

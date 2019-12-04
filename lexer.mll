@@ -69,6 +69,7 @@ rule read =
   | "COS" {COS}
   | "TAN" {TAN}
   | "!" { EXCL }
+  | "$" { DOLLAR }
   | "ARCTAN" {ARCTAN}
   | "ARCCOS" {ARCCOS}
   | "ARCSIN" {ARCSIN}

@@ -61,6 +61,7 @@ let has_dups lst =
 %token COMMA
 %token VAR
 %token COLON
+%token DOLLAR
 %token DISP
 %token END
 %token IF 
@@ -179,8 +180,7 @@ expr:
 	| GETKEY; { GetKey }
 	| PROMPT; { Prompt }
 	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1,e2)}
-	| n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; { InstantiateStruct (n, xe) }
-	| n = NAME; COLON; COLON; s = NAME; { Var (n ^ "::" ^ s) }
+	| n = NAME; DOLLAR; s = NAME; { StructGet (n, s) }
 	| LPAREN; e=expr; RPAREN {e} 
 
 	
@@ -228,6 +228,9 @@ defn:
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, xs, ad, DEnd) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; { DDefStruct (n, xs, ad, DEnd) }
+	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; END; d = defn; { DInstantiateStruct (s, n, xe, d) }
+	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; END; { DInstantiateStruct (s, n, xe, DEnd) }
+	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; { DInstantiateStruct (s, n, xe, DEnd) }
 	| GOTO; s = NAME; END; d = defn; { DGoto (s, d) }
 	| GOTOSUB; s = NAME; END; d = defn; { DGotoSub (s, d) }
 	| LBL; s = NAME; END; d = defn; { DLabel (s, d) }

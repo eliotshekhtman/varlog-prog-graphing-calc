@@ -47,6 +47,7 @@ let rec has_goto = function
   | DLine (_, _, _, _, d) -> has_goto d
   | DFunction (_, _, d) -> has_goto d
   | DDefStruct (_, _, _, d) -> has_goto d
+  | DInstantiateStruct (_, _, _, d) -> has_goto d
   | _ -> failwith "Unimplemented"
 
 let rec eval d vl = 
@@ -69,10 +70,31 @@ let rec eval d vl =
     VarLog.bind name (eval_func args body vl) vl;
     (Null, VarLog.expose vl)
   | DDefStruct (name, cargs, body, d) -> 
-    eval_struct name cargs body d vl
+    eval_structdef name cargs body d vl
+  | DInstantiateStruct (s, name, xe, d) -> 
+    eval_struct s name xe vl d
   | _ -> failwith "Unimplemented"
 
-and eval_struct name cargs body d vl = 
+and eval_struct s n xe vl_full d = 
+  let vl = VarLog.expose vl_full in
+  match substitute vl n with 
+  | Struct (cargs, body) -> begin 
+      if List.length cargs != List.length xe then failwith "precondition violated: wrong # of args in constructor"
+      else
+        let rec eval_xe xe cargs acc = 
+          match xe, cargs with 
+          | [], [] -> acc 
+          | h :: t, a :: t' -> 
+            let r = eval_expr vl h |> fst in 
+            eval_xe t t' ((a, r) :: acc)
+          | _ -> failwith "improper # args checking"
+        in 
+        let res = eval body (ref (eval_xe xe cargs [], [])) |> snd in
+        VarLog.bind s (Built res) vl_full; eval d vl_full
+    end
+  | _ -> failwith "precondition violated: not a struct"
+
+and eval_structdef name cargs body d vl = 
   let s = Struct (cargs, body) in 
   VarLog.bind name s vl;
   eval d vl
@@ -170,6 +192,7 @@ let rec find_lbls vl = function
   | DLine (_, _, _, _, d) -> find_lbls vl d
   | DFunction (_, _, d) -> find_lbls vl d
   | DDefStruct (_, _, _, d) -> find_lbls vl d
+  | DInstantiateStruct (_, _, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented"
 
 let eval_init vl d = eval d (find_lbls vl d)

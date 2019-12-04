@@ -224,26 +224,13 @@ let rec eval_expr vl e =
   | MakeMatrix (a,b) -> eval_matrix a b vl 
   | MatrixGet (m, a, b) -> eval_matrixget vl m a b
   | RandInt (lb, ub) -> eval_randint vl lb ub
-  | InstantiateStruct (n, xe) -> eval_struct n xe vl
+  | StructGet (n, s) -> eval_structget n s vl
   | _ -> failwith "lol right"
 
-and eval_struct n xe vl = 
+and eval_structget n s vl = 
   match substitute vl n with 
-  | Struct (cargs, body) -> begin 
-      if List.length cargs != List.length xe then failwith "precondition violated: wrong # of args in constructor"
-      else
-        let rec eval_xe xe cargs acc = 
-          match xe, cargs with 
-          | [], [] -> acc 
-          | h :: t, a :: t' -> 
-            let r = eval_expr vl h |> fst in 
-            eval_xe t t' ((a, r) :: acc)
-          | _ -> failwith "improper # args checking"
-        in 
-        (Built (eval_xe xe cargs []), vl)
-    end
-  | _ -> failwith "precondition violated: not a struct"
-
+  | Built vl' -> (substitute vl' s, vl)
+  | _ -> failwith "precondition violated: not a built"
 
 and eval_randint vl a b = 
   let r1 = eval_expr vl a in 
