@@ -81,7 +81,7 @@ and defn =
   | DLine of expr * expr * expr * expr * defn
   | DReturn of expr * defn
   | DFunction of id * id list * defn
-  | DDefStruct of string * id list * defn * defn
+  | DDefStruct of id * id list * defn * defn
   | DEnd 
 
 type phrase = 
