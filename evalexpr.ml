@@ -90,6 +90,7 @@ let string_of_val (v : value) : string =
   | Closure (_, _,_) -> "<closure>"
   | Matrix arr -> print_matrix arr
   | Null -> ""
+  | Struct _ -> "<struct>"
 
 let is_value_graph : expr -> bool = function
   | Val _ -> true
@@ -102,7 +103,7 @@ let get_val v = function
   | _ -> failwith "precondition violated"
 
 let rec step_graph v = function
-  | Keyword _ -> failwith "precondition violated: too many keywords"
+  (*| Keyword _ -> failwith "precondition violated: too many keywords" *)
   | Val _ -> failwith "Does not step"
   | Var _ -> failwith "precondition violated: variable"
   (* | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
@@ -197,7 +198,7 @@ let pull_num = function
 
 let rec eval_expr vl e = 
   match e with
-  | Keyword _ -> failwith "precondition violated: too many keywords"
+  (*| Keyword _ -> failwith "precondition violated: too many keywords" *)
   | Val v -> (v, vl) 
   | PreString s -> 
     let len = String.length s - 2 in 

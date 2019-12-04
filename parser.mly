@@ -56,6 +56,8 @@ let has_dups lst =
 %token PERM
 %token LPAREN
 %token RPAREN
+%token LCURLY
+%token RCURLY
 %token COMMA
 %token VAR
 %token COLON
@@ -71,6 +73,7 @@ let has_dups lst =
 %token GETKEY
 %token PROMPT
 %token OUTPUT
+%token STRUCT
 %token EOF
 %token FUN
 
@@ -107,6 +110,13 @@ let has_dups lst =
 %%
 
 parse_phrase:
+  | EVAL; e = expr; EOF { Eval e }
+	| GRAPH; e = expr; EOF { Graph e }
+	| NEWTON; e = expr; EOF { Newton e }
+	| EXEC; e = expr; EOF { Exec e }
+	| SETSCALE; EOF { SetScale }
+	| SOLVE; THREEVAR; EOF {Solver "three"}
+	| SOLVE; TWOVAR; EOF {Solver "two"}
   | e = expr; EOF { Expr e }
 	| d = defn; EOF { Defn d }
 	;
@@ -124,11 +134,6 @@ ident:
         { x }
 
 expr:
-  | EVAL; e = expr; { Keyword (Eval, e) }
-	| GRAPH; e = expr; { Keyword (Graph, e) }
-	| NEWTON; e = expr; { Keyword (Newton, e) }
-	| EXEC; e = expr; { Keyword (Exec, e) }
-	| SETSCALE; { SetScale }
 	| INTEGRAL; LPAREN; LPAREN; e1 = expr; COMMA; 
 	  e2 = expr; RPAREN; COMMA; e3 = expr RPAREN;
 		{ Ternop (Integral, (e1 , e2), e3) }
@@ -171,12 +176,12 @@ expr:
 	| ARCCOS; e = expr; {Uniop (ArcCos, e)}
 	| ARCSIN; e = expr; {Uniop (ArcSin, e)}
 	| VAR; s = NAME; COLON; e1 = expr; END; e2 = expr; { Bind (s, e1, e2) }
-	| LPAREN; e=expr; RPAREN {e} 
-	| SOLVE; THREEVAR; {Solver "three"}
-	| SOLVE; TWOVAR; {Solver "two"}
 	| GETKEY; { GetKey }
 	| PROMPT; { Prompt }
 	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1,e2)}
+	| n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; { InstantiateStruct (n, xe) }
+	| n = NAME; COLON; COLON; s = NAME; { Var (n ^ "::" ^ s) }
+	| LPAREN; e=expr; RPAREN {e} 
 
 	
 defn: 
@@ -220,6 +225,7 @@ defn:
 	  d2 = defn; { DIf (e, d1, DEnd, d2) }
 	| IF; e = expr; THEN; d = short_defn; END; { DIf (e, d, DEnd, DEnd) }
 	| IF; e = expr; THEN; d = short_defn; { DIf (e, d, DEnd, DEnd) }
+	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; ad = obj_defn; END; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
 	| GOTO; s = NAME; END; d = defn; { DGoto (s, d) }
 	| GOTOSUB; s = NAME; END; d = defn; { DGotoSub (s, d) }
 	| LBL; s = NAME; END; d = defn; { DLabel (s, d) }
@@ -248,7 +254,7 @@ defn:
 	| RETURN; d = defn; { DReturn (Val Null, d) }
 	| RETURN; END; { DReturn (Val Null, DEnd) }
 	| RETURN; { DReturn (Val Null, DEnd) }
-	| END; d = defn; { d }
+	| END; d = defn; { d } 
 	| d = defn; END; { d }
   | END; { DEnd }
 	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; d = defn;
@@ -273,3 +279,13 @@ short_defn:
 	| RETURN; { DReturn (Val Null, DEnd) }
 	| LPAREN; d = defn; RPAREN; { d }
 	| END; { DEnd }
+	;
+
+obj_defn:
+	| s = NAME; COLON; e = expr; END; d = obj_defn; { DAssign (s, e, d) }
+	| s = NAME; COLON; e = expr; END; { DAssign (s, e, DEnd) }
+	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
+	| END; d = obj_defn; { d } 
+	| d = obj_defn; END; { d }
+  | END; { DEnd }
+	;

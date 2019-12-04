@@ -39,21 +39,10 @@ type uop =
   | ArcTan
   | Not
 
-type key =
-  | Eval
-  | Graph
-  | Newton
-  | Exec
-  (* | Derivative *)
-
-
 type expr = 
-  | SetScale
   | MakeMatrix of expr * expr
   | MatrixGet of expr * expr * expr
-  | Solver of string
   | PreString of string
-  | Keyword of key * expr
   | Val of value
   | Var of string 
   | Binop of bop * expr * expr
@@ -66,12 +55,14 @@ type expr =
   | GetKey
   | Prompt
   | RandInt of expr * expr
+  | InstantiateStruct of string * expr list
 and value = 
   | Num of float 
   | Bool of bool 
   | Str of string
   | Closure of id list * defn * ((string * value) list)
   | Matrix of float array array
+  | Struct of (string * value) list
   | Null
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
@@ -90,8 +81,15 @@ and defn =
   | DLine of expr * expr * expr * expr * defn
   | DReturn of expr * defn
   | DFunction of id * id list * defn
+  | DDefStruct of string * id list * defn * defn
   | DEnd 
 
 type phrase = 
   | Expr of expr 
   | Defn of defn
+  | Eval of expr
+  | Graph of expr
+  | Newton of expr
+  | Exec of expr
+  | Solver of string
+  | SetScale

@@ -353,24 +353,19 @@ let set_scale coords =
 
 let interp (s : string) : string =
   match s |> parse_phrase with 
-  | Expr e -> begin 
-      match s |> Evalexpr.parse with 
-      | Keyword (k, e) -> begin  
-          match k with
-          | Eval -> e |> eval_expr !State.empty |> fst |> string_of_val
-          | Graph ->
-            let em = Coords.empty in 
-            Graphing.graph em.x_min em.x_max em.y_min em.y_max (e |> eval_graph); 
-            "Graphed"
-          | Newton -> newton_helper e
-          | Exec -> exec_helper (e |> eval_expr [] |> fst)
-        end
-      | Solver s -> linear_solver_helper s
-      | SetScale -> set_scale Coords.empty; ""
-      | _ -> raise No_keyword
-    end 
+  | Expr e -> e |> eval_expr !State.empty |> fst |> string_of_val
   | Defn d -> begin 
       let vl' = ref (!State.empty, []) in
       let res = s |> Main_lang.parse |> Evallang.eval_init vl' in 
       State.update_state State.empty (snd res); (fst res) |> string_of_val
     end
+  | Solver s -> linear_solver_helper s
+  | SetScale -> set_scale Coords.empty; ""
+  | Eval e -> e |> eval_expr !State.empty |> fst |> string_of_val
+  | Graph e ->
+    let em = Coords.empty in 
+    Graphing.graph em.x_min em.x_max em.y_min em.y_max (e |> eval_graph); 
+    "Graphed"
+  | Newton e -> newton_helper e
+  | Exec e -> exec_helper (e |> eval_expr [] |> fst)
+  | _ -> raise No_keyword
