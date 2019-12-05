@@ -1,3 +1,5 @@
 STRUCT hello : a -> { x : a }
 greet : hello(3)
 DISP greet$x
+greet$x : 4
+DISP greet$x

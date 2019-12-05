@@ -231,6 +231,9 @@ defn:
 	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; END; d = defn; { DInstantiateStruct (s, n, xe, d) }
 	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; END; { DInstantiateStruct (s, n, xe, DEnd) }
 	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; { DInstantiateStruct (s, n, xe, DEnd) }
+	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; d = defn; { DStructSet (n, s, e, d) }
+	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; { DStructSet (n, s, e, DEnd) }
+	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; { DStructSet (n, s, e, DEnd) }
 	| GOTO; s = NAME; END; d = defn; { DGoto (s, d) }
 	| GOTOSUB; s = NAME; END; d = defn; { DGotoSub (s, d) }
 	| LBL; s = NAME; END; d = defn; { DLabel (s, d) }
@@ -274,6 +277,7 @@ short_defn:
 	| s = NAME; COLON; PROMPT; END; { DPrompt (s, DEnd) }
 	| s = NAME; COLON; PROMPT; { DPrompt (s, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
+	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; { DStructSet (n, s, e, DEnd) }
 	| GOTOSUB; s = NAME; { DGotoSub (s, DEnd) }
 	| GOTO; s = NAME; { DGoto (s, DEnd) }
 	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; 

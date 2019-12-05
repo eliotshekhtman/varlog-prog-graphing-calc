@@ -48,7 +48,8 @@ let rec has_goto = function
   | DFunction (_, _, d) -> has_goto d
   | DDefStruct (_, _, _, d) -> has_goto d
   | DInstantiateStruct (_, _, _, d) -> has_goto d
-  | _ -> failwith "Unimplemented"
+  | DStructSet (_, _, _, d) -> has_goto d
+  | _ -> failwith "Unimplemented: has_goto"
 
 let rec eval d vl = 
   match d with 
@@ -73,7 +74,21 @@ let rec eval d vl =
     eval_structdef name cargs body d vl
   | DInstantiateStruct (s, name, xe, d) -> 
     eval_struct s name xe vl d
-  | _ -> failwith "Unimplemented"
+  | DStructSet (n, s, e, d) -> 
+    eval_structset n s e d vl
+  | _ -> failwith "Unimplemented: eval"
+
+and eval_structset n s e d vl = 
+  match VarLog.find n vl with 
+  | Some (Built vl') -> begin 
+      let v = e |> eval_expr (VarLog.expose vl) |> fst in 
+      let rec replace lst k v = 
+        match lst with 
+        | [] -> [(k, v)]
+        | h :: t -> if (fst h) = k then (k, v) :: t else h :: replace t k v
+      in VarLog.bind n (Built (replace vl' s v)) vl; eval d vl
+    end
+  | _ -> failwith "precondition violated: not a built"
 
 and eval_struct s n xe vl_full d = 
   let vl = VarLog.expose vl_full in
@@ -193,6 +208,7 @@ let rec find_lbls vl = function
   | DFunction (_, _, d) -> find_lbls vl d
   | DDefStruct (_, _, _, d) -> find_lbls vl d
   | DInstantiateStruct (_, _, _, d) -> find_lbls vl d
-  | _ -> failwith "Unimplemented"
+  | DStructSet (_, _, _, d) -> find_lbls vl d
+  | _ -> failwith "Unimplemented: find_lbls"
 
 let eval_init vl d = eval d (find_lbls vl d)
