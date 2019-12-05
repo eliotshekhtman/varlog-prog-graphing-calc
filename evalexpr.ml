@@ -222,10 +222,29 @@ let rec eval_expr vl e =
       s |> parse |> eval_expr vl
     end
   | MakeMatrix (a,b) -> eval_matrix a b vl 
+  | MakeVarMat (a, b) -> eval_varmat a b vl
   | MatrixGet (m, a, b) -> eval_matrixget vl m a b
   | RandInt (lb, ub) -> eval_randint vl lb ub
   | StructGet (n, s) -> eval_structget n s vl
+  | Ternary (guard, e1, e2) -> eval_ternary vl guard e1 e2 
   | _ -> failwith "lol right"
+
+and eval_varmat a b vl = 
+  let r1 = eval_expr vl a in
+  let r2 = eval_expr (snd r1) b in
+  match fst r1, fst r2 with
+  | Num a, Num b  -> 
+    if (is_int a = false || is_int b = false) then 
+      failwith "cannot have float values"
+    else 
+      ((VarMat (Array.make_matrix (a|>int_of_float) (b|>int_of_float) Null)), vl)
+  |_-> failwith "precondition violated: make varmat"
+
+and eval_ternary vl g a b = 
+  match eval_expr vl g with 
+  | Bool true, vl' -> eval_expr vl' a 
+  | Bool false, vl' -> eval_expr vl' b 
+  | _ -> failwith "precondition violated: guard didn't evaluate to bool"
 
 and eval_structget n s vl = 
   match substitute vl n with 
@@ -262,6 +281,10 @@ and eval_matrixget vl m a b =
   | Matrix m, Num a, Num b -> 
     if is_int a && is_int b then 
       (Num m.(a |> int_of_float).(b |> int_of_float), vl')
+    else failwith "precondition violated: float indeces"
+  | VarMat m, Num a, Num b ->
+    if is_int a && is_int b then 
+      (m.(a |> int_of_float).(b |> int_of_float), vl')
     else failwith "precondition violated: float indeces"
   | _ -> failwith "precondition violated: matrix get"
 

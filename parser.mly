@@ -6,6 +6,7 @@ let has_dups lst =
 
 %}
 %token MATRIX
+%token VARMAT
 %token RARROW 
 %token RBRACKET
 %token LBRACKET
@@ -61,6 +62,7 @@ let has_dups lst =
 %token COMMA
 %token VAR
 %token COLON
+%token QUESTION
 %token DOLLAR
 %token DISP
 %token END
@@ -169,6 +171,7 @@ expr:
 	| e1 = expr; OR; e2 = expr { Boolop (Or, e1, e2) }
 	| e1 = expr; XOR; e2 = expr { Boolop (Xor, e1, e2) }
 	| e1 = expr; NXOR; e2 = expr { Uniop (Not, Boolop (Xor, e1, e2)) }
+	| g = expr; QUESTION; e1 = expr; COLON; e2 = expr; { Ternary (g, e1, e2) }
 	| NOT; e = expr; { Uniop (Not, e) }
 	| SIN; e = expr; {Uniop (Sin, e)}
 	| COS; e = expr; {Uniop (Cos, e)}
@@ -176,13 +179,12 @@ expr:
 	| ARCTAN; e = expr; {Uniop (ArcTan, e)}
 	| ARCCOS; e = expr; {Uniop (ArcCos, e)}
 	| ARCSIN; e = expr; {Uniop (ArcSin, e)}
-	| VAR; s = NAME; COLON; e1 = expr; END; e2 = expr; { Bind (s, e1, e2) }
 	| GETKEY; { GetKey }
 	| PROMPT; { Prompt }
-	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1,e2)}
+	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1, e2) }
+	| VARMAT; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { MakeVarMat (e1, e2) }
 	| n = NAME; DOLLAR; s = NAME; { StructGet (n, s) }
 	| LPAREN; e=expr; RPAREN {e} 
-	| n = NAME; es = nonempty_list(expr); {Application(n,es)}
 
 	
 defn: 

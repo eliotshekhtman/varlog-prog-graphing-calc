@@ -156,6 +156,11 @@ and eval_matrixset m a b v d vl =
         (m.(a |> int_of_float).(b |> int_of_float) <- v; eval d vl)
       else failwith "precondition violated: float indeces"
     end
+  | VarMat m, Num a, Num b, v -> begin 
+      if (is_int a && is_int b) then 
+        (m.(a |> int_of_float).(b |> int_of_float) <- v; eval d vl)
+      else failwith "precondition violated: float indeces"
+    end
   | _ -> failwith "precondition violated: matrix set"
 
 and eval_disp e d vl = 

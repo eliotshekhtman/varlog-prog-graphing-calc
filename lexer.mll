@@ -77,6 +77,7 @@ rule read =
   | "3x3" {THREEVAR}
   | float { NUM (float_of_string (Lexing.lexeme lexbuf)) }
   | "VAR" { VAR }
+  | "?" { QUESTION }
   | ":" { COLON }
   | "STRUCT" { STRUCT }
   | "GOSUB" { GOTOSUB }
@@ -91,6 +92,7 @@ rule read =
   | "false" { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
   | "FUN" {FUN}
   | "MATRIX" {MATRIX}
+  | "VARMAT" { VARMAT }
   | endchar { END }
   | word { NAME (Lexing.lexeme lexbuf) }
   | eof { EOF }
