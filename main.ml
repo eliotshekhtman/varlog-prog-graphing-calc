@@ -3,7 +3,7 @@ open Graphing
 open Evalexpr
 open String
 open Stdlib
-
+open VarLog
 
 (* exception DeterminantZero *)
 exception No_keyword

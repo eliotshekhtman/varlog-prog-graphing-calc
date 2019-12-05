@@ -182,6 +182,7 @@ expr:
 	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1,e2)}
 	| n = NAME; DOLLAR; s = NAME; { StructGet (n, s) }
 	| LPAREN; e=expr; RPAREN {e} 
+	| n = NAME; es = nonempty_list(expr); {Application(n,es)}
 
 	
 defn: 
