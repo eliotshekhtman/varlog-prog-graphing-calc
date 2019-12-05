@@ -51,6 +51,12 @@ let rec has_goto = function
   | DStructSet (_, _, _, d) -> has_goto d
   | _ -> failwith "Unimplemented: has_goto"
 
+
+let rec replace lst k v = 
+  match lst with 
+  | [] -> [(k, v)]
+  | h :: t -> if (fst h) = k then (k, v) :: t else h :: replace t k v
+
 let rec eval d vl = 
   match d with 
   | DEnd -> (Null, VarLog.expose vl)
@@ -82,11 +88,7 @@ and eval_structset n s e d vl =
   match VarLog.find n vl with 
   | Some (Built vl') -> begin 
       let v = e |> eval_expr (VarLog.expose vl) |> fst in 
-      let rec replace lst k v = 
-        match lst with 
-        | [] -> [(k, v)]
-        | h :: t -> if (fst h) = k then (k, v) :: t else h :: replace t k v
-      in VarLog.bind n (Built (replace vl' s v)) vl; eval d vl
+      VarLog.bind n (Built (replace vl' s v)) vl; eval d vl
     end
   | _ -> failwith "precondition violated: not a built"
 

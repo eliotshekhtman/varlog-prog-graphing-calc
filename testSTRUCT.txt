@@ -3,3 +3,6 @@ greet : hello(3)
 DISP greet$x
 greet$x : 4
 DISP greet$x
+
+STRUCT piece : v x y -> { nullity : 0 }
+DISP "Hi"
