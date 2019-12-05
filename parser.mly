@@ -225,6 +225,7 @@ defn:
 	  d2 = defn; { DIf (e, d1, DEnd, d2) }
 	| IF; e = expr; THEN; d = short_defn; END; { DIf (e, d, DEnd, DEnd) }
 	| IF; e = expr; THEN; d = short_defn; { DIf (e, d, DEnd, DEnd) }
+	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, xs, ad, DEnd) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; { DDefStruct (n, xs, ad, DEnd) }
