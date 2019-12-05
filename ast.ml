@@ -57,6 +57,7 @@ type expr =
   | RandInt of expr * expr
   | InstantiateStruct of string * expr list
   | StructGet of string * string
+  | Application of id * expr list
 and value = 
   | Num of float 
   | Bool of bool 
