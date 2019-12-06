@@ -219,7 +219,7 @@ let solve_linear_equation
 
 let exec_helper v = 
   match v with 
-  | Str s -> Main_lang.interp (s ^ ".txt")
+  | Str s -> Main_lang.interp (s ^ ".vl")
   | _ -> "Error: invalid input: requires a string filename input"
 
 
