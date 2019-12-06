@@ -1,5 +1,5 @@
 open Ast 
-open Evallang
+open Eval
 open VarLog
 (** [parse s] is the defn resulting from [s] *)
 let parse (s : string) : defn = 

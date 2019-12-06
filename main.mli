@@ -1,6 +1,6 @@
 open Ast 
 open Graphing 
-open Evalexpr
+open Eval
 
 exception No_keyword 
 exception DeterminantZero 

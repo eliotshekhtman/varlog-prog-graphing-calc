@@ -1,6 +1,6 @@
 open Ast
 open Graphing
-open Evalexpr
+open Eval
 open String
 open Stdlib
 open VarLog 
@@ -356,7 +356,7 @@ let interp (s : string) : string =
   | Expr e -> e |> eval_expr !State.empty |> fst |> string_of_val
   | Defn d -> begin 
       let vl' = ref (!State.empty, []) in
-      let res = s |> Main_lang.parse |> Evallang.eval_init vl' in 
+      let res = s |> Main_lang.parse |> eval_init vl' in 
       State.update_state State.empty (snd res); (fst res) |> string_of_val
     end
   | Solver s -> linear_solver_helper s
