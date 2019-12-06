@@ -3,7 +3,7 @@ open Graphing
 open Evalexpr
 open String
 open Stdlib
-open VarLog
+open VarLog 
 
 (* exception DeterminantZero *)
 exception No_keyword
@@ -325,7 +325,7 @@ module Coords = struct
 end
 
 module State = struct 
-  type t = (Evallang.VarLog.var list) ref
+  type t = (VarLog.var list) ref
   let empty : t = ref []
   let update_state st_old inp = 
     let st = !st_old in 

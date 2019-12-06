@@ -1,6 +1,6 @@
 open Ast 
 open Array
-
+open VarLog
 
 let rec fact n = 
   if n < 0. then failwith "not integer"
@@ -197,6 +197,14 @@ let pull_num = function
   | Num n -> n 
   | _ -> failwith "precondition violated: not a number"
 
+
+let rec find_id n' vl' =
+  match vl' with
+  |[]-> None
+  |h::t -> if(fst h = n') then Some (snd h) else
+      find_id n' t
+
+
 let rec eval_expr vl e = 
   match e with
   (*| Keyword _ -> failwith "precondition violated: too many keywords" *)
@@ -225,107 +233,152 @@ let rec eval_expr vl e =
   | MatrixGet (m, a, b) -> eval_matrixget vl m a b
   | RandInt (lb, ub) -> eval_randint vl lb ub
   | StructGet (n, s) -> eval_structget n s vl
+  | Application(n, es)-> eval_app n es vl
   | _ -> failwith "lol right"
+and eval_app n es vl =
+  let value = find_id n vl in
+  match value with
+  | Some Closure (args, d, vl_closure) ->  
+    if(List.length args <> List.length es) then 
+      failwith "Number of function arguments not consistent"
+    else (
+      let rec bind_arguments args' es' vl_closure' =
+        match args', es' with
+        |[],[] -> vl_closure'
+        |h1::t1, h2::t2 ->
+          let value_of_arg = fst (eval_expr vl h2) in
+          begin match value_of_arg with
+            | v -> VarLog.bind h1 v vl_closure'
+            | _-> failwith "Argument is not an expression"
+          end
+        |_-> failwith ""
+    ) in let new_vl = bind_arguments args es vl_closure in
+Evallang.eval d new_vl (*should be the new varlog*)
+)
+| Some _ -> failwith "Can't do function application on non-function" 
+| None -> failwith "Function not found"
+|_-> failwith "Function call impossible"
+
+(*  match (e1,env,st) |> eval_expr with 
+    | (RValue (VClosure (xs, exp, env_closure)), st) -> begin
+      if List.length xs <> List.length xe then 
+        ((RException (VString "Application: wrong number of arguments"), st))
+      else 
+        let rec bind_params xs' xe' env_closure' st' = begin
+          match xs', xe' with
+          | [], []-> env_closure'
+          | h1::t1, h2 :: t2 -> 
+            let value = 
+              begin 
+                match (h2, env, st') |> eval_expr with
+                | (RValue v, st) -> v
+                | _ -> failwith "error, not a value" 
+              end in bind_params t1 t2 (Binding.bind h1 value env_closure') st'
+          |_ -> failwith "error with your fn"
+        end
+        in let new_env = bind_params xs xe env_closure st in
+        eval_expr (exp, new_env, st)
+    end*)
 
 and eval_structget n s vl = 
-  match substitute vl n with 
-  | Built vl' -> (substitute vl' s, vl)
-  | _ -> failwith "precondition violated: not a built"
+    match substitute vl n with 
+    | Built vl' -> (substitute vl' s, vl)
+    | _ -> failwith "precondition violated: not a built"
 
 and eval_randint vl a b = 
-  let r1 = eval_expr vl a in 
-  let (r2, vl') = eval_expr (snd r1) b in 
-  match fst r1, r2 with 
-  | Num a, Num b -> begin 
-      let lb = a |> int_of_float in 
-      let ub = b |> int_of_float in 
-      let v = lb + Random.int (ub-lb) in
-      (Num (v |> float_of_int), vl)
-    end
-  | _ -> failwith "precondition violated: not numerical inputs"
+    let r1 = eval_expr vl a in 
+    let (r2, vl') = eval_expr (snd r1) b in 
+    match fst r1, r2 with 
+    | Num a, Num b -> begin 
+        let lb = a |> int_of_float in 
+        let ub = b |> int_of_float in 
+        let v = lb + Random.int (ub-lb) in
+        (Num (v |> float_of_int), vl)
+      end
+    | _ -> failwith "precondition violated: not numerical inputs"
 and eval_matrix a b vl = 
-  let r1 = eval_expr vl a in
-  let r2 = eval_expr (snd r1) b in
-  match fst r1, fst r2 with
-  | Num a, Num b  -> 
-    if (is_int a = false || is_int b = false) then 
-      failwith "cannot have float values"
-    else 
-      ((Matrix (Array.make_matrix (a|>int_of_float) (b|>int_of_float) 0.)), vl)
-  |_-> failwith "precondition violated: make matrix"
+    let r1 = eval_expr vl a in
+    let r2 = eval_expr (snd r1) b in
+    match fst r1, fst r2 with
+    | Num a, Num b  -> 
+      if (is_int a = false || is_int b = false) then 
+        failwith "cannot have float values"
+      else 
+        ((Matrix (Array.make_matrix (a|>int_of_float) (b|>int_of_float) 0.)), vl)
+    |_-> failwith "precondition violated: make matrix"
 
 and eval_matrixget vl m a b = 
-  let r1 = eval_expr vl m in 
-  let r2 = eval_expr (snd r1) a in 
-  let (r3, vl') = eval_expr (snd r2) b in
-  match (fst r1), (fst r2), r3 with 
-  | Matrix m, Num a, Num b -> 
-    if is_int a && is_int b then 
-      (Num m.(a |> int_of_float).(b |> int_of_float), vl')
-    else failwith "precondition violated: float indeces"
-  | _ -> failwith "precondition violated: matrix get"
+    let r1 = eval_expr vl m in 
+    let r2 = eval_expr (snd r1) a in 
+    let (r3, vl') = eval_expr (snd r2) b in
+    match (fst r1), (fst r2), r3 with 
+    | Matrix m, Num a, Num b -> 
+      if is_int a && is_int b then 
+        (Num m.(a |> int_of_float).(b |> int_of_float), vl')
+      else failwith "precondition violated: float indeces"
+    | _ -> failwith "precondition violated: matrix get"
 
 and eval_boop vl b e1 e2 = 
-  let r1 = eval_expr vl e1 in 
-  match b, (fst r1) with 
-  | And, Bool false -> (Bool false, snd r1)
-  | Or, Bool true -> (Bool true, snd r1) 
-  | _ -> 
-    let (r2, vl2) = eval_expr (snd r1) e2 in 
-    begin 
-      match b, (fst r1), r2 with 
-      | And, Bool a, Bool b -> (Bool (a && b), vl2)
-      | Or, Bool a, Bool b -> (Bool (a || b), vl2) 
-      | Xor, Bool a, Bool b -> (Bool (a <> b), vl2)
-      | _ -> failwith "unimplemented"
-    end
+    let r1 = eval_expr vl e1 in 
+    match b, (fst r1) with 
+    | And, Bool false -> (Bool false, snd r1)
+    | Or, Bool true -> (Bool true, snd r1) 
+    | _ -> 
+      let (r2, vl2) = eval_expr (snd r1) e2 in 
+      begin 
+        match b, (fst r1), r2 with 
+        | And, Bool a, Bool b -> (Bool (a && b), vl2)
+        | Or, Bool a, Bool b -> (Bool (a || b), vl2) 
+        | Xor, Bool a, Bool b -> (Bool (a <> b), vl2)
+        | _ -> failwith "unimplemented"
+      end
 and eval_bop vl b e1 e2 = 
-  let r1 = eval_expr vl e1 in 
-  let (r2, vl2) = eval_expr (snd r1) e2 in 
-  match b, (fst r1), r2 with 
-  | Add, v1, v2 -> (add_helper v1 v2, vl2)
-  | Subt, Num a, Num b -> (Num (a -. b), vl2)
-  | Mult, Matrix a, Num b -> (Matrix (scalar_mult b a), vl2)
-  | Mult, Num a, Matrix b -> (Matrix (scalar_mult a b), vl2)
-  | Mult, Matrix a, Matrix b -> (Matrix (matrix_mult a b), vl2)
-  | Mult, Num a, Num b -> (Num (a *. b), vl2)
-  | Div, Num a, Num b -> (Num (a /. b), vl2)
-  | Pow, Num a, Num b -> (Num (a ** b), vl2)
-  | Perm, Num a, Num b -> 
-    let res = (fact a) /. ((fact b) *. (a -. b |> fact)) in (Num (res), vl2)
-  | Comb, Num a, Num b -> (Num ((fact a) /. (fact b)), vl2)
-  | Eq, v1, v2 -> (eq_helper v1 v2, vl2)
-  | Neq, v1, v2 -> (eq_helper v1 v2 |> not_val, vl2)
-  | Lt, v1, v2 -> (lt_helper v1 v2, vl2)
-  | Geq, v1, v2 -> (lt_helper v1 v2 |> not_val, vl2)
-  | Gt, v1, v2 -> (gt_helper v1 v2, vl2)
-  | Leq, v1, v2 -> (gt_helper v1 v2 |> not_val, vl2)
-  | _ -> failwith "precondition violated: bop input types"
+    let r1 = eval_expr vl e1 in 
+    let (r2, vl2) = eval_expr (snd r1) e2 in 
+    match b, (fst r1), r2 with 
+    | Add, v1, v2 -> (add_helper v1 v2, vl2)
+    | Subt, Num a, Num b -> (Num (a -. b), vl2)
+    | Mult, Matrix a, Num b -> (Matrix (scalar_mult b a), vl2)
+    | Mult, Num a, Matrix b -> (Matrix (scalar_mult a b), vl2)
+    | Mult, Matrix a, Matrix b -> (Matrix (matrix_mult a b), vl2)
+    | Mult, Num a, Num b -> (Num (a *. b), vl2)
+    | Div, Num a, Num b -> (Num (a /. b), vl2)
+    | Pow, Num a, Num b -> (Num (a ** b), vl2)
+    | Perm, Num a, Num b -> 
+      let res = (fact a) /. ((fact b) *. (a -. b |> fact)) in (Num (res), vl2)
+    | Comb, Num a, Num b -> (Num ((fact a) /. (fact b)), vl2)
+    | Eq, v1, v2 -> (eq_helper v1 v2, vl2)
+    | Neq, v1, v2 -> (eq_helper v1 v2 |> not_val, vl2)
+    | Lt, v1, v2 -> (lt_helper v1 v2, vl2)
+    | Geq, v1, v2 -> (lt_helper v1 v2 |> not_val, vl2)
+    | Gt, v1, v2 -> (gt_helper v1 v2, vl2)
+    | Leq, v1, v2 -> (gt_helper v1 v2 |> not_val, vl2)
+    | _ -> failwith "precondition violated: bop input types"
 and eval_uop vl u e = 
-  let (r, vl') = eval_expr vl e in 
-  match u, r with 
-  | Not, Bool b -> (Bool (not b), vl')
-  | Subt, Num n -> (Num (~-.n), vl')
-  | Fact, Num n -> (Num (fact n), vl')
-  | Sin, Num n -> (Num (sin n), vl')
-  | Cos, Num n -> (Num (cos n), vl')
-  | Tan, Num n -> (Num (tan n), vl')
-  | ArcSin, Num n -> (Num (asin n), vl')
-  | ArcCos, Num n -> (Num (acos n), vl')
-  | ArcTan, Num n -> (Num (atan n), vl')
-  | _ -> failwith "precondition violated: uop"
+    let (r, vl') = eval_expr vl e in 
+    match u, r with 
+    | Not, Bool b -> (Bool (not b), vl')
+    | Subt, Num n -> (Num (~-.n), vl')
+    | Fact, Num n -> (Num (fact n), vl')
+    | Sin, Num n -> (Num (sin n), vl')
+    | Cos, Num n -> (Num (cos n), vl')
+    | Tan, Num n -> (Num (tan n), vl')
+    | ArcSin, Num n -> (Num (asin n), vl')
+    | ArcCos, Num n -> (Num (acos n), vl')
+    | ArcTan, Num n -> (Num (atan n), vl')
+    | _ -> failwith "precondition violated: uop"
 and eval_top vl top e1 e2 e3 = 
-  let r1 = eval_expr vl e1 in 
-  let r2 = eval_expr (snd r1) e2 in 
-  match top, (fst r1), (fst r2) with 
-  | Integral, Num a, Num b -> 
-    (Num (integrate a b 0. (e3 |> eval_graph)), (snd r2))
-  | _ -> failwith "precondition violated: top"
+    let r1 = eval_expr vl e1 in 
+    let r2 = eval_expr (snd r1) e2 in 
+    match top, (fst r1), (fst r2) with 
+    | Integral, Num a, Num b -> 
+      (Num (integrate a b 0. (e3 |> eval_graph)), (snd r2))
+    | _ -> failwith "precondition violated: top"
 and eval_deriv vl der e1 e2 = 
-  let r1 = eval_expr vl e1 in 
-  match der, (fst r1) with 
-  | Der, Num a -> (Num (derive a (e2 |> eval_graph)), (snd r1))
-  | _ -> failwith "precondition violated: derivative"
+    let r1 = eval_expr vl e1 in 
+    match der, (fst r1) with 
+    | Der, Num a -> (Num (derive a (e2 |> eval_graph)), (snd r1))
+    | _ -> failwith "precondition violated: derivative"
 
 
 (*
