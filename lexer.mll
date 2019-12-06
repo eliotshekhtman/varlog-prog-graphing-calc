@@ -70,6 +70,11 @@ rule read =
   | "TAN" {TAN}
   | "!" { EXCL }
   | "$" { DOLLAR }
+  | "RED" { RED }
+  | "GREEN" { GREEN }
+  | "BLUE" { BLUE }
+  | "YELLOW" { YELLOW }
+  | "BLACK" { BLACK }
   | "ARCTAN" {ARCTAN}
   | "ARCCOS" {ARCCOS}
   | "ARCSIN" {ARCSIN}

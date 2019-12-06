@@ -15,7 +15,7 @@ let rec has_goto = function
   | DGotoSub (_, d) -> has_goto d
   | DLabel (_, d) -> has_goto d
   | DMatrixSet (_, _, _, _, d) -> has_goto d
-  | DOutput (_, _, _, d) -> has_goto d
+  | DOutput (_, _, _, _, d) -> has_goto d
   | DLine (_, _, _, _, d) -> has_goto d
   | DFunction (_, _, d) -> has_goto d
   | DDefStruct (_, _, _, d) -> has_goto d
@@ -37,7 +37,7 @@ let rec eval d vl =
   | DGoto (s, d) -> eval (VarLog.find_lbl s vl) vl
   | DGotoSub (s, d) -> eval (VarLog.find_lbl s vl) vl; eval d vl (* NOTE: probably have to edit this, goto, and if so that return will actually return and not continue evaluating *)
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
-  | DOutput (x, y, v, d) -> eval_output x y v d vl
+  | DOutput (x, y, v, c, d) -> eval_output x y v c d vl
   | DLine (x1, y1, x2, y2, d) -> eval_line x1 y1 x2 y2 d vl
   | DFunction (name, args, body) -> 
     VarLog.bind name (eval_func args body vl) vl;
@@ -115,13 +115,14 @@ and eval_dgraph e d vl =
   Graphing.graph_func (-10.) (10.) (-10.) (10.) 0 Graphics.black f;
   eval d vl
 
-and eval_output x y v d vl = 
+and eval_output x y v c d vl = 
   let x' = x |> eval_expr (VarLog.expose vl) |> fst in 
   let y' = y |> eval_expr (VarLog.expose vl) |> fst in 
   let v' = v |> eval_expr (VarLog.expose vl) |> fst in 
+  let c' = c |> eval_expr (VarLog.expose vl) |> fst in 
   match x', y' with 
   | Num a, Num b -> begin 
-      Graphing.output a b (v' |> string_of_val); eval d vl
+      Graphing.output a b (v' |> string_of_val) c'; eval d vl
     end
   | _ -> failwith "precondition violated: not numerical coordinates"
 
@@ -190,7 +191,7 @@ let rec find_lbls vl = function
   | DGotoSub (_, d) -> find_lbls vl d
   | DLabel (s, d) -> VarLog.bind_lbl s d vl; find_lbls vl d
   | DMatrixSet (_, _, _, _, d) -> find_lbls vl d
-  | DOutput (_, _, _, d) -> find_lbls vl d
+  | DOutput (_, _, _, _, d) -> find_lbls vl d
   | DLine (_, _, _, _, d) -> find_lbls vl d
   | DFunction (_, _, d) -> find_lbls vl d
   | DDefStruct (_, _, _, d) -> find_lbls vl d

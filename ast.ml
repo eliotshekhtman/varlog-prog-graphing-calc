@@ -39,6 +39,13 @@ type uop =
   | ArcTan
   | Not
 
+type color = 
+  | Red
+  | Blue 
+  | Green 
+  | Yellow 
+  | Black
+
 type expr = 
   | MakeMatrix of expr * expr
   | MakeVarMat of expr * expr
@@ -67,6 +74,7 @@ and value =
   | VarMat of value array array
   | Built of (string * value) list
   | Struct of id list * defn
+  | Color of color
   | Null
   (* | Let of string * expr * expr
      | If of expr * expr * expr *)
@@ -79,7 +87,7 @@ and defn =
   | DGoto of string * defn
   | DGotoSub of string * defn
   | DLabel of string * defn
-  | DOutput of expr * expr * expr * defn
+  | DOutput of expr * expr * expr * expr * defn
   | DMatrixSet of expr * expr * expr * expr * defn
   | DGraph of expr * defn
   | DLine of expr * expr * expr * expr * defn

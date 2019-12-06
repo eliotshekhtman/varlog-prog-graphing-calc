@@ -13,14 +13,14 @@ IF n > 0 THEN GOTO setup
 RETURN
 
 LBL SetPic
-IF matrix[x,y] = 0 THEN pic : " "
-ELSE (IF matrix[x,y] = 1 THEN pic : ":"
-  ELSE (IF matrix[x,y] = 2 THEN pic : "&"
-    ELSE (IF matrix[x,y] = 3 THEN pic : "i"
-      ELSE (IF matrix[x,y] = 4 THEN pic : "*"
-        ELSE (IF matrix[x,y] = 5 THEN pic : "@"
-          ELSE (IF matrix[x,y] = 14 THEN pic : "~"
-            ELSE (IF matrix[x,y] = 10 THEN pic : "%"
+IF matrix[x,y] = 0 THEN (pic : " " END color : BLACK)
+ELSE (IF matrix[x,y] = 1 THEN (pic : ":" END color : BLACK)
+  ELSE (IF matrix[x,y] = 2 THEN (pic : "&" END color : RED)
+    ELSE (IF matrix[x,y] = 3 THEN (pic : "i" END color : YELLOW)
+      ELSE (IF matrix[x,y] = 4 THEN (pic : "*" END color : BLUE)
+        ELSE (IF matrix[x,y] = 5 THEN (pic : "@" END color : GREEN)
+          ELSE (IF matrix[x,y] = 14 THEN (pic : "~" END color : BLUE)
+            ELSE (IF matrix[x,y] = 10 THEN (pic : "%" END color : RED)
               ELSE (pic : "?"
               )
             )
@@ -33,7 +33,7 @@ ELSE (IF matrix[x,y] = 1 THEN pic : ":"
 RETURN
 
 LBL DispMap
-x : 0 END y : 0 END pic : " "
+x : 0 END y : 0 END pic : " " END color : BLACK
 LBL dispMapY
 LBL dispMapX
 GOSUB SetPic
@@ -101,7 +101,7 @@ WHILE (NOT end) {
   IF ((d = 3) & (y < 29)) THEN y : y+1
   matrix[x,y] : v 
   GOSUB SetPic
-  OUTPUT(x,y,pic)
+  OUTPUT(x,y,pic,color)
 }
 
 DISP "Game Over"

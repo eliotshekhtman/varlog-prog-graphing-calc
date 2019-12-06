@@ -1,3 +1,5 @@
+open Ast
+
 (**[better_int_of_float f] converts float [f] into an int*)
 val better_int_of_float: float -> int
 
@@ -5,7 +7,7 @@ val better_int_of_float: float -> int
 val open_output_window: unit -> unit
 
 (**[output x y s] prints string s at x,y position [x],[y]*)
-val output: float -> float -> string -> unit
+val output: float -> float -> string -> value -> unit
 
 (** [draw_line x1 y1 x2 y2] draws a line from ([x1],[y1])
     to ([x2],[y2]), where the window is divided into a 

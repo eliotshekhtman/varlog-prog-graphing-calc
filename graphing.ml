@@ -1,3 +1,4 @@
+open Ast
 open Graphics
 
 (** [better_int_of_float f] is [f] cast to an integer, for the purposes
@@ -23,7 +24,15 @@ let open_output_window () =
   set_text_size 20;
   ()
 
-let output x y s = 
+let parse_color = function 
+  | Color Red -> red 
+  | Color Black -> black 
+  | Color Green -> green 
+  | Color Yellow -> yellow 
+  | Color Blue -> blue
+  | _ -> failwith "precondition violated: not a color"
+
+let output x y s c = 
   let incx = window_width / 30 in 
   let incy = window_height / 30 in 
   let x' = (x *. (incx |> float_of_int)) |> int_of_float in 
@@ -38,8 +47,9 @@ let output x y s =
   let ix = incx - 1 in
   let iy = incx - 1 in 
   fill_rect x' y' ix iy;
-  set_color black;
+  c |> parse_color |> set_color;
   draw_string s;
+  set_color black;
   ()
 
 let draw_line x1 y1 x2 y2 = 

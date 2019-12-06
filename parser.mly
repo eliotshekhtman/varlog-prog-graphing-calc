@@ -23,6 +23,11 @@ let has_dups lst =
 %token DERIVATIVE
 %token RANDINT
 %token LINE
+%token RED 
+%token GREEN 
+%token BLUE 
+%token BLACK 
+%token YELLOW
 %token SIN
 %token COS
 %token TAN
@@ -149,6 +154,11 @@ expr:
 	| i = NUM { Val (Num i) }
 	| s = STRING; { PreString s }
 	| b = BOOL; { Val (Bool b) }
+	| RED { Val (Color Red)}
+	| YELLOW { Val (Color Yellow)}
+	| BLUE { Val (Color Blue)}
+	| BLACK { Val (Color Black)}
+	| GREEN { Val (Color Green)}
 	| s = NAME { Var s }
 	| LPAREN; SUBT; e = expr; RPAREN { Binop (Subt, Val (Num 0.), e) }
 	| e = expr; EXCL {Uniop (Fact, e)}
@@ -249,11 +259,17 @@ defn:
 	| LBL; s = NAME; END; { DLabel (s, DEnd) }
 	| LBL; s = NAME; { DLabel (s, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
-	  e3 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, d) }
+	  e3 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, Val (Color Black), d) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
-	  e3 = expr; RPAREN; END; { DOutput (e1, e2, e3, DEnd) }
+	  e3 = expr; RPAREN; END; { DOutput (e1, e2, e3, Val (Color Black), DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
-	  e3 = expr; RPAREN; { DOutput (e1, e2, e3, DEnd) }
+	  e3 = expr; RPAREN; { DOutput (e1, e2, e3, Val (Color Black), DEnd) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
+	  e3 = expr; COMMA; e4 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, e4, d) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
+	  e3 = expr; COMMA; e4 = expr; RPAREN; END; { DOutput (e1, e2, e3, e4, DEnd) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
+	  e3 = expr; COMMA; e4 = expr; RPAREN; { DOutput (e1, e2, e3, e4, DEnd) }
 	| LINE LPAREN e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; COMMA; e4 = expr;
 	  RPAREN; END; d = defn; { DLine (e1, e2, e3, e4, d) }
 	| LINE LPAREN e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; COMMA; e4 = expr;
@@ -294,7 +310,9 @@ short_defn:
 	| m = expr; LBRACKET; e1 = expr; COMMA; e2 = expr; RBRACKET; COLON; 
 	  e3 = expr; { DMatrixSet (m, e1, e2, e3, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; e3 = expr; RPAREN; 
-	  { DOutput (e1, e2, e3, DEnd) }
+	  { DOutput (e1, e2, e3, Val (Color Black), DEnd) }
+	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
+	  e3 = expr; COMMA; e4 = expr; RPAREN; { DOutput (e1, e2, e3, e4, DEnd) }
 	| RETURN; e = expr; { DReturn (e, DEnd) }
 	| RETURN; { DReturn (Val Null, DEnd) }
 	| LPAREN; d = defn; RPAREN; { d }
