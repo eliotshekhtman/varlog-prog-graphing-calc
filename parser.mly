@@ -219,28 +219,28 @@ defn:
 	| DISP; e = expr; END; d = defn; { DDisp (e, d) }
 	| DISP; e = expr; END; { DDisp (e, DEnd) }
 	| DISP; e = expr; { DDisp (e, DEnd) }
-	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; 
-	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; END; THEN; END; d1 = short_defn; END; ELSE; END; 
-	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; 
-	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; 
-	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; 
-	  d2 = short_defn; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; END; d1 = short_defn; END; ELSE; END; 
-	  d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; ELSE; 
-	  d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; 
-	  d2 = short_defn; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; 
-	  d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; END; 
-	  d2 = defn; { DIf (e, d1, DEnd, d2) }
-	| IF; e = expr; THEN; d = short_defn; END; { DIf (e, d, DEnd, DEnd) }
-	| IF; e = expr; THEN; d = short_defn; { DIf (e, d, DEnd, DEnd) }
+
+  | IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+  | IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+
+  | IF; e = expr; END; THEN; d1 = short_defn; END; d = defn; { DIf (e, d1, DEnd, d)}
+	| IF; e = expr; END; THEN; d1 = short_defn; END; { DIf (e, d1, DEnd, DEnd)}
+	| IF; e = expr; END; THEN; d1 = short_defn; { DIf (e, d1, DEnd, DEnd)}
+	| IF; e = expr; THEN; d1 = short_defn; END; d = defn; { DIf (e, d1, DEnd, d)}
+	| IF; e = expr; THEN; d1 = short_defn; END; { DIf (e, d1, DEnd, DEnd)}
+	| IF; e = expr; THEN; d1 = short_defn; { DIf (e, d1, DEnd, DEnd)}
+
+	
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, xs, ad, DEnd) }

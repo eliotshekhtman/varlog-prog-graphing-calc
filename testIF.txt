@@ -1,12 +1,11 @@
-IF true THEN DISP "Hi"
+IF true 
+THEN DISP "Hi"
 IF false THEN DISP "Hi x2"
 DISP "bye"
 
-IF true
-THEN 
-DISP "Hello"
-ELSE
-DISP "Goodbye"
+IF true 
+THEN DISP "Hello"
+ELSE DISP "Goodbye"
 DISP "Ok actually leaving now"
 
 
@@ -14,7 +13,6 @@ DISP "a"
 IF true THEN DISP "b" 
 ELSE DISP "c" 
 DISP "c"
-IF true THEN
-DISP "d"
-ELSE 
-DISP "a" 
+IF true 
+THEN DISP "d"
+ELSE DISP "a" 
