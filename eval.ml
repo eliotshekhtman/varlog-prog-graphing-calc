@@ -2,7 +2,26 @@ open Ast
 open Array
 open VarLog
 
-
+let rec find_lbls vl = function 
+  | DEnd -> vl 
+  | DReturn (e,d) -> find_lbls vl d
+  | DDisp (_, d) -> find_lbls vl d 
+  | DGraph (_, d) -> find_lbls vl d
+  | DAssign (_, _, d) -> find_lbls vl d 
+  | DPrompt (_, d) -> find_lbls vl d
+  | DIf (_, _, _, d) -> find_lbls vl d
+  | DGoto (_, d) -> find_lbls vl d 
+  | DGotoSub (_, d) -> find_lbls vl d
+  | DLabel (s, d) -> VarLog.bind_lbl s d vl; find_lbls vl d
+  | DMatrixSet (_, _, _, _, d) -> find_lbls vl d
+  | DOutput (_, _, _, _, d) -> find_lbls vl d
+  | DLine (_, _, _, _, d) -> find_lbls vl d
+  | DFunction (_, _, d) -> find_lbls vl d
+  | DDefStruct (_, _, _, d) -> find_lbls vl d
+  | DInstantiateStruct (_, _, _, d) -> find_lbls vl d
+  | DStructSet (_, _, _, d) -> find_lbls vl d
+  | DWhile (_, _, d) -> find_lbls vl d
+  | _ -> failwith "Unimplemented: find_lbls"
 
 let rec has_goto = function 
   | DEnd -> false
@@ -266,9 +285,9 @@ let rec eval_expr vl e =
   | Application(n, es) -> eval_app n es vl
   | _ -> failwith "lol right"
 and eval_app n es vl =
-  let value = find_id n vl in
+  let value = substitute vl n in
   match value with 
-  | Some Closure (args, d, vl_closure) ->  
+  | Closure (args, d, vl_closure) ->  
     if(List.length args <> List.length es) then 
       failwith "Number of function arguments not consistent"
     else 
@@ -285,12 +304,10 @@ and eval_app n es vl =
         |_->failwith ""
       in let new_vl = bind_arguments args es vl_closure in
       let x = ref (new_vl,[]) in
-      failwith ""
-  (*Evallang.eval d x should be the new varlog*)
+      eval d (find_lbls x d)
 
-  | Some _ -> failwith "Can't do function application on non-function" 
-  | None -> failwith "Function not found"
-  |_-> failwith "Function call impossible"
+  | _ -> failwith "Can't do function application on non-function" 
+
 
 
 (*  match (e1,env,st) |> eval_expr with 
@@ -592,26 +609,5 @@ let string_of_expr (e : expr) : string =
   | Val (Bool b) -> string_of_bool b
   | Val (Str s) -> s
   | _ -> failwith "precondition violated: sov"
-
-let rec find_lbls vl = function 
-  | DEnd -> vl 
-  | DReturn (e,d) -> find_lbls vl d
-  | DDisp (_, d) -> find_lbls vl d 
-  | DGraph (_, d) -> find_lbls vl d
-  | DAssign (_, _, d) -> find_lbls vl d 
-  | DPrompt (_, d) -> find_lbls vl d
-  | DIf (_, _, _, d) -> find_lbls vl d
-  | DGoto (_, d) -> find_lbls vl d 
-  | DGotoSub (_, d) -> find_lbls vl d
-  | DLabel (s, d) -> VarLog.bind_lbl s d vl; find_lbls vl d
-  | DMatrixSet (_, _, _, _, d) -> find_lbls vl d
-  | DOutput (_, _, _, _, d) -> find_lbls vl d
-  | DLine (_, _, _, _, d) -> find_lbls vl d
-  | DFunction (_, _, d) -> find_lbls vl d
-  | DDefStruct (_, _, _, d) -> find_lbls vl d
-  | DInstantiateStruct (_, _, _, d) -> find_lbls vl d
-  | DStructSet (_, _, _, d) -> find_lbls vl d
-  | DWhile (_, _, d) -> find_lbls vl d
-  | _ -> failwith "Unimplemented: find_lbls"
 
 let eval_init vl d = eval d (find_lbls vl d)

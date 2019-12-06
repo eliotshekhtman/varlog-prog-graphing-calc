@@ -195,6 +195,7 @@ expr:
 	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1, e2) }
 	| VARMAT; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { MakeVarMat (e1, e2) }
 	| n = NAME; DOLLAR; s = NAME; { StructGet (n, s) }
+	| n = NAME; LPAREN; es = nonempty_list(expr); RPAREN; {Application(n,es)}
 	| LPAREN; e=expr; RPAREN {e} 
 
 	
@@ -292,7 +293,7 @@ defn:
 	| END; d = defn; { d } 
 	| d = defn; END; { d }
   | END; { DEnd }
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; d = defn;
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY;  d = defn;RCURLY;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
 			else DFunction (n, xs, d) }
