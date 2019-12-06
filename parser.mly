@@ -245,6 +245,10 @@ defn:
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, xs, ad, DEnd) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; { DDefStruct (n, xs, ad, DEnd) }
+	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; END; d = defn; { DDefStruct (n, [], ad, d) }
+	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, [], ad, d) }
+	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, [], ad, DEnd) }
+	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; { DDefStruct (n, [], ad, DEnd) }
 	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; d = defn; { DStructSet (n, s, e, d) }
 	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; { DStructSet (n, s, e, DEnd) }
 	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; { DStructSet (n, s, e, DEnd) }
@@ -288,13 +292,15 @@ defn:
 	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
 	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; { DWhile (e, d1, DEnd) }
 	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; d1 = defn; END; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; d1 = defn; END; RCURLY; END; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; d1 = defn; END; RCURLY; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; RCURLY; END; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; RCURLY; { DWhile (e, d1, DEnd) }
 	| END; d = defn; { d } 
 	| d = defn; END; { d }
   | END; { DEnd }
-	| FUN; n = ident; COLON; ARROW; LCURLY; d = defn; RCURLY; d2 = defn;
-		{ DFunction (n, [], d, d2) }
-	| FUN; n = ident; COLON; ARROW; LCURLY; END; d = defn; END; RCURLY; d2 = defn;
-		{ DFunction (n, [], d, d2) }
 	| FUN; n = ident; COLON; ARROW; LCURLY; d = defn; RCURLY; END; d2 = defn;
 		{ DFunction (n, [], d, d2) }
 	| FUN; n = ident; COLON; ARROW; LCURLY; END; d = defn; END; RCURLY; END; d2 = defn;
@@ -308,14 +314,6 @@ defn:
 	| FUN; n = ident; COLON; ARROW; LCURLY; END; d = defn; END; RCURLY; END;
 		{ DFunction (n, [], d, DEnd) }
 
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY; d2 = defn;
-		{ if has_dups xs
-			then $syntaxerror (* duplicate argument names *)
-			else DFunction (n, xs, d, d2) }
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; d = defn; END; RCURLY; d2 = defn;
-		{ if has_dups xs
-			then $syntaxerror (* duplicate argument names *)
-			else DFunction (n, xs, d, d2) }
 	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY; END; d2 = defn;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
@@ -345,7 +343,6 @@ defn:
 short_defn:
   | GRAPH; e = expr; { DGraph (e, DEnd) }
 	| DISP; e = expr; { DDisp (e, DEnd) }
-	| s = NAME; COLON; PROMPT; END; { DPrompt (s, DEnd) }
 	| s = NAME; COLON; PROMPT; { DPrompt (s, DEnd) }
 	| s = NAME; COLON; e = expr; { DAssign (s, e, DEnd) }
 	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; { DStructSet (n, s, e, DEnd) }
