@@ -192,10 +192,11 @@ expr:
 	| ARCSIN; e = expr; {Uniop (ArcSin, e)}
 	| GETKEY; { GetKey }
 	| PROMPT; { Prompt }
-	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1, e2) }
+	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { MakeMatrix (e1, e2) }
 	| VARMAT; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { MakeVarMat (e1, e2) }
 	| n = NAME; DOLLAR; s = NAME; { StructGet (n, s) }
-	| n = NAME; LPAREN; es = nonempty_list(expr); RPAREN; {Application(n,es)}
+	| n = NAME; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; { Application(n,es) }
+	| n = NAME; RARROW; LPAREN; xe = nonempty_list(expr); RPAREN; { InstantiateStruct (n, xe) }
 	| LPAREN; e=expr; RPAREN {e} 
 
 	
@@ -244,9 +245,6 @@ defn:
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, xs, ad, DEnd) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; { DDefStruct (n, xs, ad, DEnd) }
-	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; END; d = defn; { DInstantiateStruct (s, n, xe, d) }
-	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; END; { DInstantiateStruct (s, n, xe, DEnd) }
-	| s = NAME; COLON; n = NAME; LPAREN; xe = nonempty_list(expr); RPAREN; { DInstantiateStruct (s, n, xe, DEnd) }
 	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; d = defn; { DStructSet (n, s, e, d) }
 	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; { DStructSet (n, s, e, DEnd) }
 	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; { DStructSet (n, s, e, DEnd) }
@@ -293,10 +291,55 @@ defn:
 	| END; d = defn; { d } 
 	| d = defn; END; { d }
   | END; { DEnd }
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY;  d = defn;RCURLY;
+	| FUN; n = ident; COLON; ARROW; LCURLY; d = defn; RCURLY; d2 = defn;
+		{ DFunction (n, [], d, d2) }
+	| FUN; n = ident; COLON; ARROW; LCURLY; END; d = defn; END; RCURLY; d2 = defn;
+		{ DFunction (n, [], d, d2) }
+	| FUN; n = ident; COLON; ARROW; LCURLY; d = defn; RCURLY; END; d2 = defn;
+		{ DFunction (n, [], d, d2) }
+	| FUN; n = ident; COLON; ARROW; LCURLY; END; d = defn; END; RCURLY; END; d2 = defn;
+		{ DFunction (n, [], d, d2) }
+	| FUN; n = ident; COLON; ARROW; LCURLY; d = defn; RCURLY;
+		{ DFunction (n, [], d, DEnd) }
+	| FUN; n = ident; COLON; ARROW; LCURLY; END; d = defn; END; RCURLY;
+		{ DFunction (n, [], d, DEnd) }
+	| FUN; n = ident; COLON; ARROW; LCURLY; d = defn; RCURLY; END;
+		{ DFunction (n, [], d, DEnd) }
+	| FUN; n = ident; COLON; ARROW; LCURLY; END; d = defn; END; RCURLY; END;
+		{ DFunction (n, [], d, DEnd) }
+
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY; d2 = defn;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
-			else DFunction (n, xs, d) }
+			else DFunction (n, xs, d, d2) }
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; d = defn; END; RCURLY; d2 = defn;
+		{ if has_dups xs
+			then $syntaxerror (* duplicate argument names *)
+			else DFunction (n, xs, d, d2) }
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY; END; d2 = defn;
+		{ if has_dups xs
+			then $syntaxerror (* duplicate argument names *)
+			else DFunction (n, xs, d, d2) }
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; d = defn; END; RCURLY; END; d2 = defn;
+		{ if has_dups xs
+			then $syntaxerror (* duplicate argument names *)
+			else DFunction (n, xs, d, d2) }
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY;
+		{ if has_dups xs
+			then $syntaxerror (* duplicate argument names *)
+			else DFunction (n, xs, d, DEnd) }
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; d = defn; END; RCURLY;
+		{ if has_dups xs
+			then $syntaxerror (* duplicate argument names *)
+			else DFunction (n, xs, d, DEnd) }
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY; END;
+		{ if has_dups xs
+			then $syntaxerror (* duplicate argument names *)
+			else DFunction (n, xs, d, DEnd) }
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; d = defn; END; RCURLY; END;
+		{ if has_dups xs
+			then $syntaxerror (* duplicate argument names *)
+			else DFunction (n, xs, d, DEnd) }
 	;
 
 short_defn:

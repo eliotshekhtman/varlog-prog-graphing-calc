@@ -16,7 +16,7 @@ let rec find_lbls vl = function
   | DMatrixSet (_, _, _, _, d) -> find_lbls vl d
   | DOutput (_, _, _, _, d) -> find_lbls vl d
   | DLine (_, _, _, _, d) -> find_lbls vl d
-  | DFunction (_, _, d) -> find_lbls vl d
+  | DFunction (_, _, _, d) -> find_lbls vl d
   | DDefStruct (_, _, _, d) -> find_lbls vl d
   | DInstantiateStruct (_, _, _, d) -> find_lbls vl d
   | DStructSet (_, _, _, d) -> find_lbls vl d
@@ -37,7 +37,7 @@ let rec has_goto = function
   | DMatrixSet (_, _, _, _, d) -> has_goto d
   | DOutput (_, _, _, _, d) -> has_goto d
   | DLine (_, _, _, _, d) -> has_goto d
-  | DFunction (_, _, d) -> has_goto d
+  | DFunction (_, _, _, d) -> has_goto d
   | DDefStruct (_, _, _, d) -> has_goto d
   | DInstantiateStruct (_, _, _, d) -> has_goto d
   | DStructSet (_, _, _, d) -> has_goto d
@@ -284,6 +284,7 @@ let rec eval_expr vl e =
   | Ternary (guard, e1, e2) -> eval_ternary vl guard e1 e2 
   | Application(n, es) -> eval_app n es vl
   | _ -> failwith "lol right"
+
 and eval_app n es vl =
   let value = substitute vl n in
   match value with 
@@ -305,7 +306,20 @@ and eval_app n es vl =
       in let new_vl = bind_arguments args es vl_closure in
       let x = ref (new_vl,[]) in
       eval d (find_lbls x d)
-
+  | Struct (cargs, body) -> begin 
+      if List.length cargs != List.length es then failwith "precondition violated: wrong # of args in constructor"
+      else
+        let rec eval_xe xe cargs acc = 
+          match xe, cargs with 
+          | [], [] -> acc 
+          | h :: t, a :: t' -> 
+            let r = eval_expr vl h |> fst in 
+            eval_xe t t' ((a, r) :: acc)
+          | _ -> failwith "improper # args checking"
+        in 
+        let res = eval body (ref (eval_xe es cargs [], [])) |> snd in
+        (Built res, vl)
+    end
   | _ -> failwith "Can't do function application on non-function" 
 
 
@@ -470,9 +484,8 @@ and eval d vl =
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
   | DOutput (x, y, v, c, d) -> eval_output x y v c d vl
   | DLine (x1, y1, x2, y2, d) -> eval_line x1 y1 x2 y2 d vl
-  | DFunction (name, args, body) -> 
-    VarLog.bind name (eval_func args body vl) vl;
-    (Null, VarLog.expose vl)
+  | DFunction (name, args, body, d) -> 
+    VarLog.bind name (eval_func args body vl) vl; eval d vl
   | DDefStruct (name, cargs, body, d) -> 
     eval_structdef name cargs body d vl
   | DInstantiateStruct (s, name, xe, d) -> 
