@@ -71,6 +71,7 @@ let has_dups lst =
 %token ELSE
 %token GOTO 
 %token GOTOSUB
+%token WHILE
 %token RETURN
 %token LBL
 %token GETKEY
@@ -266,6 +267,12 @@ defn:
 	| RETURN; d = defn; { DReturn (Val Null, d) }
 	| RETURN; END; { DReturn (Val Null, DEnd) }
 	| RETURN; { DReturn (Val Null, DEnd) }
+	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; END; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; { DWhile (e, d1, DEnd) }
 	| END; d = defn; { d } 
 	| d = defn; END; { d }
   | END; { DEnd }

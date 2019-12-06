@@ -93,6 +93,7 @@ rule read =
   | "FUN" {FUN}
   | "MATRIX" {MATRIX}
   | "VARMAT" { VARMAT }
+  | "WHILE" { WHILE }
   | endchar { END }
   | word { NAME (Lexing.lexeme lexbuf) }
   | eof { EOF }

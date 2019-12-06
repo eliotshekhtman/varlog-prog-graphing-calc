@@ -92,6 +92,7 @@ let string_of_val (v : value) : string =
   | Null -> ""
   | Struct _ -> "<struct>"
   | Built _ -> "<built>"
+  | VarMat _ -> "<varmat>"
 
 let is_value_graph : expr -> bool = function
   | Val _ -> true
@@ -244,7 +245,7 @@ and eval_ternary vl g a b =
   match eval_expr vl g with 
   | Bool true, vl' -> eval_expr vl' a 
   | Bool false, vl' -> eval_expr vl' b 
-  | _ -> failwith "precondition violated: guard didn't evaluate to bool"
+  | _ -> failwith "precondition violated: ternary operator guard"
 
 and eval_structget n s vl = 
   match substitute vl n with 

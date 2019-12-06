@@ -82,7 +82,21 @@ let rec eval d vl =
     eval_struct s name xe vl d
   | DStructSet (n, s, e, d) -> 
     eval_structset n s e d vl
+  | DWhile (e, d1, d2) -> eval_while false e d1 d2 vl
   | _ -> failwith "Unimplemented: eval"
+
+and eval_while evaluated_once e d1 d2 vl = 
+  match e |> eval_expr (VarLog.expose vl) |> fst with 
+  | Bool false -> 
+    if (not evaluated_once || d1 |> has_goto |> not) then eval d2 vl
+    else (Null, VarLog.expose vl)
+  | Bool true -> 
+    let r = eval d1 vl in 
+    if (not evaluated_once || d1 |> has_goto |> not) 
+    then eval_while true e d1 d2 vl
+    else r
+  | _ -> failwith "precondition violated: while guard"
+
 
 and eval_structset n s e d vl = 
   match VarLog.find n vl with 
@@ -216,6 +230,7 @@ let rec find_lbls vl = function
   | DDefStruct (_, _, _, d) -> find_lbls vl d
   | DInstantiateStruct (_, _, _, d) -> find_lbls vl d
   | DStructSet (_, _, _, d) -> find_lbls vl d
+  | DWhile (_, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented: find_lbls"
 
 let eval_init vl d = eval d (find_lbls vl d)

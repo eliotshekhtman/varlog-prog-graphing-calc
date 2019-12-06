@@ -88,6 +88,7 @@ and defn =
   | DDefStruct of id * id list * defn * defn
   | DInstantiateStruct of string * string * expr list * defn
   | DStructSet of string * string * expr * defn
+  | DWhile of expr * defn * defn
   | DEnd 
 
 type phrase = 
