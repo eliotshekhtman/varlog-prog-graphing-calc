@@ -3,6 +3,7 @@ GOTO skip
 LBL InputSub
 DISP bacStr
 n : PROMPT
+IF n = 0 THEN RETURN
 LBL setup
 x : RANDINT(0,30)
 y : RANDINT(0,30)
@@ -11,28 +12,61 @@ n : n-1
 IF n > 0 THEN GOTO setup
 RETURN
 
+LBL SetPic
+IF matrix[x,y] = 0 THEN pic : " "
+ELSE (IF matrix[x,y] = 1 THEN pic : ":"
+  ELSE (IF matrix[x,y] = 2 THEN pic : "&"
+    ELSE (IF matrix[x,y] = 3 THEN pic : "i"
+      ELSE (IF matrix[x,y] = 4 THEN pic : "*"
+        ELSE (IF matrix[x,y] = 5 THEN pic : "@"
+          ELSE (IF matrix[x,y] = 14 THEN pic : "~"
+            ELSE (IF matrix[x,y] = 10 THEN pic : "%"
+              ELSE (pic : "?"
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
+RETURN
+
 LBL DispMap
-x : 0 END y : 0
+x : 0 END y : 0 END pic : " "
 LBL dispMapY
 LBL dispMapX
-IF matrix[x,y] != 0 THEN OUTPUT(x,y,matrix[x,y])
+GOSUB SetPic
+IF matrix[x,y] != 0 THEN OUTPUT(x,y,pic)
 x : x+1
 IF x < 30 THEN GOTO dispMapX 
 x : 0 END y : y+1
 IF y < 30 THEN GOTO dispMapY 
 RETURN
 
-LBL checkEnd 
+LBL CheckEnd 
 x : 0 END y : 0 END v : 0
 LBL checkEndY
 LBL checkEndX
-IF ((v != 0) & (matrix[x,y] != 0) & (matrix[x,y] != v)) THEN GOTO continue 
-v : matrix[x,y]
+IF ((v != 0) & (matrix[x,y] != 0) & (matrix[x,y] != v)) THEN (
+  end : false
+  RETURN
+)
+IF matrix[x,y] != 0 THEN v : matrix[x,y]
 x : x+1
 IF x < 30 THEN GOTO checkEndX
 x : 0 END y : y+1
 IF y < 30 THEN GOTO checkEndY
-GOTO end
+end : true
+RETURN 
+
+LBL PickLoc
+LBL continue
+x : RANDINT(0,30)
+y : RANDINT(0,30)
+v : matrix[x,y]
+IF v = 0 THEN GOTO continue 
+RETURN
 
 LBL skip
 
@@ -56,21 +90,18 @@ GOSUB InputSub
 
 GOSUB DispMap
 
-LBL gameLoop
-GOTO checkEnd
-LBL continue
-x : RANDINT(0,30)
-y : RANDINT(0,30)
-v : matrix[x,y]
-IF v = 0 THEN GOTO continue 
-d : RANDINT(0,4)
-IF ((d = 0) & (x > 0)) THEN x : x-1
-IF ((d = 1) & (y > 0)) THEN y : y-1
-IF ((d = 2) & (x < 29)) THEN x : x+1
-IF ((d = 3) & (y < 29)) THEN y : y+1
-matrix[x,y] : v 
-OUTPUT(x,y,matrix[x,y])
-GOTO gameLoop
+end : false
+WHILE (NOT end) {
+  GOSUB CheckEnd
+  GOSUB PickLoc
+  d : RANDINT(0,4)
+  IF ((d = 0) & (x > 0)) THEN x : x-1
+  IF ((d = 1) & (y > 0)) THEN y : y-1
+  IF ((d = 2) & (x < 29)) THEN x : x+1
+  IF ((d = 3) & (y < 29)) THEN y : y+1
+  matrix[x,y] : v 
+  GOSUB SetPic
+  OUTPUT(x,y,pic)
+}
 
-LBL end
 DISP "Game Over"
