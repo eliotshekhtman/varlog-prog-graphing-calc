@@ -4,6 +4,11 @@ open Array
 (**[fact n] is the factorial of float [n]*)
 val fact: float -> float
 
+(** [replace lst k v] is [lst] with [(k, v)] inserted, and if 
+    [lst] already had a [(k, _)] tuple, it is replaced with 
+    [(k, v)] *)
+val replace : (string * value) list -> string -> value -> (string * value) list
+
 (**[is_value e] is whether expr [e] is a valid value*)
 val is_value: Ast.expr -> bool
 

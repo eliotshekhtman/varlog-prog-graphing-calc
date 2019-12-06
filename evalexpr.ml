@@ -11,6 +11,10 @@ let is_value : expr -> bool = function
   | Var _ -> failwith "precondition violated: variable"
   | _ -> false
 
+let rec replace lst k v = 
+  match lst with 
+  | [] -> [(k, v)]
+  | h :: t -> if (fst h) = k then (k, v) :: t else h :: replace t k v
 
 (** [parse s] parses [s] into an AST. *)
 let parse (s : string) : expr =

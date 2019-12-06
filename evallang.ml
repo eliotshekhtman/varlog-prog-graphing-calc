@@ -51,12 +51,6 @@ let rec has_goto = function
   | DStructSet (_, _, _, d) -> has_goto d
   | _ -> failwith "Unimplemented: has_goto"
 
-
-let rec replace lst k v = 
-  match lst with 
-  | [] -> [(k, v)]
-  | h :: t -> if (fst h) = k then (k, v) :: t else h :: replace t k v
-
 let rec eval d vl = 
   match d with 
   | DEnd -> (Null, VarLog.expose vl)
