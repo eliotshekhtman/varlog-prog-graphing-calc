@@ -1,3 +1,7 @@
+STRUCT piece : val x y -> { 
+  team : (val < 10 ? "white" : "black")
+}
+
 GOTO init
 
 LBL DrawGrid

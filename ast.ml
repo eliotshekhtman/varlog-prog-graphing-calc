@@ -41,6 +41,7 @@ type uop =
 
 type expr = 
   | MakeMatrix of expr * expr
+  | MakeVarMat of expr * expr
   | MatrixGet of expr * expr * expr
   | PreString of string
   | Val of value
@@ -50,20 +51,20 @@ type expr =
   | Derivative of der * expr * expr
   | Ternop of top * (expr * expr) * expr
   | Uniop of uop * expr
-  | Bind of string * expr * expr
-  | Disp of expr * expr
   | GetKey
   | Prompt
   | RandInt of expr * expr
   | InstantiateStruct of string * expr list
   | StructGet of string * string
   | Application of id * expr list
+  | Ternary of expr * expr * expr
 and value = 
   | Num of float 
   | Bool of bool 
   | Str of string
   | Closure of id list * defn * ((string * value) list)
   | Matrix of float array array
+  | VarMat of value array array
   | Built of (string * value) list
   | Struct of id list * defn
   | Null
@@ -87,6 +88,7 @@ and defn =
   | DDefStruct of id * id list * defn * defn
   | DInstantiateStruct of string * string * expr list * defn
   | DStructSet of string * string * expr * defn
+  | DWhile of expr * defn * defn
   | DEnd 
 
 type phrase = 

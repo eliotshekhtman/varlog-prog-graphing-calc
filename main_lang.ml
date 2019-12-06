@@ -1,6 +1,6 @@
 open Ast 
 open Evallang
-
+open VarLog
 (** [parse s] is the defn resulting from [s] *)
 let parse (s : string) : defn = 
   let lexbuf = Lexing.from_string s in 

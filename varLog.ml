@@ -18,6 +18,7 @@ module VarLog = struct
         else h :: helper t
     in vl := helper (fst !vl), snd !vl
 
+
   let expose vl = fst !vl
 
   let bind_lbl id d vl = 

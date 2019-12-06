@@ -6,6 +6,7 @@ let has_dups lst =
 
 %}
 %token MATRIX
+%token VARMAT
 %token RARROW 
 %token RBRACKET
 %token LBRACKET
@@ -61,6 +62,7 @@ let has_dups lst =
 %token COMMA
 %token VAR
 %token COLON
+%token QUESTION
 %token DOLLAR
 %token DISP
 %token END
@@ -69,6 +71,7 @@ let has_dups lst =
 %token ELSE
 %token GOTO 
 %token GOTOSUB
+%token WHILE
 %token RETURN
 %token LBL
 %token GETKEY
@@ -169,6 +172,7 @@ expr:
 	| e1 = expr; OR; e2 = expr { Boolop (Or, e1, e2) }
 	| e1 = expr; XOR; e2 = expr { Boolop (Xor, e1, e2) }
 	| e1 = expr; NXOR; e2 = expr { Uniop (Not, Boolop (Xor, e1, e2)) }
+	| g = expr; QUESTION; e1 = expr; COLON; e2 = expr; { Ternary (g, e1, e2) }
 	| NOT; e = expr; { Uniop (Not, e) }
 	| SIN; e = expr; {Uniop (Sin, e)}
 	| COS; e = expr; {Uniop (Cos, e)}
@@ -176,13 +180,12 @@ expr:
 	| ARCTAN; e = expr; {Uniop (ArcTan, e)}
 	| ARCCOS; e = expr; {Uniop (ArcCos, e)}
 	| ARCSIN; e = expr; {Uniop (ArcSin, e)}
-	| VAR; s = NAME; COLON; e1 = expr; END; e2 = expr; { Bind (s, e1, e2) }
 	| GETKEY; { GetKey }
 	| PROMPT; { Prompt }
-	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1,e2)}
+	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; {MakeMatrix (e1, e2) }
+	| VARMAT; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { MakeVarMat (e1, e2) }
 	| n = NAME; DOLLAR; s = NAME; { StructGet (n, s) }
 	| LPAREN; e=expr; RPAREN {e} 
-	| n = NAME; es = nonempty_list(expr); {Application(n,es)}
 
 	
 defn: 
@@ -226,6 +229,7 @@ defn:
 	  d2 = defn; { DIf (e, d1, DEnd, d2) }
 	| IF; e = expr; THEN; d = short_defn; END; { DIf (e, d, DEnd, DEnd) }
 	| IF; e = expr; THEN; d = short_defn; { DIf (e, d, DEnd, DEnd) }
+	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, xs, ad, DEnd) }
 	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; { DDefStruct (n, xs, ad, DEnd) }
@@ -263,6 +267,12 @@ defn:
 	| RETURN; d = defn; { DReturn (Val Null, d) }
 	| RETURN; END; { DReturn (Val Null, DEnd) }
 	| RETURN; { DReturn (Val Null, DEnd) }
+	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; END; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; { DWhile (e, d1, DEnd) }
 	| END; d = defn; { d } 
 	| d = defn; END; { d }
   | END; { DEnd }

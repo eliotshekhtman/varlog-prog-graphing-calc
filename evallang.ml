@@ -48,17 +48,27 @@ let rec eval d vl =
     eval_struct s name xe vl d
   | DStructSet (n, s, e, d) -> 
     eval_structset n s e d vl
+  | DWhile (e, d1, d2) -> eval_while false e d1 d2 vl
   | _ -> failwith "Unimplemented: eval"
+
+and eval_while evaluated_once e d1 d2 vl = 
+  match e |> eval_expr (VarLog.expose vl) |> fst with 
+  | Bool false -> 
+    if (not evaluated_once || d1 |> has_goto |> not) then eval d2 vl
+    else (Null, VarLog.expose vl)
+  | Bool true -> 
+    let r = eval d1 vl in 
+    if (not evaluated_once || d1 |> has_goto |> not) 
+    then eval_while true e d1 d2 vl
+    else r
+  | _ -> failwith "precondition violated: while guard"
+
 
 and eval_structset n s e d vl = 
   match VarLog.find n vl with 
   | Some (Built vl') -> begin 
       let v = e |> eval_expr (VarLog.expose vl) |> fst in 
-      let rec replace lst k v = 
-        match lst with 
-        | [] -> [(k, v)]
-        | h :: t -> if (fst h) = k then (k, v) :: t else h :: replace t k v
-      in VarLog.bind n (Built (replace vl' s v)) vl; eval d vl
+      VarLog.bind n (Built (replace vl' s v)) vl; eval d vl
     end
   | _ -> failwith "precondition violated: not a built"
 
@@ -126,6 +136,11 @@ and eval_matrixset m a b v d vl =
         (m.(a |> int_of_float).(b |> int_of_float) <- v; eval d vl)
       else failwith "precondition violated: float indeces"
     end
+  | VarMat m, Num a, Num b, v -> begin 
+      if (is_int a && is_int b) then 
+        (m.(a |> int_of_float).(b |> int_of_float) <- v; eval d vl)
+      else failwith "precondition violated: float indeces"
+    end
   | _ -> failwith "precondition violated: matrix set"
 
 and eval_disp e d vl = 
@@ -181,6 +196,7 @@ let rec find_lbls vl = function
   | DDefStruct (_, _, _, d) -> find_lbls vl d
   | DInstantiateStruct (_, _, _, d) -> find_lbls vl d
   | DStructSet (_, _, _, d) -> find_lbls vl d
+  | DWhile (_, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented: find_lbls"
 
 let eval_init vl d = eval d (find_lbls vl d)

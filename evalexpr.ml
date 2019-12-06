@@ -2,6 +2,14 @@ open Ast
 open Array
 open VarLog
 
+
+
+
+
+
+
+
+
 let rec fact n = 
   if n < 0. then failwith "not integer"
   else if n = 0. then 1. else n *. fact (n -. 1.)
@@ -11,6 +19,10 @@ let is_value : expr -> bool = function
   | Var _ -> failwith "precondition violated: variable"
   | _ -> false
 
+let rec replace lst k v = 
+  match lst with 
+  | [] -> [(k, v)]
+  | h :: t -> if (fst h) = k then (k, v) :: t else h :: replace t k v
 
 (** [parse s] parses [s] into an AST. *)
 let parse (s : string) : expr =
@@ -92,6 +104,7 @@ let string_of_val (v : value) : string =
   | Null -> ""
   | Struct _ -> "<struct>"
   | Built _ -> "<built>"
+  | VarMat _ -> "<varmat>"
 
 let is_value_graph : expr -> bool = function
   | Val _ -> true
@@ -230,34 +243,38 @@ let rec eval_expr vl e =
       s |> parse |> eval_expr vl
     end
   | MakeMatrix (a,b) -> eval_matrix a b vl 
+  | MakeVarMat (a, b) -> eval_varmat a b vl
   | MatrixGet (m, a, b) -> eval_matrixget vl m a b
   | RandInt (lb, ub) -> eval_randint vl lb ub
   | StructGet (n, s) -> eval_structget n s vl
-  | Application(n, es)-> eval_app n es vl
+  | Ternary (guard, e1, e2) -> eval_ternary vl guard e1 e2 
+  | Application(n, es) -> eval_app n es vl
   | _ -> failwith "lol right"
 and eval_app n es vl =
   let value = find_id n vl in
-  match value with
+  match value with 
   | Some Closure (args, d, vl_closure) ->  
     if(List.length args <> List.length es) then 
       failwith "Number of function arguments not consistent"
-    else (
+    else 
       let rec bind_arguments args' es' vl_closure' =
         match args', es' with
         |[],[] -> vl_closure'
         |h1::t1, h2::t2 ->
-          let value_of_arg = fst (eval_expr vl h2) in
-          begin match value_of_arg with
-            | v -> VarLog.bind h1 v vl_closure'
-            | _-> failwith "Argument is not an expression"
-          end
-        |_-> failwith ""
-    ) in let new_vl = bind_arguments args es vl_closure in
-Evallang.eval d new_vl (*should be the new varlog*)
-)
+          let value_of_arg = 
+            begin match fst (eval_expr vl h2) with
+              | v -> v 
+              | _ -> failwith "Argument is not an expression"
+            end
+          in bind_arguments t1 t2 (replace vl_closure' h1 v)
+      in let new_vl = bind_arguments args es vl_closure in
+      let x = ref (new_vl,[]) in
+      Evallang.eval d x (*should be the new varlog*)
+) 
 | Some _ -> failwith "Can't do function application on non-function" 
 | None -> failwith "Function not found"
 |_-> failwith "Function call impossible"
+
 
 (*  match (e1,env,st) |> eval_expr with 
     | (RValue (VClosure (xs, exp, env_closure)), st) -> begin
@@ -279,6 +296,23 @@ Evallang.eval d new_vl (*should be the new varlog*)
         in let new_env = bind_params xs xe env_closure st in
         eval_expr (exp, new_env, st)
     end*)
+
+and eval_varmat a b vl = 
+    let r1 = eval_expr vl a in
+    let r2 = eval_expr (snd r1) b in
+    match fst r1, fst r2 with
+    | Num a, Num b  -> 
+      if (is_int a = false || is_int b = false) then 
+        failwith "cannot have float values"
+      else 
+        ((VarMat (Array.make_matrix (a|>int_of_float) (b|>int_of_float) Null)), vl)
+    |_-> failwith "precondition violated: make varmat"
+
+and eval_ternary vl g a b = 
+    match eval_expr vl g with 
+    | Bool true, vl' -> eval_expr vl' a 
+    | Bool false, vl' -> eval_expr vl' b 
+    | _ -> failwith "precondition violated: ternary operator guard"
 
 and eval_structget n s vl = 
     match substitute vl n with 
@@ -315,6 +349,10 @@ and eval_matrixget vl m a b =
     | Matrix m, Num a, Num b -> 
       if is_int a && is_int b then 
         (Num m.(a |> int_of_float).(b |> int_of_float), vl')
+      else failwith "precondition violated: float indeces"
+    | VarMat m, Num a, Num b ->
+      if is_int a && is_int b then 
+        (m.(a |> int_of_float).(b |> int_of_float), vl')
       else failwith "precondition violated: float indeces"
     | _ -> failwith "precondition violated: matrix get"
 

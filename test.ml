@@ -5,7 +5,7 @@ open Main
 (** [make_eval_test n i s] makes an OUnit test named [n] that expects
     [s] to evalute to [String i]. *)
 let make_eval_test n i s =
-  n >:: (fun _ -> assert_equal i (interp ("EVAL " ^ s)))
+  n >:: (fun _ -> assert_equal i (interp s) ~printer:(fun (s:string) -> s))
 
 (** [make_exec_test n i s] makes an OUnit test named [n] that 
     expects file [s] to evaluate to [String i] *)
@@ -102,6 +102,17 @@ let eval_tests = [
   make_eval_test "nxor4 ff" "true" "false NXOR false";
   make_eval_test "rint1 lt" "true" "RANDINT(0,4) < 4";
   make_eval_test "rint2 gt" "true" "RANDINT(0,4) > -1";
+  make_eval_test "struct1" "" "STRUCT hello : a -> { x : a }";
+  make_eval_test "struct2" "<struct>" "STRUCT hello : a -> { x : a } END RETURN hello";
+  make_eval_test "struct3" "" 
+    "STRUCT hello : a -> { x : a } END greet : hello(3)";
+  make_eval_test "struct4" "<built>" 
+    "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet";
+  make_eval_test "struct5" "3" 
+    "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet$x";
+  make_eval_test "struct6" "4" 
+    "STRUCT hello : a -> { x : a } 
+     greet : hello(3) END greet$x : 4 END RETURN greet$x";
 
   make_exec_test "disp" "" "testDISP";
   make_exec_test "matrix" "" "testMATRIX";

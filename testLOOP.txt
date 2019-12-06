@@ -1,0 +1,11 @@
+x : 0
+WHILE (x < 100) {
+
+  DISP "hello " + x
+  x : x+1
+  IF x = 50 THEN GOTO end
+
+}
+
+LBL end
+DISP "bye"

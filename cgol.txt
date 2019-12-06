@@ -75,20 +75,7 @@ IF n = 1 THEN GOSUB Pulsar
 IF n != 1 & n != 2 THEN GOSUB ManualInsert
 RETURN
 
-LBL init 
-steps : 0
-ma : MATRIX(30,30)
-mb : MATRIX(30,30)
-
-DISP "Manual or preset 1 2"
-n : PROMPT 
-IF n = 1 THEN GOSUB ManualInsert
-IF n = 2 THEN GOSUB Preset
-
-LBL gameLoop 
-DISP ("Steps " + steps)
-steps : steps+1
-
+LBL Update
 x : 0 END y : 0
 LBL loopY
 LBL loopX
@@ -99,10 +86,27 @@ x : x+1
 IF x < 30 THEN GOTO loopX 
 x : 0 END y : y+1
 IF y < 30 THEN GOTO loopY 
+RETURN
 
-ma : mb 
+LBL init 
+steps : 0
+ma : MATRIX(30,30)
 mb : MATRIX(30,30)
 
-GOTO gameLoop
+DISP "Manual or preset 1 2"
+n : PROMPT 
+IF n = 1 THEN GOSUB ManualInsert
+IF n = 2 THEN GOSUB Preset
+
+WHILE true {
+  DISP ("Steps " + steps)
+  steps : steps+1
+
+  GOSUB Update
+
+  ma : mb 
+  mb : MATRIX(30,30)
+
+}
 
 DISP "Done"

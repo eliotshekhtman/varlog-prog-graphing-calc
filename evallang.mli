@@ -1,25 +1,25 @@
 open Ast 
 open Evalexpr
+open VarLog
+(* module VarLog : sig 
 
-module VarLog : sig 
+   type var = string * value
 
-  type var = string * value
+   type t = ((var list) * ((string * defn) list)) ref
 
-  type t = ((var list) * ((string * defn) list)) ref
+   val empty: unit -> t
 
-  val empty: unit -> t
+   val find: 'a -> (('a * 'b) list * 'c) ref -> 'b option
 
-  val find: 'a -> (('a * 'b) list * 'c) ref -> 'b option
+   val bind: 'a -> 'b -> (('a * 'b) list * 'c) ref -> unit
 
-  val bind: 'a -> 'b -> (('a * 'b) list * 'c) ref -> unit
+   val expose: ('a * 'b) ref -> 'a
 
-  val expose: ('a * 'b) ref -> 'a
+   val bind_lbl: 'a -> 'b -> ('c * ('a * 'b) list) ref -> unit
 
-  val bind_lbl: 'a -> 'b -> ('c * ('a * 'b) list) ref -> unit
+   val find_lbl: 'a -> ('b * ('a * 'c) list) ref -> 'c
 
-  val find_lbl: 'a -> ('b * ('a * 'c) list) ref -> 'c
-
-end
+   end *)
 
 val has_goto: Ast.defn -> bool
 
