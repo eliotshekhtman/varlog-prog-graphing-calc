@@ -1,11 +1,11 @@
-UNITS=authors ast eval main main_lang repl graphing
-MLS_WITHOUT_MLIS=ast
+UNITS=authors eval main repl graphing
+MLS_WITHOUT_MLIS=ast main_lang
 MLS=$(UNITS:=.ml) $(MLS_WITHOUT_MLIS:=.ml)
 OBJECTS=$(UNITS:=.cmo) $(MLS_WITHOUT_MLIS:=.cmo) parser.cmo
 MLIS=$(UNITS:=.mli)
 TEST=test.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
-PKGS=oUnit,str,graphics
+PKGS=oUnit,str,graphics,ANSITerminal
 
 default: build
 	utop
