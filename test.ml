@@ -12,6 +12,25 @@ let make_eval_test n i s =
 let make_exec_test n i s = 
   n >:: (fun _ -> assert_equal i (interp ({|EXEC "|} ^ s ^ {|"|})))
 
+
+let print_matrix arr = 
+  let printed = ref "" in
+  let row_length = Array.length arr in
+  let col_length = Array.length arr.(0) in
+  let print_matrix_helper arr str = 
+    for i = 0 to row_length - 1 do
+      for j = 0 to col_length - 1 do
+        str := !str ^ " " ^ (arr.(i).(j) |> string_of_float) ;
+      done;
+      str := !str ^ "\n";
+    done;
+    str
+  in 
+  let stringified = printed |> print_matrix_helper arr in
+  !stringified
+
+let matrix = [| [|0.;4.;0.|]; [|0.;0.;7.|] ; [|0.;0.;0.|] |] 
+
 let eval_tests = [
   make_eval_test "integer" "22" "22";
   make_eval_test "float" "23.5" "23.5";
@@ -102,20 +121,36 @@ let eval_tests = [
   make_eval_test "nxor4 ff" "true" "false NXOR false";
   make_eval_test "rint1 lt" "true" "RANDINT(0,4) < 4";
   make_eval_test "rint2 gt" "true" "RANDINT(0,4) > -1";
-  make_eval_test "struct1" "" "STRUCT hello : a -> { x : a }";
-  make_eval_test "struct2" "<struct>" "STRUCT hello : a -> { x : a } END RETURN hello";
-  make_eval_test "struct3" "" 
-    "STRUCT hello : a -> { x : a } END greet : hello(3)";
-  make_eval_test "struct4" "<built>" 
-    "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet";
-  make_eval_test "struct5" "3" 
-    "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet$x";
-  make_eval_test "struct6" "4" 
-    "STRUCT hello : a -> { x : a } 
-     greet : hello(3) END greet$x : 4 END RETURN greet$x";
+  (* make_eval_test "struct1" "" "STRUCT hello : a -> { x : a }";
+     make_eval_test "struct2" "<struct>" "STRUCT hello : a -> { x : a } END RETURN hello";
+     make_eval_test "struct3" "" 
+     "STRUCT hello : a -> { x : a } END greet : hello(3)";
+     make_eval_test "struct4" "<built>" 
+     "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet";
+     make_eval_test "struct5" "3" 
+     "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet$x";
+     make_eval_test "struct6" "4" 
+     "STRUCT hello : a -> { x : a } 
+     greet : hello(3) END greet$x : 4 END RETURN greet$x"; *)
+
+
+  make_eval_test "function check application" "5" 
+    "FUN hello: a b -> {x:a END RETURN x} END x: hello<-(5 6) END RETURN x";
+
+  make_eval_test "function check closure test" "<closure>" 
+    "FUN hello: a b -> {x:a END RETURN x} END x: hello<-(5 6) END RETURN hello";
+
+  make_eval_test "function scalar mult matrix test" "30" 
+    "x : MATRIX(3,4) END x[2,2] : 5 END FUN scalar: b -> {RETURN b * x} END y: scalar<-(6) END RETURN y[2,2]";
+
+
+  make_eval_test "function standard matrix mult test" (print_matrix matrix)
+    "x : MATRIX(3,3) END x[0,0] : 1 END x[1,1] : 1 END x[2,2] : 1 END DISP x END y : MATRIX(3,3) END y[0,1] : 4 END y[1,2] : 7 END DISP y END FUN matMult: mOne mTwo -> {RETURN mOne * mTwo} END z: matMult<-(x y) END RETURN z";
+
+
 
   make_exec_test "disp" "" "testDISP";
-  make_exec_test "matrix" "" "testMATRIX";
+  (* make_exec_test "matrix" "" "testMATRIX"; *)
   make_exec_test "goto" "" "testGOTO";
   make_exec_test "random" "" "testRANDOM";
   make_exec_test "goto2" "" "testWHILE";
