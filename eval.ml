@@ -208,6 +208,7 @@ let add_helper v1 v2 =
   | Str a, Str b -> Str (a ^ b)
   | Num a, Str b -> Str ((v1 |> string_of_val) ^ b)
   | Str a, Num b -> Str (a ^ (v2 |> string_of_val))
+  | Matrix a, Matrix b -> failwith "somebody pls implement matrix addition?"
   | _ -> failwith "precondition violated: add types"
 
 let eq_helper v1 v2 = 

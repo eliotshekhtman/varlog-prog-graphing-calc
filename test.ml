@@ -10,7 +10,7 @@ let make_eval_test n i s =
 (** [make_exec_test n i s] makes an OUnit test named [n] that 
     expects file [s] to evaluate to [String i] *)
 let make_exec_test n i s = 
-  n >:: (fun _ -> assert_equal i (interp ({|EXEC "|} ^ s ^ {|"|})))
+  n >:: (fun _ -> assert_equal i (interp ({|EXEC "|} ^ s ^ {|"|}) ) ~printer:(fun (s:string) -> s))
 
 let eval_tests = [
   make_eval_test "integer" "22" "22";
@@ -105,17 +105,17 @@ let eval_tests = [
   make_eval_test "struct1" "" "STRUCT hello : a -> { x : a }";
   make_eval_test "struct2" "<struct>" "STRUCT hello : a -> { x : a } END RETURN hello";
   make_eval_test "struct3" "" 
-    "STRUCT hello : a -> { x : a } END greet : hello(3)";
+    "STRUCT hello : a -> { x : a } END greet : hello<-(3)";
   make_eval_test "struct4" "<built>" 
-    "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet";
+    "STRUCT hello : a -> { x : a } END greet : hello<-(3) END RETURN greet";
   make_eval_test "struct5" "3" 
-    "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet$x";
+    "STRUCT hello : a -> { x : a } END greet : hello<-(3) END RETURN greet$x";
   make_eval_test "struct6" "4" 
     "STRUCT hello : a -> { x : a } 
-     greet : hello(3) END greet$x : 4 END RETURN greet$x";
+     greet : hello<-(3) END greet$x : 4 END RETURN greet$x";
 
   make_exec_test "disp" "" "testDISP";
-  make_exec_test "matrix" "" "testMATRIX";
+  (*make_exec_test "matrix" "" "testMATRIX";*)
   make_exec_test "goto" "" "testGOTO";
   make_exec_test "random" "" "testRANDOM";
   make_exec_test "goto2" "" "testWHILE";
