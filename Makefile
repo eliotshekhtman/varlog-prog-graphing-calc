@@ -4,8 +4,8 @@ MLS=$(UNITS:=.ml) $(MLS_WITHOUT_MLIS:=.ml)
 OBJECTS=$(UNITS:=.cmo) $(MLS_WITHOUT_MLIS:=.cmo) parser.cmo
 MLIS=$(UNITS:=.mli)
 TEST=test.byte
-OCAMLBUILD=ocamlbuild -use-ocamlfind
-PKGS=oUnit,str,graphics,ANSITerminal
+OCAMLBUILD=ocamlbuild -use-ocamlfind -plugin-tag 'package(bisect_ppx-ocamlbuild)'
+PKGS=oUnit,str,graphics,ANSITerminal,qcheck
 
 default: build
 	utop
@@ -14,7 +14,10 @@ build:
 	$(OCAMLBUILD) -pkg graphics $(OBJECTS)
 
 test:
-	$(OCAMLBUILD) -tag 'debug' $(TEST) -pkg graphics && ./$(TEST)
+	BISECT_COVERAGE=YES $(OCAMLBUILD) -tag 'debug' $(TEST) -pkg graphics && ./$(TEST) -runner sequential
+
+bisect: clean test
+	bisect-ppx-report -I _build -html report bisect0001.out
 
 clean:
 	ocamlbuild -clean

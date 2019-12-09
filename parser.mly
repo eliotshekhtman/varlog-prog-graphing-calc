@@ -195,9 +195,11 @@ expr:
 	| MATRIX; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { MakeMatrix (e1, e2) }
 	| VARMAT; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN; { MakeVarMat (e1, e2) }
 	| n = NAME; DOLLAR; s = NAME; { StructGet (n, s) }
-	| n = NAME; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; { Application(n,es) }
+	| n = NAME; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; 
+	  { Application(n,es) }
 	| n = NAME; RARROW; LPAREN; RPAREN; { Application(n,[]) }
-	| n = NAME; RARROW; LPAREN; xe = nonempty_list(expr); RPAREN; { InstantiateStruct (n, xe) }
+	| n = NAME; RARROW; LPAREN; xe = nonempty_list(expr); RPAREN; 
+	  { InstantiateStruct (n, xe) }
 	| LPAREN; e=expr; RPAREN {e} 
 
 	

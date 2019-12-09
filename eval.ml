@@ -308,7 +308,8 @@ and eval_app n es vl =
       let x = ref (new_vl,[]) in
       eval d (find_lbls x d)
   | Struct (cargs, body) -> begin 
-      if List.length cargs != List.length es then failwith "precondition violated: wrong # of args in constructor"
+      if List.length cargs != List.length es 
+      then failwith "precondition violated: wrong # of args in constructor"
       else
         let rec eval_xe xe cargs acc = 
           match xe, cargs with 
@@ -354,7 +355,8 @@ and eval_varmat a b vl =
     if (is_int a = false || is_int b = false) then 
       failwith "cannot have float values"
     else 
-      ((VarMat (Array.make_matrix (a|>int_of_float) (b|>int_of_float) Null)), vl)
+      ((VarMat (Array.make_matrix (a|>int_of_float) 
+                  (b|>int_of_float) Null)), vl)
   |_-> failwith "precondition violated: make varmat"
 
 and eval_ternary vl g a b = 
@@ -521,7 +523,8 @@ and eval_struct s n xe vl_full d =
   let vl = VarLog.expose vl_full in
   match substitute vl n with 
   | Struct (cargs, body) -> begin 
-      if List.length cargs != List.length xe then failwith "precondition violated: wrong # of args in constructor"
+      if List.length cargs != List.length xe 
+      then failwith "precondition violated: wrong # of args in constructor"
       else
         let rec eval_xe xe cargs acc = 
           match xe, cargs with 

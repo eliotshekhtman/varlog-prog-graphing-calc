@@ -10,7 +10,8 @@ let make_eval_test n i s =
 (** [make_exec_test n i s] makes an OUnit test named [n] that 
     expects file [s] to evaluate to [String i] *)
 let make_exec_test n i s = 
-  n >:: (fun _ -> assert_equal i (interp ({|EXEC "|} ^ s ^ {|"|}) ) ~printer:(fun (s:string) -> s))
+  n >:: (fun _ -> assert_equal i (interp ({|EXEC "|} ^ s ^ {|"|}) ) 
+            ~printer:(fun (s:string) -> s))
 
 
 let print_matrix arr = 
@@ -121,17 +122,6 @@ let eval_tests = [
   make_eval_test "nxor4 ff" "true" "false NXOR false";
   make_eval_test "rint1 lt" "true" "RANDINT(0,4) < 4";
   make_eval_test "rint2 gt" "true" "RANDINT(0,4) > -1";
-  (* make_eval_test "struct1" "" "STRUCT hello : a -> { x : a }";
-     make_eval_test "struct2" "<struct>" "STRUCT hello : a -> { x : a } END RETURN hello";
-     make_eval_test "struct3" "" 
-     "STRUCT hello : a -> { x : a } END greet : hello(3)";
-     make_eval_test "struct4" "<built>" 
-     "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet";
-     make_eval_test "struct5" "3" 
-     "STRUCT hello : a -> { x : a } END greet : hello(3) END RETURN greet$x";
-     make_eval_test "struct6" "4" 
-     "STRUCT hello : a -> { x : a } 
-     greet : hello(3) END greet$x : 4 END RETURN greet$x"; *)
 
 
   make_eval_test "function check application" "5" 
@@ -141,18 +131,23 @@ let eval_tests = [
     "FUN hello: a b -> {x:a END RETURN x} END x: hello<-(5 6) END RETURN hello";
 
   make_eval_test "function scalar mult matrix test" "30" 
-    "x : MATRIX(3,4) END x[2,2] : 5 END FUN scalar: b -> {RETURN b * x} END y: scalar<-(6) END RETURN y[2,2]";
+    "x : MATRIX(3,4) END x[2,2] : 5
+     FUN scalar: b -> {RETURN b * x} END y: scalar<-(6) END RETURN y[2,2]";
 
 
   make_eval_test "function standard matrix mult test" (print_matrix matrix)
-    "x : MATRIX(3,3) END x[0,0] : 1 END x[1,1] : 1 END x[2,2] : 1 END DISP x END y : MATRIX(3,3) END y[0,1] : 4 END y[1,2] : 7 END DISP y END FUN matMult: mOne mTwo -> {RETURN mOne * mTwo} END z: matMult<-(x y) END RETURN z";
+    "x : MATRIX(3,3) END x[0,0] : 1 END x[1,1] : 1 END x[2,2] : 1 END DISP x
+     y : MATRIX(3,3) END y[0,1] : 4 END y[1,2] : 7 END DISP y
+     FUN matMult: mOne mTwo -> {RETURN mOne * mTwo} 
+     z: matMult<-(x y) END RETURN z";
 
 
 
   make_exec_test "disp" "" "testDISP";
   (* make_exec_test "matrix" "" "testMATRIX"; *)
   make_eval_test "struct1" "" "STRUCT hello : a -> { x : a }";
-  make_eval_test "struct2" "<struct>" "STRUCT hello : a -> { x : a } END RETURN hello";
+  make_eval_test "struct2" "<struct>" 
+    "STRUCT hello : a -> { x : a } END RETURN hello";
   make_eval_test "struct3" "" 
     "STRUCT hello : a -> { x : a } END greet : hello<-(3)";
   make_eval_test "struct4" "<built>" 

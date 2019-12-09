@@ -13,6 +13,10 @@ vΛrl0g.zip
 *.byte
 _build
 
+# bisect
+report
+bisect*
+
 # temporary files
 *.swp
 *~

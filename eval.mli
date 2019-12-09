@@ -22,7 +22,8 @@ val is_int: float -> bool
 (**[print_matrix m] prints matrix [m]*)
 val print_matrix: float array array -> string
 
-(**[scalar_mult f m] is the result of scalar multiplication of float [f] with matrix [m]*)
+(**[scalar_mult f m] is the result of scalar multiplication of 
+   float [f] with matrix [m]*)
 val scalar_mult: float -> float array array -> float array array
 
 (**[matrix_mult m1 m2] is the product of matrix [m1] and matrix [m2]*)
@@ -130,22 +131,28 @@ val eval: Ast.defn -> ((string * Ast.value) list * (string * Ast.defn) list) ref
   -> Ast.value * VarLog.var list
 
 val eval_output: Ast.expr -> Ast.expr -> Ast.expr -> Ast.expr -> Ast.defn -> 
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> 
+  Ast.value * VarLog.var list
 
 val eval_matrixset: Ast.expr -> Ast.expr -> Ast.expr -> Ast.expr -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> 
+  Ast.value * VarLog.var list
 
 val eval_disp: Ast.expr -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> 
+  Ast.value * VarLog.var list
 
 val eval_prompt: string -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> 
+  Ast.value * VarLog.var list
 
 val eval_assign: string -> Ast.expr -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> 
+  Ast.value * VarLog.var list
 
 val eval_if: Ast.expr -> Ast.defn -> Ast.defn -> Ast.defn ->
-  ((string * Ast.value) list * (string * Ast.defn) list) ref -> Ast.value * VarLog.var list
+  ((string * Ast.value) list * (string * Ast.defn) list) ref -> 
+  Ast.value * VarLog.var list
 
 val string_of_expr : Ast.expr -> string
 

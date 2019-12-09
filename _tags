@@ -1,1 +1,3 @@
-true: package(oUnit), use_menhir, package(ANSITerminal)
+<{eval,graphing,main,main_lang,ast,repl}.ml>: coverage
+<test.{byte,native}>: coverage
+true: package(oUnit), package(qcheck), use_menhir, package(ANSITerminal)
