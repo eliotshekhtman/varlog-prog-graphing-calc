@@ -111,7 +111,6 @@ and defn =
 type phrase = 
   | Expr of expr 
   | Defn of defn
-  | Eval of expr
   | Graph of expr
   | Newton of expr
   | Exec of expr

@@ -14,7 +14,6 @@ let has_dups lst =
 %token TWOVAR
 %token THREEVAR
 %token SOLVE
-%token EVAL
 %token GRAPH
 %token NEWTON
 %token EXEC
@@ -119,7 +118,6 @@ let has_dups lst =
 %%
 
 parse_phrase:
-  | EVAL; e = expr; EOF { Eval e }
 	| GRAPH; e = expr; EOF { Graph e }
 	| NEWTON; e = expr; EOF { Newton e }
 	| EXEC; e = expr; EOF { Exec e }
