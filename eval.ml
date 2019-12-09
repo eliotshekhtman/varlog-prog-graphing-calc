@@ -165,14 +165,8 @@ let get_val v = function
 
 (** [step e] takes a single step in the graphing of [e]*)
 let rec step_graph v = function
-  (*| Keyword _ -> failwith "precondition violated: too many keywords" *)
   | Val _ -> failwith "Does not step"
   | Var _ -> failwith "precondition violated: variable"
-  (* | Ternop (top, (e1,e2), e3) when is_value e1 && is_value e2 ->
-     step_top top e1 e2 e3
-     | Ternop (top, (e1,e2), e3) when is_value e1 -> 
-     Ternop(top, (e1, step e2), e3)
-     | Ternop (top, (e1,e2), e3)-> Ternop(top, (step e1, e2), e3) *)
   | Binop (bop, e1, e2) when is_value_graph e1 && is_value_graph e2 -> 
     step_bop v bop e1 e2
   | Binop (bop, e1, e2) when is_value_graph e1 ->
@@ -289,7 +283,6 @@ let rec eval_expr vl e =
   | Binop (bop, e1, e2) -> eval_bop vl bop e1 e2 
   | Ternop (top, (e1, e2), e3) -> eval_top vl top e1 e2 e3
   | Derivative (der, e1, e2) -> eval_deriv vl der e1 e2
-  (* | Function (xs, e1) -> eval_func xs e1 vl *)
   | Boolop (boop, e1, e2) -> eval_boop vl boop e1 e2
   | GetKey -> 
     (* learned how to do this here: 
