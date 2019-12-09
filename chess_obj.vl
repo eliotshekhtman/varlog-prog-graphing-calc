@@ -49,8 +49,17 @@ CLASS piece : x y -> {
       IF team="W" & x=6 & xb=4 THEN RETURN true 
       IF team="B" & xb=x+1 THEN RETURN true 
       IF team="W" & xb=x-1 THEN RETURN true
-      ` Isnt working for some reason??? `
-      RETURN true
+      weat : team="W" & (next.team="B") & (xb=x-1) & (yb=y+1 | yb=y-1)
+      beat : team="B" & (next.team="W") & (xb=x+1) & (yb=y+1 | yb=y-1)
+      DISP next.team
+      DISP team 
+      DISP (yb=y+1 | yb=y-1)
+      DISP (xb=x-1)
+      DISP xb + " " + x + " " + (x-1)
+      IF weat THEN RETURN true
+      IF beat THEN RETURN true
+      DISP "Invalid move: pawn"
+      RETURN false
     )
     ELSE (
       DISP "Unimplemented!"
@@ -120,6 +129,7 @@ WHILE(xold >= 0 & yold >= 0 & xnew >= 0 & ynew >= 0) {
   oldp : board[xold,yold]
   IF oldp.validMove<-(turn xnew ynew board) THEN (
     oldp.moved : true 
+    oldp.x : xnew END oldp.y : ynew
     board[xold,yold] : nullc<-()
     board[xnew,ynew] : oldp
     IF turn="W" THEN turn : "B"

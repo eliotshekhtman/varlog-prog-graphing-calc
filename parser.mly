@@ -420,7 +420,7 @@ short_defn:
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
 	  e3 = expr; COMMA; e4 = expr; RPAREN; { DOutput (e1, e2, e3, e4, DEnd) }
 	| RETURN; e = expr; { DReturn (e, DEnd) }
-	| RETURN; END; { DReturn (Val Null, DEnd) }
+	| RETURN; { DReturn (Val Null, DEnd) }
 	| LPAREN; d = defn; RPAREN; { d }
 	| END; { DEnd }
 	;

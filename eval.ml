@@ -38,7 +38,8 @@ let rec has_goto = function
   | DDisp (_, d) -> has_goto d
   | DAssign (_, _, d) -> has_goto d
   | DPrompt (_, d) -> has_goto d
-  | DIf (_, _, _, d) -> has_goto d
+  | DIf (_, d1, d2, d3) -> 
+    has_goto d1 || has_goto d2 || has_goto d3
   | DGoto (_, d) -> true 
   | DGotoSub (_, d) -> has_goto d
   | DLabel (_, d) -> has_goto d
@@ -300,8 +301,8 @@ let rec eval_expr vl e =
     (Str (Char.escaped c.Graphics.key), vl)
   | Prompt -> begin
       print_string ">> ";
-      let s = read_line() in
-      s |> parse |> eval_expr vl
+      let s = try (read_line () |> parse) with _ -> Val (Str "") in
+      s |> eval_expr vl
     end
   | MakeMatrix (a,b) -> eval_matrix a b vl 
   | MakeVarMat (a, b) -> eval_varmat a b vl
@@ -631,7 +632,7 @@ and eval_disp e d vl =
 
 and eval_prompt s d vl = 
   print_string (s ^ " >> ");
-  let e = read_line () |> parse in
+  let e = try (read_line () |> parse) with _ -> Val (Str "") in
   eval_assign s e d vl
 
 and eval_assign s e d vl =
