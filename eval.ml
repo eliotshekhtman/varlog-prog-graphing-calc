@@ -2,6 +2,8 @@ open Ast
 open Array
 open VarLog
 
+(** [find_lbls vl d] is the VarLog [vl] with all the labels
+    in [d] bound to it *)
 let rec find_lbls vl = function 
   | DEnd -> vl 
   | DReturn (e,d) -> find_lbls vl d
@@ -23,6 +25,9 @@ let rec find_lbls vl = function
   | DWhile (_, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented: find_lbls"
 
+(** [has_goto d] is if there is an abrupt transfer of control
+    in [d], such as a [GOTO] or a [RETURN], which is in
+    essence not to different from a [GOTO] in standard usage *)
 let rec has_goto = function 
   | DEnd -> false
   | DReturn (e,d) -> true
@@ -43,12 +48,12 @@ let rec has_goto = function
   | DStructSet (_, _, _, d) -> has_goto d
   | _ -> failwith "Unimplemented: has_goto"
 
-(**[fact n] is the factorial of float [n]*)
+(** [fact n] is the factorial of float [n] *)
 let rec fact n = 
   if n < 0. then failwith "not integer"
   else if n = 0. then 1. else n *. fact (n -. 1.)
 
-(**[is_value e] is whether expr [e] is a valid value*)
+(** [is_value e] is whether expr [e] is a valid value *)
 let is_value : expr -> bool = function
   | Val _ -> true
   | Var _ -> failwith "precondition violated: variable"
@@ -67,21 +72,13 @@ let parse (s : string) : expr =
   let ast = Parser.parse_expr Lexer.read lexbuf in
   ast
 
-(**[is_int f] is whether a float [f] is a float representation of an integer*)
+(** [is_int f] is whether a float [f] is a float representation of an integer *)
 let is_int f = 
   let f' = f |> int_of_float |> float_of_int in 
   if f = f' then true 
   else false
 
-
-let matrix = [| [|1.;2.;3.|];[|0.;1.;5.|];[|5.;6.;0.|] |]
-let identity = [| [|1.;0.;0.|];[|0.;1.;0.|];[|0.;0.;1.|] |]
-
-
-let firstMatrix = [| [|3.;-2.;5.|]; [|3.;0.;-4.|] |]
-let secondMatrix = [| [|2.;3.|]; [|-9.;0.|];[|0.;4.|] |]
-
-(**[print_matrix m] prints matrix [m]*)
+(** [print_matrix m] prints matrix [m] *)
 let print_matrix arr = 
   let printed = ref "" in
   let row_length = Array.length arr in
@@ -98,7 +95,7 @@ let print_matrix arr =
   let stringified = printed |> print_matrix_helper arr in
   !stringified
 
-(**[scalar_mult f m] is the result of scalar multiplication of float [f] with matrix [m]*)
+(** [scalar_mult f m] is the result of scalar multiplication of float [f] with matrix [m] *)
 let scalar_mult a (arr: float array array) : float array array = 
   let arr' = Array.make_matrix (Array.length arr) (Array.length arr.(0)) 0. in
   for i = 0 to (arr|>length) - 1 do
@@ -108,7 +105,7 @@ let scalar_mult a (arr: float array array) : float array array =
   done;
   arr'
 
-(**[matrix_mult m1 m2] is the product of matrix [m1] and matrix [m2]*)
+(** [matrix_mult m1 m2] is the product of matrix [m1] and matrix [m2] *)
 let matrix_mult arr1 arr2 : float array array = 
   (* let printed = ref "" in *)
   let r1 = Array.length arr1 in
@@ -148,13 +145,13 @@ let string_of_val (v : value) : string =
   | VarMat _ -> "<varmat>"
   | Color _ -> "<color>"
 
-(**[is_value e] is whether [e] is a value. *)
+(** [is_value e] is whether [e] is a value. *)
 let is_value_graph : expr -> bool = function
   | Val _ -> true
   | Var "x" -> true
   | _ -> false
 
-(**[get_val v] is the number stored in value [v] *)
+(** [get_val v] is the number stored in value [v] *)
 let get_val v = function
   | Val (Num n) -> n
   | Var "x" -> v 
@@ -206,8 +203,8 @@ let rec eval_graph (e : expr) (v : float) : float =
   | Var "x" -> v
   | _ -> eval_graph (e |> step_graph v) v
 
-(**[integrate b1 b2 acc f] is the definite integral of function [f] between
-   bounds [b1] and [b2]*)
+(** [integrate b1 b2 acc f] is the definite integral of function [f] between
+    bounds [b1] and [b2] *)
 let rec integrate a b acc fn = 
   if(a >= b) then acc 
   else
@@ -217,8 +214,8 @@ let rec integrate a b acc fn =
 let derive a fn = 
   (fn (a+.0.000000001) -. fn (a-.0.000000001)) /. 0.000000002
 
-(**[add_helper v1 v2] is the sum of [v1] and [v2].
-   Requires: [v1] and [v2] are both values.*)
+(** [add_helper v1 v2] is the sum of [v1] and [v2].
+    Requires: [v1] and [v2] are both values. *)
 let add_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Num (a +. b)
@@ -228,8 +225,8 @@ let add_helper v1 v2 =
   | Matrix a, Matrix b -> failwith "somebody pls implement matrix addition?"
   | _ -> failwith "precondition violated: add types"
 
-(**[add_helper v1 v2] is whether [v1] and [v2] are equal.
-   Requires: [v1] and [v2] are both values.*)
+(** [add_helper v1 v2] is whether [v1] and [v2] are equal.
+    Requires: [v1] and [v2] are both values. *)
 let eq_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Bool (a = b)
@@ -237,8 +234,8 @@ let eq_helper v1 v2 =
   | Bool a, Bool b -> Bool (a = b) 
   | _ -> Bool false
 
-(**[add_helper v1 v2] is whether [v1] is less than [v2].
-   Requires: [v1] and [v2] are both values.*)
+(** [add_helper v1 v2] is whether [v1] is less than [v2].
+    Requires: [v1] and [v2] are both values. *)
 let lt_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Bool (a < b)
@@ -246,8 +243,8 @@ let lt_helper v1 v2 =
   | Bool a, Bool b -> Bool (a < b) 
   | _ -> Bool false
 
-(**[add_helper v1 v2] is whether [v1] is greater than [v2].
-   Requires: [v1] and [v2] are both values.*)
+(** [add_helper v1 v2] is whether [v1] is greater than [v2].
+    Requires: [v1] and [v2] are both values. *)
 let gt_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Bool (a > b)
@@ -255,8 +252,8 @@ let gt_helper v1 v2 =
   | Bool a, Bool b -> Bool (a > b) 
   | _ -> Bool false
 
-(**[add_helper v1 v2] is the "not" operator acted on v1.
-   Requires: [v1] is of type Bool*)
+(** [add_helper v1 v2] is the "not" operator acted on v1.
+    Requires: [v1] is of type Bool *)
 let not_val v = 
   match v with 
   | Bool b -> Bool (not b)
@@ -313,8 +310,8 @@ let rec eval_expr vl e =
   | Application(n, es) -> eval_app n es vl
   | _ -> failwith "lol right"
 
-(**[eval_app n es vl] evaluates the function bound to [n] in VarLog [vl] with
-   arguments [es]*)
+(** [eval_app n es vl] evaluates the function bound to [n] in VarLog [vl] with
+    arguments [es] *)
 and eval_app n es vl =
   let value = substitute vl n in
   match value with 
@@ -353,29 +350,6 @@ and eval_app n es vl =
     end
   | _ -> failwith "Can't do function application on non-function" 
 
-
-
-(*  match (e1,env,st) |> eval_expr with 
-    | (RValue (VClosure (xs, exp, env_closure)), st) -> begin
-      if List.length xs <> List.length xe then 
-        ((RException (VString "Application: wrong number of arguments"), st))
-      else 
-        let rec bind_params xs' xe' env_closure' st' = begin
-          match xs', xe' with
-          | [], []-> env_closure'
-          | h1::t1, h2 :: t2 -> 
-            let value = 
-              begin 
-                match (h2, env, st') |> eval_expr with
-                | (RValue v, st) -> v
-                | _ -> failwith "error, not a value" 
-              end in bind_params t1 t2 (Binding.bind h1 value env_closure') st'
-          |_ -> failwith "error with your fn"
-        end
-        in let new_env = bind_params xs xe env_closure st in
-        eval_expr (exp, new_env, st)
-    end*)
-
 and eval_varmat a b vl = 
   let r1 = eval_expr vl a in
   let r2 = eval_expr (snd r1) b in
@@ -388,17 +362,24 @@ and eval_varmat a b vl =
                   (b|>int_of_float) Null)), vl)
   |_-> failwith "precondition violated: make varmat"
 
+(** [eval_ternary vl g a b] is the result of evaluating either 
+    [a] or [b], depending on the truth value returned by the
+    evaluation of [g] *)
 and eval_ternary vl g a b = 
   match eval_expr vl g with 
   | Bool true, vl' -> eval_expr vl' a 
   | Bool false, vl' -> eval_expr vl' b 
   | _ -> failwith "precondition violated: ternary operator guard"
 
+(** [eval_structget n s vl] is field [s] of built [n] *)
 and eval_structget n s vl = 
   match substitute vl n with 
   | Built vl' -> (substitute vl' s, vl)
   | _ -> failwith "precondition violated: not a built"
 
+(** [eval_randint vl a b] is a random integer between
+    the results of evaluating [a] and [b], not including
+    the upper bound *)
 and eval_randint vl a b = 
   let r1 = eval_expr vl a in 
   let (r2, vl') = eval_expr (snd r1) b in 
@@ -410,6 +391,10 @@ and eval_randint vl a b =
       (Num (v |> float_of_int), vl)
     end
   | _ -> failwith "precondition violated: not numerical inputs"
+
+(** [eval_matrix a b vl] is a matrix (2D Int Array) with length
+    given by the evaluating of [a] and height given by the 
+    evaluation of [b] with VarLog [vl] *)
 and eval_matrix a b vl = 
   let r1 = eval_expr vl a in
   let r2 = eval_expr (snd r1) b in
@@ -421,6 +406,8 @@ and eval_matrix a b vl =
       ((Matrix (Array.make_matrix (a|>int_of_float) (b|>int_of_float) 0.)), vl)
   |_-> failwith "precondition violated: make matrix"
 
+(** [eval_matrixget vl m a b] is the value in [m] at x location [a]
+    and y location [b] *)
 and eval_matrixget vl m a b = 
   let r1 = eval_expr vl m in 
   let r2 = eval_expr (snd r1) a in 
@@ -506,7 +493,6 @@ and eval_deriv vl der e1 e2 =
   | Der, Num a -> (Num (derive a (e2 |> eval_graph)), (snd r1))
   | _ -> failwith "precondition violated: derivative"
 
-(* Definitions! *)
 (**[eval d vl] evaluates definition [d] in VarLog [vl]*)
 and eval d vl = 
   match d with 
@@ -520,7 +506,7 @@ and eval d vl =
   | DIf (e, d1, d2, d3) -> eval_if e d1 d2 d3 vl
   | DLabel (s, d) -> eval d vl 
   | DGoto (s, d) -> eval (VarLog.find_lbl s vl) vl
-  | DGotoSub (s, d) -> eval (VarLog.find_lbl s vl) vl; eval d vl (* NOTE: probably have to edit this, goto, and if so that return will actually return and not continue evaluating *)
+  | DGotoSub (s, d) -> ignore (eval (VarLog.find_lbl s vl) vl); eval d vl 
   | DMatrixSet (m, e1, e2, e3, d) -> eval_matrixset m e1 e2 e3 d vl
   | DOutput (x, y, v, c, d) -> eval_output x y v c d vl
   | DLine (x1, y1, x2, y2, d) -> eval_line x1 y1 x2 y2 d vl
@@ -647,14 +633,15 @@ and eval_assign s e d vl =
   | Matrix m -> 
     VarLog.bind s (Matrix (Array.map Array.copy m)) vl; eval d vl
   | _ -> VarLog.bind s v vl; eval d vl
+
 and eval_if e d1 d2 d3 vl =
   match e |> eval_expr (VarLog.expose vl) |> fst with 
   | Bool true -> 
-    eval d1 vl; 
-    if(d1 |> has_goto |> not) then eval d3 vl else (Null, VarLog.expose vl)
+    let res = eval d1 vl in
+    if(d1 |> has_goto |> not) then eval d3 vl else res
   | Bool false -> 
-    eval d2 vl; 
-    if(d2 |> has_goto |> not) then eval d3 vl else (Null, VarLog.expose vl)
+    let res = eval d2 vl in
+    if(d2 |> has_goto |> not) then eval d3 vl else res
   | _ -> failwith "precondition violated: if guard"
 
 (** [string_of_expr e] converts [e] to a string.

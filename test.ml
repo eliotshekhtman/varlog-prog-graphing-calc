@@ -2,6 +2,19 @@ open OUnit2
 open Ast
 open Main
 
+(* We are not testing I/O expressions/etc ([GETKEY], [PROMPT], etc), 
+     as they would interrupt the flow of the testing: 
+     as such, we take the proper working of our repl tests and 
+     execution of our text files which use them as proof of their 
+     proper behavior.  This includes graphing, the solvers (Newton 
+     and linear), and complex script files.  We only test small 
+     scripts to ensure that they compile, but can't test their actual
+     side effects, except by analysis.  We assume that their compilation,
+     combined with our inspection, will ensure their scalability into 
+     larger examples.  
+
+*)
+
 (** [make_eval_test n i s] makes an OUnit test named [n] that expects
     [s] to evalute to [String i]. *)
 let make_eval_test n i s =
@@ -141,7 +154,9 @@ let eval_tests = [
      FUN matMult: mOne mTwo -> {RETURN mOne * mTwo} 
      z: matMult<-(x y) END RETURN z";
 
-
+  make_eval_test "function1" "Bagel" 
+    "FUN bagel :-> { RETURN \"Bagel\" } 
+     RETURN bagel<-()";
 
   make_exec_test "disp" "" "testDISP";
   (* make_exec_test "matrix" "" "testMATRIX"; *)
@@ -158,22 +173,17 @@ let eval_tests = [
     "STRUCT hello : a -> { x : a } 
      greet : hello<-(3) END greet$x : 4 END RETURN greet$x";
 
+  make_eval_test "varmat1" "hello" 
+    "x : VARMAT(3,3) END x[1,1] : \"hello\"
+     RETURN x[1,1]";
+
   make_exec_test "disp" "" "testDISP";
   (*make_exec_test "matrix" "" "testMATRIX";*)
   make_exec_test "goto" "" "testGOTO";
   make_exec_test "random" "" "testRANDOM";
   make_exec_test "goto2" "" "testWHILE";
 
-  (* We are not testing I/O expressions/etc ([GETKEY], [PROMPT], etc), 
-     as they would interrupt the flow of the testing: 
-     as such, we take the proper working of our repl tests and 
-     execution of our text files which use them as proof of their 
-     proper behavior.  This includes graphing, the solvers (Newton 
-     and linear), and complex script files.  We only test small 
-     scripts to ensure that they compile, but can't test their actual
-     side effects, except by analysis.  We assume that their compilation,
-     combined with our inspection, will ensure their scalability into 
-     larger examples. *)
+
 ]
 
 let tests = [
