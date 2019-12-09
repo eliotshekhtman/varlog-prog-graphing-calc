@@ -61,9 +61,10 @@ type expr =
   | GetKey
   | Prompt
   | RandInt of expr * expr
-  | InstantiateStruct of string * expr list
   | StructGet of string * string
+  | ObjectGet of string * string
   | Application of id * expr list
+  | ComplApp of expr * expr list
   | Ternary of expr * expr * expr
 and value = 
   | Num of float 
@@ -74,6 +75,8 @@ and value =
   | VarMat of value array array
   | Built of (string * value) list
   | Struct of id list * defn
+  | Class of id list * defn 
+  | Object of (string * value) list
   | Color of color
   | Null
   (* | Let of string * expr * expr
@@ -94,8 +97,9 @@ and defn =
   | DReturn of expr * defn
   | DFunction of id * id list * defn * defn
   | DDefStruct of id * id list * defn * defn
-  | DInstantiateStruct of string * string * expr list * defn
+  | DDefClass of id * id list * defn * defn
   | DStructSet of string * string * expr * defn
+  | DObjSet of string * string * expr * defn
   | DWhile of expr * defn * defn
   | DEnd 
 

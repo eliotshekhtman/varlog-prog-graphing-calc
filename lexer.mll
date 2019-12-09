@@ -18,6 +18,7 @@ rule read =
   | comment { END }
   | string { STRING (Lexing.lexeme lexbuf) }
   | white { read lexbuf }
+  | "." { DOT }
   | "GRAPH" { GRAPH }
   | "NEWTON" { NEWTON }
   | "SOLVE" {SOLVE}
@@ -84,6 +85,7 @@ rule read =
   | "?" { QUESTION }
   | ":" { COLON }
   | "STRUCT" { STRUCT }
+  | "CLASS" { CLASS }
   | "GOSUB" { GOTOSUB }
   | "RETURN" { RETURN }
   | "GOTO" { GOTO }

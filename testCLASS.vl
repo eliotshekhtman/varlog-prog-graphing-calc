@@ -1,0 +1,23 @@
+CLASS hello :-> {
+  x : 3
+  FUN func :-> {
+    DISP "hi"
+  }
+}
+
+greet : hello<-()
+null : greet.func<-()
+DISP greet.x
+greet.x : 4
+DISP greet.x
+FUN func :-> { DISP "bye" }
+greet.func : func 
+null : greet.func<-()
+FUN funcy : x -> { DISP (x+" is a lame number") }
+null : funcy<-(3)
+greet.func : funcy 
+null : greet.func<-(4)
+
+CLASS goodbye :-> { FUN f : x -> { RETURN x }}
+bye : goodbye<-()
+DISP bye.f<-(4)

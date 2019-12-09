@@ -20,9 +20,10 @@ let rec find_lbls vl = function
   | DLine (_, _, _, _, d) -> find_lbls vl d
   | DFunction (_, _, _, d) -> find_lbls vl d
   | DDefStruct (_, _, _, d) -> find_lbls vl d
-  | DInstantiateStruct (_, _, _, d) -> find_lbls vl d
   | DStructSet (_, _, _, d) -> find_lbls vl d
   | DWhile (_, _, d) -> find_lbls vl d
+  | DDefClass (_, _, _, d) -> find_lbls vl d
+  | DObjSet (_, _, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented: find_lbls"
 
 (*BISECT-IGNORE-BEGIN*)
@@ -46,8 +47,9 @@ let rec has_goto = function
   | DLine (_, _, _, _, d) -> has_goto d
   | DFunction (_, _, _, d) -> has_goto d
   | DDefStruct (_, _, _, d) -> has_goto d
-  | DInstantiateStruct (_, _, _, d) -> has_goto d
   | DStructSet (_, _, _, d) -> has_goto d
+  | DObjSet (_, _, _, d) -> has_goto d
+  | DDefClass (_, _, _, d) -> has_goto d
   | _ -> failwith "Unimplemented: has_goto"
 
 (*BISECT-IGNORE-END*)
@@ -148,6 +150,8 @@ let string_of_val (v : value) : string =
   | Built _ -> "<built>"
   | VarMat _ -> "<varmat>"
   | Color _ -> "<color>"
+  | Class _ -> "<class>"
+  | Object _ -> "<object>"
 
 (*BISECT-IGNORE-BEGIN*)
 
@@ -269,7 +273,7 @@ let substitute vl s =
 
 let pull_num = function 
   | Num n -> n 
-  | _ -> failwith "precondition violated: not a number"
+  | _ -> failwith "precondition violated: not a number"  
 
 let rec eval_expr vl e = 
   match e with
@@ -299,49 +303,58 @@ let rec eval_expr vl e =
   | MatrixGet (m, a, b) -> eval_matrixget vl m a b
   | RandInt (lb, ub) -> eval_randint vl lb ub
   | StructGet (n, s) -> eval_structget n s vl
+  | ObjectGet (n, s) -> eval_objectget n s vl
   | Ternary (guard, e1, e2) -> eval_ternary vl guard e1 e2 
   | Application(n, es) -> eval_app n es vl
+  | ComplApp(e, es) -> eval_complapp e es vl
   | _ -> failwith "lol right"
 
-(** [eval_app n es vl] evaluates the function bound to [n] in VarLog [vl] with
-    arguments [es] *)
+and eval_app_helper args es clos = 
+  if List.length args != List.length es 
+  then failwith "precondition violated: wrong # of args in function"
+  else
+    let rec bind_args args ex vl = 
+      match args, ex with 
+      | [], [] -> vl 
+      | h1 :: t1, h2 :: t2 ->
+        let val_arg = fst (eval_expr vl h2) in 
+        bind_args t1 t2 (replace vl h1 val_arg)
+      | _ -> failwith "improper # args checking"
+    in 
+    let new_vl = bind_args args es clos in 
+    new_vl  
+
+(** [eval_app n es vl] is the evaluation of the function bound to [n] in 
+    VarLog [vl] with arguments [es] *)
 and eval_app n es vl =
   let value = substitute vl n in
   match value with 
+  | Class (cargs, body) -> 
+    let new_vl = eval_app_helper cargs es [] in 
+    let vl' = ref (new_vl, []) in 
+    let res = eval body (find_lbls vl' body) in 
+    (Object (res |> snd), vl)
   | Closure (args, d, vl_closure) ->  
-    if(List.length args <> List.length es) then 
-      failwith "Number of function arguments not consistent"
-    else 
-      let rec bind_arguments args' es' vl_closure' =
-        match args', es' with
-        |[],[] -> vl_closure'
-        |h1::t1, h2::t2 ->
-          let value_of_arg = 
-            begin match fst (eval_expr vl h2) with
-              | v -> v 
-              | _ -> failwith "Argument is not an expression"
-            end
-          in bind_arguments t1 t2 (replace vl_closure' h1 value_of_arg)
-        |_->failwith ""
-      in let new_vl = bind_arguments args es vl_closure in
-      let x = ref (new_vl,[]) in
-      eval d (find_lbls x d)
+    let new_vl = eval_app_helper args es vl_closure in
+    let x = ref (new_vl,[]) in
+    eval d (find_lbls x d)
   | Struct (cargs, body) -> begin 
-      if List.length cargs != List.length es 
-      then failwith "precondition violated: wrong # of args in constructor"
-      else
-        let rec eval_xe xe cargs acc = 
-          match xe, cargs with 
-          | [], [] -> acc 
-          | h :: t, a :: t' -> 
-            let r = eval_expr vl h |> fst in 
-            eval_xe t t' ((a, r) :: acc)
-          | _ -> failwith "improper # args checking"
-        in 
-        let res = eval body (ref (eval_xe es cargs [], [])) |> snd in
-        (Built res, vl)
+      let new_vl = eval_app_helper cargs es [] in
+      let res = eval body (ref (new_vl, [])) |> snd in
+      (Built res, vl)
     end
   | _ -> failwith "Can't do function application on non-function" 
+
+(** [eval_complapp e es vl] is the result of evaluating a closure given 
+    in [e] with arguments [es] in VarLog [vl] *)
+and eval_complapp e es vl = 
+  let clsr = eval_expr vl e |> fst in 
+  match clsr with 
+  | Closure (args, d, vl_closure) -> 
+    let new_vl = eval_app_helper args es vl_closure in
+    let x = ref (new_vl,[]) in
+    eval d (find_lbls x d) 
+  | _ -> failwith "Can't do function application on non-function"
 
 and eval_varmat a b vl = 
   let r1 = eval_expr vl a in
@@ -363,6 +376,12 @@ and eval_ternary vl g a b =
   | Bool true, vl' -> eval_expr vl' a 
   | Bool false, vl' -> eval_expr vl' b 
   | _ -> failwith "precondition violated: ternary operator guard"
+
+(** [eval_objectget n s vl] is field [s] of object [n] *)
+and eval_objectget n s vl = 
+  match substitute vl n with 
+  | Object vl' -> (substitute vl' s, vl)
+  | _ -> failwith "precondition violated: not an object"
 
 (** [eval_structget n s vl] is field [s] of built [n] *)
 and eval_structget n s vl = 
@@ -507,10 +526,12 @@ and eval d vl =
     VarLog.bind name (eval_func args body vl) vl; eval d vl
   | DDefStruct (name, cargs, body, d) -> 
     eval_structdef name cargs body d vl
-  | DInstantiateStruct (s, name, xe, d) -> 
-    eval_struct s name xe vl d
+  | DDefClass (name, cargs, body, d) -> 
+    eval_classdef name cargs body d vl
   | DStructSet (n, s, e, d) -> 
-    eval_structset n s e d vl
+    eval_set n s e d vl
+  | DObjSet (n, s, e, d) -> 
+    eval_set n s e d vl
   | DWhile (e, d1, d2) -> eval_while false e d1 d2 vl
   | _ -> failwith "Unimplemented: eval"
 (**[eval_while evaluated_once e d1 d2 vl] evaluates a while loop*)
@@ -526,34 +547,22 @@ and eval_while evaluated_once e d1 d2 vl =
     else r
   | _ -> failwith "precondition violated: while guard"
 
+and eval_classdef name cargs body d vl = 
+  let c = Class (cargs, body) in 
+  VarLog.bind name c vl;
+  eval d vl
 
-and eval_structset n s e d vl = 
+and eval_set n s e d vl = 
   match VarLog.find n vl with 
   | Some (Built vl') -> begin 
       let v = e |> eval_expr (VarLog.expose vl) |> fst in 
       VarLog.bind n (Built (replace vl' s v)) vl; eval d vl
     end
-  | _ -> failwith "precondition violated: not a built"
-
-and eval_struct s n xe vl_full d = 
-  let vl = VarLog.expose vl_full in
-  match substitute vl n with 
-  | Struct (cargs, body) -> begin 
-      if List.length cargs != List.length xe 
-      then failwith "precondition violated: wrong # of args in constructor"
-      else
-        let rec eval_xe xe cargs acc = 
-          match xe, cargs with 
-          | [], [] -> acc 
-          | h :: t, a :: t' -> 
-            let r = eval_expr vl h |> fst in 
-            eval_xe t t' ((a, r) :: acc)
-          | _ -> failwith "improper # args checking"
-        in 
-        let res = eval body (ref (eval_xe xe cargs [], [])) |> snd in
-        VarLog.bind s (Built res) vl_full; eval d vl_full
+  | Some (Object vl') -> begin 
+      let v = e |> eval_expr (VarLog.expose vl) |> fst in 
+      VarLog.bind n (Object (replace vl' s v)) vl; eval d vl
     end
-  | _ -> failwith "precondition violated: not a struct"
+  | _ -> failwith "precondition violated: not a built"
 
 and eval_structdef name cargs body d vl = 
   let s = Struct (cargs, body) in 
