@@ -43,26 +43,31 @@ let rec has_goto = function
   | DStructSet (_, _, _, d) -> has_goto d
   | _ -> failwith "Unimplemented: has_goto"
 
+(**[fact n] is the factorial of float [n]*)
 let rec fact n = 
   if n < 0. then failwith "not integer"
   else if n = 0. then 1. else n *. fact (n -. 1.)
 
+(**[is_value e] is whether expr [e] is a valid value*)
 let is_value : expr -> bool = function
   | Val _ -> true
   | Var _ -> failwith "precondition violated: variable"
   | _ -> false
 
+(** [replace lst k v] is [lst] with [(k, v)] inserted, and if 
+    [lst] already had a [(k, _)] tuple, it is replaced with 
+    [(k, v)] *)
 let rec replace lst k v = 
   match lst with 
   | [] -> [(k, v)]
   | h :: t -> if (fst h) = k then (k, v) :: t else h :: replace t k v
 
-(** [parse s] parses [s] into an AST. *)
 let parse (s : string) : expr =
   let lexbuf = Lexing.from_string s in
   let ast = Parser.parse_expr Lexer.read lexbuf in
   ast
 
+(**[is_int f] is whether a float [f] is a float representation of an integer*)
 let is_int f = 
   let f' = f |> int_of_float |> float_of_int in 
   if f = f' then true 
@@ -76,6 +81,7 @@ let identity = [| [|1.;0.;0.|];[|0.;1.;0.|];[|0.;0.;1.|] |]
 let firstMatrix = [| [|3.;-2.;5.|]; [|3.;0.;-4.|] |]
 let secondMatrix = [| [|2.;3.|]; [|-9.;0.|];[|0.;4.|] |]
 
+(**[print_matrix m] prints matrix [m]*)
 let print_matrix arr = 
   let printed = ref "" in
   let row_length = Array.length arr in
@@ -92,6 +98,7 @@ let print_matrix arr =
   let stringified = printed |> print_matrix_helper arr in
   !stringified
 
+(**[scalar_mult f m] is the result of scalar multiplication of float [f] with matrix [m]*)
 let scalar_mult a (arr: float array array) : float array array = 
   let arr' = Array.make_matrix (Array.length arr) (Array.length arr.(0)) 0. in
   for i = 0 to (arr|>length) - 1 do
@@ -101,6 +108,7 @@ let scalar_mult a (arr: float array array) : float array array =
   done;
   arr'
 
+(**[matrix_mult m1 m2] is the product of matrix [m1] and matrix [m2]*)
 let matrix_mult arr1 arr2 : float array array = 
   (* let printed = ref "" in *)
   let r1 = Array.length arr1 in
@@ -140,16 +148,19 @@ let string_of_val (v : value) : string =
   | VarMat _ -> "<varmat>"
   | Color _ -> "<color>"
 
+(**[is_value e] is whether [e] is a value. *)
 let is_value_graph : expr -> bool = function
   | Val _ -> true
   | Var "x" -> true
   | _ -> false
 
+(**[get_val v] is the number stored in value [v] *)
 let get_val v = function
   | Val (Num n) -> n
   | Var "x" -> v 
   | _ -> failwith "precondition violated"
 
+(** [step e] takes a single step in the graphing of [e]*)
 let rec step_graph v = function
   (*| Keyword _ -> failwith "precondition violated: too many keywords" *)
   | Val _ -> failwith "Does not step"
@@ -168,7 +179,8 @@ let rec step_graph v = function
     step_uop v uop e
   | Uniop (uop, e) -> Uniop (uop, step_graph v e)
   | _ -> failwith "unimplemented"
-
+(** [step_bop bop v1 v2] implements the primitive operation
+    [v1 bop v2].  Requires: [v1] and [v2] are both values. *)
 and step_bop v bop e1 e2 = match bop with
   | Add -> Val (Num ((get_val v e1) +. (get_val v e2)))
   | Mult -> Val (Num ((get_val v e1) *. (get_val v e2)))
@@ -176,7 +188,8 @@ and step_bop v bop e1 e2 = match bop with
   | Div -> Val (Num ((get_val v e1) /. (get_val v e2)))
   | Pow -> Val (Num ((get_val v e1) ** (get_val v e2)))
   | _ -> failwith "precondition violated: bop"
-
+(** [step_bop uop v] implements the primitive operation
+    [uop v].  Requires: [v] is a value. *)
 and step_uop v uop e = match uop with
   | Fact -> Val (Num (fact (get_val v e)))
   | Sin -> Val (Num (sin (get_val v e)))
@@ -193,6 +206,8 @@ let rec eval_graph (e : expr) (v : float) : float =
   | Var "x" -> v
   | _ -> eval_graph (e |> step_graph v) v
 
+(**[integrate b1 b2 acc f] is the definite integral of function [f] between
+   bounds [b1] and [b2]*)
 let rec integrate a b acc fn = 
   if(a >= b) then acc 
   else
@@ -202,6 +217,8 @@ let rec integrate a b acc fn =
 let derive a fn = 
   (fn (a+.0.000000001) -. fn (a-.0.000000001)) /. 0.000000002
 
+(**[add_helper v1 v2] is the sum of [v1] and [v2].
+   Requires: [v1] and [v2] are both values.*)
 let add_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Num (a +. b)
@@ -211,6 +228,8 @@ let add_helper v1 v2 =
   | Matrix a, Matrix b -> failwith "somebody pls implement matrix addition?"
   | _ -> failwith "precondition violated: add types"
 
+(**[add_helper v1 v2] is whether [v1] and [v2] are equal.
+   Requires: [v1] and [v2] are both values.*)
 let eq_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Bool (a = b)
@@ -218,6 +237,8 @@ let eq_helper v1 v2 =
   | Bool a, Bool b -> Bool (a = b) 
   | _ -> Bool false
 
+(**[add_helper v1 v2] is whether [v1] is less than [v2].
+   Requires: [v1] and [v2] are both values.*)
 let lt_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Bool (a < b)
@@ -225,6 +246,8 @@ let lt_helper v1 v2 =
   | Bool a, Bool b -> Bool (a < b) 
   | _ -> Bool false
 
+(**[add_helper v1 v2] is whether [v1] is greater than [v2].
+   Requires: [v1] and [v2] are both values.*)
 let gt_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Bool (a > b)
@@ -232,11 +255,15 @@ let gt_helper v1 v2 =
   | Bool a, Bool b -> Bool (a > b) 
   | _ -> Bool false
 
+(**[add_helper v1 v2] is the "not" operator acted on v1.
+   Requires: [v1] is of type Bool*)
 let not_val v = 
   match v with 
   | Bool b -> Bool (not b)
   | _ -> failwith "precondition violated: not bool"
 
+(**[substitute vl e] is the value that [e] represents in the
+   association list vl. Requires: [e] is a string*)
 let substitute vl s = 
   try List.assoc s vl with _ -> 
     failwith ("precondition violated: unbound var " ^ s)
@@ -245,13 +272,13 @@ let pull_num = function
   | Num n -> n 
   | _ -> failwith "precondition violated: not a number"
 
-
+(**[find_id n vl] is the option containing the value bound to id [n] in VarLog 
+   [vl]*)
 let rec find_id n' vl' =
   match vl' with
   |[]-> None
   |h::t -> if(fst h = n') then Some (snd h) else
       find_id n' t
-
 
 let rec eval_expr vl e = 
   match e with
@@ -286,6 +313,8 @@ let rec eval_expr vl e =
   | Application(n, es) -> eval_app n es vl
   | _ -> failwith "lol right"
 
+(**[eval_app n es vl] evaluates the function bound to [n] in VarLog [vl] with
+   arguments [es]*)
 and eval_app n es vl =
   let value = substitute vl n in
   match value with 
@@ -406,7 +435,8 @@ and eval_matrixget vl m a b =
       (m.(a |> int_of_float).(b |> int_of_float), vl')
     else failwith "precondition violated: float indeces"
   | _ -> failwith "precondition violated: matrix get"
-
+(**[eval_boop vl boop e1 e2] evaluates the primitive expression [e1] [boop] [e2].
+   Requires: [e1], [e2] are booleans*) 
 and eval_boop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 
   match b, (fst r1) with 
@@ -421,6 +451,8 @@ and eval_boop vl b e1 e2 =
       | Xor, Bool a, Bool b -> (Bool (a <> b), vl2)
       | _ -> failwith "unimplemented"
     end
+(**[eval_expr vl bop e1 e2] evaluates the primitive expression [e1] [bop] [e2].
+   Requires: [e1], [e2] have type expression*)  
 and eval_bop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 
   let (r2, vl2) = eval_expr (snd r1) e2 in 
@@ -443,6 +475,8 @@ and eval_bop vl b e1 e2 =
   | Gt, v1, v2 -> (gt_helper v1 v2, vl2)
   | Leq, v1, v2 -> (gt_helper v1 v2 |> not_val, vl2)
   | _ -> failwith "precondition violated: bop input types"
+(**[eval_expr vl uop e] evaluates the primitive expression [uop] [e].
+   Requires: [e] has type expression*)
 and eval_uop vl u e = 
   let (r, vl') = eval_expr vl e in 
   match u, r with 
@@ -456,6 +490,8 @@ and eval_uop vl u e =
   | ArcCos, Num n -> (Num (acos n), vl')
   | ArcTan, Num n -> (Num (atan n), vl')
   | _ -> failwith "precondition violated: uop"
+(**[eval_expr vl top e1 e2 e3] evaluates the primitive expression [top] [e1] 
+   [e2] [e3]. Requires: [e] has type expression*)
 and eval_top vl top e1 e2 e3 = 
   let r1 = eval_expr vl e1 in 
   let r2 = eval_expr (snd r1) e2 in 
@@ -463,6 +499,7 @@ and eval_top vl top e1 e2 e3 =
   | Integral, Num a, Num b -> 
     (Num (integrate a b 0. (e3 |> eval_graph)), (snd r2))
   | _ -> failwith "precondition violated: top"
+(**[eval_deriv vl der e1 e2] evaluates the derivative der*)
 and eval_deriv vl der e1 e2 = 
   let r1 = eval_expr vl e1 in 
   match der, (fst r1) with 
@@ -470,7 +507,7 @@ and eval_deriv vl der e1 e2 =
   | _ -> failwith "precondition violated: derivative"
 
 (* Definitions! *)
-
+(**[eval d vl] evaluates definition [d] in VarLog [vl]*)
 and eval d vl = 
   match d with 
   | DEnd -> (Null, VarLog.expose vl)
@@ -497,7 +534,7 @@ and eval d vl =
     eval_structset n s e d vl
   | DWhile (e, d1, d2) -> eval_while false e d1 d2 vl
   | _ -> failwith "Unimplemented: eval"
-
+(**[eval_while evaluated_once e d1 d2 vl] evaluates a while loop*)
 and eval_while evaluated_once e d1 d2 vl = 
   match e |> eval_expr (VarLog.expose vl) |> fst with 
   | Bool false -> 
@@ -544,6 +581,8 @@ and eval_structdef name cargs body d vl =
   VarLog.bind name s vl;
   eval d vl
 
+(**[eval_func args body vl] evaluates function [body] with arguments [args] in
+   VarLog [vl]*)
 and eval_func args body vl = 
   Closure (args, body, (VarLog.expose vl))
 
