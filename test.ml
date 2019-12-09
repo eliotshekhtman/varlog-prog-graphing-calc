@@ -2,8 +2,8 @@ open OUnit2
 open Ast
 open Main
 
-(* We are not testing I/O expressions/etc ([GETKEY], [PROMPT], etc), 
-     as they would interrupt the flow of the testing: 
+(* We are not testing I/O expressions/etc ([GETKEY], [PROMPT], [SOLVER], 
+    [GRAPHING] etc), as they would interrupt the flow of the testing: 
      as such, we take the proper working of our repl tests and 
      execution of our text files which use them as proof of their 
      proper behavior.  This includes graphing, the solvers (Newton 
