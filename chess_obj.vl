@@ -1,0 +1,129 @@
+x : 0 END y : 0
+
+CLASS nullc :-> { 
+  x : 0 
+  y : 0 
+  str : " "
+  moved : false
+  type : "null"
+  team : "null"
+  FUN validMove : a b c d -> { 
+    DISP "Invalid move: no piece at location"
+    RETURN false
+  }
+}
+
+CLASS piece : x y -> { 
+  moved : false
+  team : ((x<2) ? "B" : "W")
+  type : "null"
+  IF x=1 | x=6 THEN type : "P"
+  ELSE (
+    IF y=0 | y=7 THEN type : "R"
+    IF y=1 | y=6 THEN type : "Kn"
+    IF y=2 | y=5 THEN type : "B"
+  )
+  IF x=0 & y=3 THEN type : "Kg"
+  IF x=7 & y=4 THEN type : "Kg"
+  IF x=0 & y=4 THEN type : "Q"
+  IF x=7 & y=3 THEN type : "Q"
+  str : team+type
+  FUN validMove : turn xb yb board -> {
+    IF turn!=team THEN (
+      DISP "Invalid move: not your piece"
+      RETURN false
+    )
+    IF NOT (xb>=0 & yb>=0 & xb<8 & yb<8) THEN (
+      DISP "Invalid move: out of bounds"
+      RETURN false
+    )
+    `Add castling eventually`
+    next : board[xb,yb]
+    IF team=next.team THEN (
+      DISP "Invalid move: can't take your own pieces"
+      RETURN false
+    )
+    IF type="P" THEN (
+      DISP "pawn "+type+" "+team+" "+x+" "+y+" "+xb+" "+yb
+      IF team="B" & x=1 & xb=3 THEN RETURN true
+      IF team="W" & x=6 & xb=4 THEN RETURN true 
+      IF team="B" & xb=x+1 THEN RETURN true 
+      IF team="W" & xb=x-1 THEN RETURN true
+      ` Isnt working for some reason??? `
+      RETURN true
+    )
+    ELSE (
+      DISP "Unimplemented!"
+      RETURN false
+    )
+    DISP "Invalid move"
+    RETURN false
+  }
+}
+
+GOTO init
+
+LBL DrawGrid
+LINE(xo,yo,8+xo,yo) END LINE(yo,xo,yo,8+xo)
+LINE(xo,1+yo,8+xo,1+yo) END LINE(1+xo,yo,1+xo,8+yo)
+LINE(xo,2+yo,8+xo,2+yo) END LINE(2+xo,yo,2+xo,8+yo)
+LINE(xo,3+yo,8+xo,3+yo) END LINE(3+xo,yo,3+xo,8+yo)
+LINE(xo,4+yo,8+xo,4+yo) END LINE(4+xo,yo,4+xo,8+yo)
+LINE(xo,6+yo,8+xo,6+yo) END LINE(6+xo,yo,6+xo,8+yo)
+LINE(xo,5+yo,8+xo,5+yo) END LINE(5+xo,yo,5+xo,8+yo)
+LINE(xo,7+yo,8+xo,7+yo) END LINE(7+xo,yo,7+xo,8+yo)
+LINE(xo,8+yo,8+xo,8+yo) END LINE(8+xo,yo,8+xo,8+yo)
+RETURN
+
+LBL SetupBoard
+x : 0 END y : 0
+WHILE(x < 8) {
+  y : 0
+  WHILE(y < 8) {
+    IF x < 2 | x > 5 THEN board[x,y] : piece<-(x y)
+    ELSE (
+      board[x,y] : nullc<-()
+    )
+    y : y+1
+  } 
+  x : x+1
+}
+RETURN
+
+LBL DrawBoard
+x : 0 END y : 0
+WHILE(y < 8) {
+  x : 0
+  WHILE(x < 8) {
+    temp : board[x,y]
+    OUTPUT(x+xo,y+yo,temp.str)
+    x : x+1
+  } 
+  y : y+1
+}
+RETURN
+
+LBL init 
+xo : 11 END yo : 11 END x : 0 END y : 0
+DISP "Initializing"
+board : VARMAT(8,8) END GOSUB SetupBoard
+DISP "Drawing"
+GOSUB DrawBoard END GOSUB DrawGrid
+xold : 0 END yold : 0 END xnew : 0 END ynew : 0
+turn : "W"
+WHILE(xold >= 0 & yold >= 0 & xnew >= 0 & ynew >= 0) {
+  DISP turn + "s move!"
+  xold : PROMPT
+  yold : PROMPT 
+  xnew : PROMPT
+  ynew : PROMPT
+  oldp : board[xold,yold]
+  IF oldp.validMove<-(turn xnew ynew board) THEN (
+    oldp.moved : true 
+    board[xold,yold] : nullc<-()
+    board[xnew,ynew] : oldp
+    IF turn="W" THEN turn : "B"
+    ELSE turn : "W"
+    GOSUB DrawBoard END GOSUB DrawGrid
+  )
+}

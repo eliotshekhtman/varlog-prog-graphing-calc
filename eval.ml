@@ -50,6 +50,7 @@ let rec has_goto = function
   | DStructSet (_, _, _, d) -> has_goto d
   | DObjSet (_, _, _, d) -> has_goto d
   | DDefClass (_, _, _, d) -> has_goto d
+  | DWhile (_, _, d) -> has_goto d
   | _ -> failwith "Unimplemented: has_goto"
 
 (*BISECT-IGNORE-END*)
@@ -275,6 +276,10 @@ let pull_num = function
   | Num n -> n 
   | _ -> failwith "precondition violated: not a number"  
 
+let rec merge_vl vl = function 
+  | [] -> vl 
+  | h :: t -> replace (fst h) (snd h)
+
 let rec eval_expr vl e = 
   match e with
   (*| Keyword _ -> failwith "precondition violated: too many keywords" *)
@@ -309,19 +314,19 @@ let rec eval_expr vl e =
   | ComplApp(e, es) -> eval_complapp e es vl
   | _ -> failwith "lol right"
 
-and eval_app_helper args es clos = 
+and eval_app_helper args es clos vl_ext = 
   if List.length args != List.length es 
   then failwith "precondition violated: wrong # of args in function"
   else
-    let rec bind_args args ex vl = 
+    let rec bind_args args ex vl vl_ext = 
       match args, ex with 
       | [], [] -> vl 
       | h1 :: t1, h2 :: t2 ->
-        let val_arg = fst (eval_expr vl h2) in 
-        bind_args t1 t2 (replace vl h1 val_arg)
+        let val_arg = fst (eval_expr vl_ext h2) in 
+        bind_args t1 t2 (replace vl h1 val_arg) vl_ext
       | _ -> failwith "improper # args checking"
     in 
-    let new_vl = bind_args args es clos in 
+    let new_vl = bind_args args es clos vl_ext in 
     new_vl  
 
 (** [eval_app n es vl] is the evaluation of the function bound to [n] in 
@@ -330,16 +335,16 @@ and eval_app n es vl =
   let value = substitute vl n in
   match value with 
   | Class (cargs, body) -> 
-    let new_vl = eval_app_helper cargs es [] in 
+    let new_vl = eval_app_helper cargs es [] vl in 
     let vl' = ref (new_vl, []) in 
     let res = eval body (find_lbls vl' body) in 
     (Object (res |> snd), vl)
   | Closure (args, d, vl_closure) ->  
-    let new_vl = eval_app_helper args es vl_closure in
+    let new_vl = eval_app_helper args es vl_closure vl in
     let x = ref (new_vl,[]) in
     eval d (find_lbls x d)
   | Struct (cargs, body) -> begin 
-      let new_vl = eval_app_helper cargs es [] in
+      let new_vl = eval_app_helper cargs es vl [] in
       let res = eval body (ref (new_vl, [])) |> snd in
       (Built res, vl)
     end
@@ -351,7 +356,7 @@ and eval_complapp e es vl =
   let clsr = eval_expr vl e |> fst in 
   match clsr with 
   | Closure (args, d, vl_closure) -> 
-    let new_vl = eval_app_helper args es vl_closure in
+    let new_vl = eval_app_helper args es vl_closure vl in
     let x = ref (new_vl,[]) in
     eval d (find_lbls x d) 
   | _ -> failwith "Can't do function application on non-function"

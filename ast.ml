@@ -91,7 +91,6 @@ and value =
   (**type defn represents a definition*)
 and defn = 
   | DPrompt of string * defn
-  | DBind of string * expr * defn 
   | DAssign of string * expr * defn
   | DIf of expr * defn * defn * defn
   | DDisp of expr * defn 
