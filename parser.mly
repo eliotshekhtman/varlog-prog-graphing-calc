@@ -224,48 +224,82 @@ defn:
 	| DISP; e = expr; END; { DDisp (e, DEnd) }
 	| DISP; e = expr; { DDisp (e, DEnd) }
 
-  | IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
-  | IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; { DIf (e, d1, d2, d3) }
-	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
-	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; { DIf (e, d1, d2, DEnd) }
+  | IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; 
+	d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; 
+	d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; 
+	{ DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; 
+	{ DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; END; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; 
+	{ DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; END; THEN; d1 = short_defn; ELSE; d2 = short_defn; 
+	{ DIf (e, d1, d2, DEnd) }
+  | IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; 
+	d3 = defn; { DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; d3 = defn; 
+	{ DIf (e, d1, d2, d3) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; END; 
+	{ DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; END; 
+	{ DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; END; ELSE; d2 = short_defn; 
+	{ DIf (e, d1, d2, DEnd) }
+	| IF; e = expr; THEN; d1 = short_defn; ELSE; d2 = short_defn; 
+	{ DIf (e, d1, d2, DEnd) }
 
-  | IF; e = expr; END; THEN; d1 = short_defn; END; d = defn; { DIf (e, d1, DEnd, d)}
+  | IF; e = expr; END; THEN; d1 = short_defn; END; d = defn; 
+	{ DIf (e, d1, DEnd, d)}
 	| IF; e = expr; END; THEN; d1 = short_defn; END; { DIf (e, d1, DEnd, DEnd)}
 	| IF; e = expr; END; THEN; d1 = short_defn; { DIf (e, d1, DEnd, DEnd)}
 	| IF; e = expr; THEN; d1 = short_defn; END; d = defn; { DIf (e, d1, DEnd, d)}
 	| IF; e = expr; THEN; d1 = short_defn; END; { DIf (e, d1, DEnd, DEnd)}
 	| IF; e = expr; THEN; d1 = short_defn; { DIf (e, d1, DEnd, DEnd)}
 
-  | CLASS; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = defn; RCURLY; END; d = defn; { DDefClass (n, xs, ad, d) }
-	| CLASS; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = defn; RCURLY; d = defn; { DDefClass (n, xs, ad, d) }
-	| CLASS; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = defn; RCURLY; END; { DDefClass (n, xs, ad, DEnd) }
-	| CLASS; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = defn; RCURLY; { DDefClass (n, xs, ad, DEnd) }
-	| CLASS; n = NAME; COLON; ARROW; LCURLY; ad = defn; RCURLY; END; d = defn; { DDefClass (n, [], ad, d) }
-	| CLASS; n = NAME; COLON; ARROW; LCURLY; ad = defn; RCURLY; d = defn; { DDefClass (n, [], ad, d) }
-	| CLASS; n = NAME; COLON; ARROW; LCURLY; ad = defn; RCURLY; END; { DDefClass (n, [], ad, DEnd) }
-	| CLASS; n = NAME; COLON; ARROW; LCURLY; ad = defn; RCURLY; { DDefClass (n, [], ad, DEnd) }
+  | CLASS; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = defn;
+	 RCURLY; END; d = defn; { DDefClass (n, xs, ad, d) }
+	| CLASS; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = defn; 
+	RCURLY; d = defn; { DDefClass (n, xs, ad, d) }
+	| CLASS; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = defn;
+	 RCURLY; END; { DDefClass (n, xs, ad, DEnd) }
+	| CLASS; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = defn;
+	 RCURLY; { DDefClass (n, xs, ad, DEnd) }
+	| CLASS; n = NAME; COLON; ARROW; LCURLY; ad = defn; RCURLY; END; d = defn;
+	 	{ DDefClass (n, [], ad, d) }
+	| CLASS; n = NAME; COLON; ARROW; LCURLY; ad = defn; RCURLY; d = defn;
+	 	{ DDefClass (n, [], ad, d) }
+	| CLASS; n = NAME; COLON; ARROW; LCURLY; ad = defn; RCURLY; END;
+	 	{ DDefClass (n, [], ad, DEnd) }
+	| CLASS; n = NAME; COLON; ARROW; LCURLY; ad = defn; RCURLY;
+	 	{ DDefClass (n, [], ad, DEnd) }
 	
-	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; d = defn; { DDefStruct (n, xs, ad, d) }
-	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
-	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, xs, ad, DEnd) }
-	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; ad = obj_defn; RCURLY; { DDefStruct (n, xs, ad, DEnd) }
-	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; END; d = defn; { DDefStruct (n, [], ad, d) }
-	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, [], ad, d) }
-	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; END; { DDefStruct (n, [], ad, DEnd) }
-	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; { DDefStruct (n, [], ad, DEnd) }
-	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; d = defn; { DStructSet (n, s, e, d) }
-	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; { DStructSet (n, s, e, DEnd) }
-	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; { DStructSet (n, s, e, DEnd) }
-	| n = NAME; DOT; s = NAME; COLON; e = expr; END; d = defn; { DObjSet (n, s, e, d) }
-	| n = NAME; DOT; s = NAME; COLON; e = expr; END; { DObjSet (n, s, e, DEnd) }
+	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY;
+	 ad = obj_defn; RCURLY; END; d = defn; { DDefStruct (n, xs, ad, d) }
+	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY;
+	 ad = obj_defn; RCURLY; d = defn; { DDefStruct (n, xs, ad, d) }
+	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY; 
+	ad = obj_defn; RCURLY; END; { DDefStruct (n, xs, ad, DEnd) }
+	| STRUCT; n = NAME; COLON; xs = nonempty_list(ident); ARROW; LCURLY;
+	 ad = obj_defn; RCURLY; { DDefStruct (n, xs, ad, DEnd) }
+	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; END;
+	 d = defn; { DDefStruct (n, [], ad, d) }
+	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; d = defn;
+	 	{ DDefStruct (n, [], ad, d) }
+	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; END;
+		 { DDefStruct (n, [], ad, DEnd) }
+	| STRUCT; n = NAME; COLON; ARROW; LCURLY; ad = obj_defn; RCURLY; 
+	{ DDefStruct (n, [], ad, DEnd) }
+	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; d = defn;
+	 	{ DStructSet (n, s, e, d) }
+	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; END; 
+		{ DStructSet (n, s, e, DEnd) }
+	| n = NAME; DOLLAR; s = NAME; COLON; e = expr; 
+		{ DStructSet (n, s, e, DEnd) }
+	| n = NAME; DOT; s = NAME; COLON; e = expr; END; d = defn; 
+		{ DObjSet (n, s, e, d) }
+	| n = NAME; DOT; s = NAME; COLON; e = expr; END; 
+		{ DObjSet (n, s, e, DEnd) }
 	| n = NAME; DOT; s = NAME; COLON; e = expr; { DObjSet (n, s, e, DEnd) }
 	| GOTO; s = NAME; END; d = defn; { DGoto (s, d) }
 	| GOTOSUB; s = NAME; END; d = defn; { DGotoSub (s, d) }
@@ -277,13 +311,15 @@ defn:
 	| LBL; s = NAME; END; { DLabel (s, DEnd) }
 	| LBL; s = NAME; { DLabel (s, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
-	  e3 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, Val (Color Black), d) }
+	  e3 = expr; RPAREN; END; d = defn; 
+		{ DOutput (e1, e2, e3, Val (Color Black), d) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
 	  e3 = expr; RPAREN; END; { DOutput (e1, e2, e3, Val (Color Black), DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
 	  e3 = expr; RPAREN; { DOutput (e1, e2, e3, Val (Color Black), DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
-	  e3 = expr; COMMA; e4 = expr; RPAREN; END; d = defn; { DOutput (e1, e2, e3, e4, d) }
+	  e3 = expr; COMMA; e4 = expr; RPAREN; END; d = defn; 
+		{ DOutput (e1, e2, e3, e4, d) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
 	  e3 = expr; COMMA; e4 = expr; RPAREN; END; { DOutput (e1, e2, e3, e4, DEnd) }
 	| OUTPUT; LPAREN; e1 = expr; COMMA; e2 = expr; COMMA; 
@@ -301,17 +337,24 @@ defn:
 	| RETURN; d = defn; { DReturn (Val Null, d) }
 	| RETURN; END; { DReturn (Val Null, DEnd) }
 	| RETURN; { DReturn (Val Null, DEnd) }
-	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; END; d2 = defn; 
+		{ DWhile (e, d1, d2) }
 	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; END; { DWhile (e, d1, DEnd) }
 	| WHILE; e = expr; LCURLY; d1 = defn; RCURLY; { DWhile (e, d1, DEnd) }
-	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
-	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; { DWhile (e, d1, DEnd) }
-	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; { DWhile (e, d1, DEnd) }
-	| WHILE; e = expr; LCURLY; d1 = defn; END; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
-	| WHILE; e = expr; LCURLY; d1 = defn; END; RCURLY; END; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; d2 = defn; 
+		{ DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; END; 
+		{ DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; END; RCURLY; {DWhile (e, d1, DEnd)}
+	| WHILE; e = expr; LCURLY; d1 = defn; END; RCURLY; END; d2 = defn; 
+		{ DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; d1 = defn; END; RCURLY; END; 
+		{ DWhile (e, d1, DEnd) }
 	| WHILE; e = expr; LCURLY; d1 = defn; END; RCURLY; { DWhile (e, d1, DEnd) }
-	| WHILE; e = expr; LCURLY; END; d1 = defn; RCURLY; END; d2 = defn; { DWhile (e, d1, d2) }
-	| WHILE; e = expr; LCURLY; END; d1 = defn; RCURLY; END; { DWhile (e, d1, DEnd) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; RCURLY; END; d2 = defn; 
+		{ DWhile (e, d1, d2) }
+	| WHILE; e = expr; LCURLY; END; d1 = defn; RCURLY; END; 
+		{ DWhile (e, d1, DEnd) }
 	| WHILE; e = expr; LCURLY; END; d1 = defn; RCURLY; { DWhile (e, d1, DEnd) }
 	| END; d = defn; { d } 
 	| d = defn; END; { d }
@@ -329,27 +372,33 @@ defn:
 	| FUN; n = ident; COLON; ARROW; LCURLY; END; d = defn; END; RCURLY; END;
 		{ DFunction (n, [], d, DEnd) }
 
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY; END; d2 = defn;
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; 
+		RCURLY; END; d2 = defn;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
 			else DFunction (n, xs, d, d2) }
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; d = defn; END; RCURLY; END; d2 = defn;
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; 
+		d = defn; END; RCURLY; END; d2 = defn;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
 			else DFunction (n, xs, d, d2) }
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY;
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; 
+		RCURLY;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
 			else DFunction (n, xs, d, DEnd) }
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; d = defn; END; RCURLY;
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; 
+		d = defn; END; RCURLY;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
 			else DFunction (n, xs, d, DEnd) }
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; RCURLY; END;
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; d = defn; 
+		RCURLY; END;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
 			else DFunction (n, xs, d, DEnd) }
-	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; d = defn; END; RCURLY; END;
+	| FUN; n = ident; COLON; xs = nonempty_list(ident); ARROW; LCURLY; END; 
+		d = defn; END; RCURLY; END;
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
 			else DFunction (n, xs, d, DEnd) }
