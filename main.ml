@@ -15,6 +15,8 @@ let parse_phrase (s : string) : phrase =
   let ast = Parser.parse_phrase Lexer.read lexbuf in
   ast
 
+(*BISECT-IGNORE-BEGIN*)
+
 (** [close_int f] is the nearest integer, as a float, to [f] if [f] is
     less than 10^(-7) away from an integer; else, it's just [f] *)
 let close_int (f : float) = 
@@ -351,6 +353,8 @@ let set_scale coords =
   let ymax = print_string "SET MAX Y> "; read_line () |> float_of_string in
   Coords.update_coords coords xmin xmax ymin ymax; ()
 
+(*BISECT-IGNORE-END*)
+
 let interp (s : string) : string =
   match s |> parse_phrase with 
   | Expr e -> e |> eval_expr !State.empty |> fst |> string_of_val
@@ -361,7 +365,6 @@ let interp (s : string) : string =
     end
   | Solver s -> linear_solver_helper s
   | SetScale -> set_scale Coords.empty; ""
-  | Eval e -> e |> eval_expr !State.empty |> fst |> string_of_val
   | Graph e ->
     let em = Coords.empty in 
     Graphing.graph em.x_min em.x_max em.y_min em.y_max (e |> eval_graph); 

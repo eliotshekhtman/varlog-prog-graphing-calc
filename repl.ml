@@ -28,7 +28,6 @@ let rec run () =
 
 let flex () = 
   print_endline "------------ V/\\RL0G -------------";
-  print_endline "[EVAL e] to evaluate an expression";
   print_endline "[GRAPH f] to graph a function";
   print_endline "  (implicitly set to y)";
   print_endline "  Do not close the graphing window";

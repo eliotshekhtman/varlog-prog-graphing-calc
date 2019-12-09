@@ -18,7 +18,6 @@ rule read =
   | comment { END }
   | string { STRING (Lexing.lexeme lexbuf) }
   | white { read lexbuf }
-  | "EVAL" { EVAL }
   | "GRAPH" { GRAPH }
   | "NEWTON" { NEWTON }
   | "SOLVE" {SOLVE}

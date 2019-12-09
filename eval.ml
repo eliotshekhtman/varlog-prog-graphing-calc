@@ -25,6 +25,8 @@ let rec find_lbls vl = function
   | DWhile (_, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented: find_lbls"
 
+(*BISECT-IGNORE-BEGIN*)
+
 (** [has_goto d] is if there is an abrupt transfer of control
     in [d], such as a [GOTO] or a [RETURN], which is in
     essence not to different from a [GOTO] in standard usage *)
@@ -47,6 +49,8 @@ let rec has_goto = function
   | DInstantiateStruct (_, _, _, d) -> has_goto d
   | DStructSet (_, _, _, d) -> has_goto d
   | _ -> failwith "Unimplemented: has_goto"
+
+(*BISECT-IGNORE-END*)
 
 (** [fact n] is the factorial of float [n] *)
 let rec fact n = 
@@ -145,6 +149,8 @@ let string_of_val (v : value) : string =
   | VarMat _ -> "<varmat>"
   | Color _ -> "<color>"
 
+(*BISECT-IGNORE-BEGIN*)
+
 (** [is_value e] is whether [e] is a value. *)
 let is_value_graph : expr -> bool = function
   | Val _ -> true
@@ -202,6 +208,8 @@ let rec eval_graph (e : expr) (v : float) : float =
   | Val (Num n) -> n
   | Var "x" -> v
   | _ -> eval_graph (e |> step_graph v) v
+
+(*BISECT-IGNORE-END*)
 
 (** [integrate b1 b2 acc f] is the definite integral of function [f] between
     bounds [b1] and [b2] *)
@@ -268,14 +276,6 @@ let substitute vl s =
 let pull_num = function 
   | Num n -> n 
   | _ -> failwith "precondition violated: not a number"
-
-(**[find_id n vl] is the option containing the value bound to id [n] in VarLog 
-   [vl]*)
-let rec find_id n' vl' =
-  match vl' with
-  |[]-> None
-  |h::t -> if(fst h = n') then Some (snd h) else
-      find_id n' t
 
 let rec eval_expr vl e = 
   match e with
@@ -643,14 +643,5 @@ and eval_if e d1 d2 d3 vl =
     let res = eval d2 vl in
     if(d2 |> has_goto |> not) then eval d3 vl else res
   | _ -> failwith "precondition violated: if guard"
-
-(** [string_of_expr e] converts [e] to a string.
-    Requires: [e] is a value. *)
-let string_of_expr (e : expr) : string =
-  match e with
-  | Val (Num f) -> string_of_float f
-  | Val (Bool b) -> string_of_bool b
-  | Val (Str s) -> s
-  | _ -> failwith "precondition violated: sov"
 
 let eval_init vl d = eval d (find_lbls vl d)
