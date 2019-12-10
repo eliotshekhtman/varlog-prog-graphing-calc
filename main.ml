@@ -78,8 +78,7 @@ let matrix_made = Array.make_matrix 3 3 4
 
 let find_det a d b c = a *. d -. b *. c
 
-
-
+(**[determined_matrix2 matrix] is the determinant of a 2 by 2 matrix [matrix]*)
 let determined_matrix2 matrix = 
   let a1 = matrix.(0).(0) in
   let d1 = matrix.(1).(1) in
@@ -90,28 +89,24 @@ let determined_matrix2 matrix =
       [|d1; -1. *. b1|];
       [|-1.*.c1; a1|]
     |], det) in new_matrix
-(* d,-b,-c,a *)
 
-
+(**[determined_matrix3 matrix] is the determinant of a 3 by 3 matrix [matrix]*)
 let determined_matrix3 (matrix:float array array ) = 
   let a1 = matrix.(1).(1) in
   let d1 = matrix.(2).(2) in
   let b1 = matrix.(1).(2) in
   let c1 = matrix.(2).(1) in
   let det1 = find_det a1 d1 b1 c1 in 
-  (* print_endline (string_of_float det1); *)
   let a2 = matrix.(1).(0) in
   let d2 = matrix.(2).(2) in
   let b2 = matrix.(1).(2) in
   let c2 = matrix.(2).(0) in
   let det2 = -1. *. find_det a2 d2 b2 c2 in
-  (* print_endline (string_of_float det2); *)
   let a3 = matrix.(1).(0) in
   let d3 = matrix.(2).(1) in
   let b3 = matrix.(1).(1) in
   let c3 = matrix.(2).(0) in
   let det3 = find_det a3 d3 b3 c3 in
-  (* print_endline (string_of_float det3); *)
   let a4 = matrix.(0).(1) in
   let d4 = matrix.(2).(2) in
   let b4 = matrix.(0).(2) in
@@ -151,6 +146,7 @@ let determined_matrix3 (matrix:float array array ) =
                         [|det4;det5;det6;|];[|det7;det8;det9;|]|], det) in
     new_matrix
 
+(**[reflect matrix] is the reflection of a 3 by 3 matrix [matrix]*)
 let reflect (matrix: float array array) =
   let temp1 = matrix.(1).(0) in
   matrix.(1).(0) <- matrix.(0).(1);
@@ -163,12 +159,9 @@ let reflect (matrix: float array array) =
   matrix.(1).(2) <- temp3; 
   matrix
 
-(* let make_matrix a b = Array.make_matrix a b 0 *)
-
-
-
-
-let normalized matrix det num= 
+(**[normalized matrix det num] is the normalized [num] by [num] matrix [matrix]
+   that has determinant [det]*)
+let normalized matrix det num = 
   print_string (string_of_float det);
   print_string ("reached this point 1******");
   let inverse_det = if det = 0. then raise DeterminantZero else det ** -1. in
@@ -193,6 +186,7 @@ let normalized matrix det num=
     matrix
   )
 
+(**[inversed matrix num] is the inverse of a [num] by [num] matrix [matrix]*)
 let inversed (matrix: float array array) num = 
   if num = 3 then 
     let determined3_matrix = determined_matrix3 matrix in
@@ -205,7 +199,11 @@ let inversed (matrix: float array array) num =
       normalized (determined2_matrix |> fst) (determined2_matrix |> snd) num in
     final 
 
-
+(**[solve_linear_equation matrix vector num] is the solution of the set of
+   linear equations with [num] unknowns, where the coefficients of the unknowns
+   are represented by the [num] by [num] matrix [matrix] and the corresponding
+   solutions to the equations are represented by [vectore], which has length
+   [num]*)
 let solve_linear_equation 
     (matrix: float array array) (vector: float array) num = 
   let inverse_matrix = inversed matrix num in
@@ -219,6 +217,9 @@ let solve_linear_equation
   done;
   answer_vector
 
+(**[exec_helper v] handles the execution of a .vl file represented by
+   value [v]. Exceptions: Raises an exception if [v] is not a valid string
+   representation*)
 let exec_helper v = 
   match v with 
   | Str s -> Main_lang.interp (s ^ ".vl")
@@ -231,16 +232,9 @@ let linear_prompt = "Please input the first equation of your system of " ^
                     "(5+3), 0, (-4*1), (4/2) \n where this corresponds to the" ^ 
                     " equation 8x + 0y -4z = 2\n\nequation 1>"
 
-(* let rec rmv_empty_elements arr new_arr= 
-   match arr with
-   | [] -> List.rev new_arr
-   | head::tail ->
-    (*If the element represented by [head] is NOT "", prepend to [new_arr]*)
-    if(not (head = "")) then rmv_empty_elements tail (head::new_arr)
-    else rmv_empty_elements tail new_arr *)
-
+(**[parse_lin_equation3 str] converts a string representation of a linear
+   equation with 3 unknowns, [str], into the required arrays for solving*)
 let parse_lin_equation3 str  = 
-  (*turn the string to an array by using [String.split_on_char sep]*)
   let string_array = String.split_on_char (',') (str) in
   match string_array with
   |s1::s2::s3::s4::[]  -> 
@@ -251,7 +245,8 @@ let parse_lin_equation3 str  =
     ([|x;y;z|], answer);
   |_-> failwith "Wrong number of values"
 
-
+(**[parse_lin_equation3 str] converts a string representation of a system of
+   linear equations with 3 unknowns, [str], into the required arrays for solving*)
 let parse_lin_equation2 str =  
   let string_array = String.split_on_char (',') (str) in
   match string_array with 
@@ -262,6 +257,8 @@ let parse_lin_equation2 str =
     ([|x;y|], answer);
   |_-> failwith "Wrong number of values"
 
+(**[parse_lin_equation3 str] converts a string representation of a system of
+   linear equations with 2 unknowns, [str], into the required arrays for solving*)
 let print_linear_equation_answer arr num =
   if(num = 3) then
     (
@@ -277,6 +274,8 @@ let print_linear_equation_answer arr num =
       ()
     )
 
+(**[linear_solver_helper s] solves the system of equations with [s] unknowns
+   which is input by the user*)
 let linear_solver_helper s =
   match s with
   |"three" ->  begin
@@ -310,6 +309,8 @@ let linear_solver_helper s =
     end
   | _-> failwith "Invalid input. Only 3x3 or 2x2 systems are supported"
 
+(**module Coords represents the maximum and minimum x and y coordinates
+   of a graphing window*)
 module Coords = struct
   type t = 
     { mutable x_min : float; 
@@ -317,14 +318,18 @@ module Coords = struct
       mutable y_min : float; 
       mutable y_max : float } 
 
+  (**empty represents the coordinates of a newly opened graphing window*)
   let empty : t = 
     { x_min = (~-.10.); x_max = 10.; y_min = (~-.10.); y_max = 10. }
 
+  (**[update_coords old_c xi xa yi ya] updates the coordinates of [old_c] to
+     the new x min and max, xi and xa, and the new y min and max, yi and ya.*)
   let update_coords old_c xi xa yi ya = 
     old_c.x_min <- xi; old_c.x_max <- xa; 
     old_c.y_min <- yi; old_c.y_max <- ya; ()
 
 end
+
 
 module State = struct 
   type t = (VarLog.var list) ref
@@ -346,6 +351,7 @@ module State = struct
     st_old := merge st inp
 end
 
+(**[set_scale coords] sets the coordinates of a graphing window to [coords]*)
 let set_scale coords = 
   let xmin = print_string "SET MIN X> "; read_line () |> float_of_string in
   let xmax = print_string "SET MAX X> "; read_line () |> float_of_string in
