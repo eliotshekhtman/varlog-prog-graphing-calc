@@ -362,6 +362,8 @@ and eval_complapp e es vl =
     eval d (find_lbls x d) 
   | _ -> failwith "Can't do function application on non-function"
 
+(** [eval_varmat a b vl] is the result of evaluating a [Varmat] type. It creates
+    an a by b matrix that can have any value in its cells *)
 and eval_varmat a b vl = 
   let r1 = eval_expr vl a in
   let r2 = eval_expr (snd r1) b in
@@ -553,11 +555,14 @@ and eval_while evaluated_once e d1 d2 vl =
     else r
   | _ -> failwith "precondition violated: while guard"
 
+(**[eval_classdef name cargs body d vl] evaluates a class and places the 
+   class into the varlog for future reference*)
 and eval_classdef name cargs body d vl = 
   let c = Class (cargs, body) in 
   VarLog.bind name c vl;
   eval d vl
 
+(**[eval_set n s e d vl] evaluates a dset*)
 and eval_set n s e d vl = 
   match VarLog.find n vl with 
   | Some (Built vl') -> begin 
@@ -570,6 +575,7 @@ and eval_set n s e d vl =
     end
   | _ -> failwith "precondition violated: not a built"
 
+
 and eval_structdef name cargs body d vl = 
   let s = Struct (cargs, body) in 
   VarLog.bind name s vl;
@@ -580,6 +586,9 @@ and eval_structdef name cargs body d vl =
 and eval_func args body vl = 
   Closure (args, body, (VarLog.expose vl))
 
+(**[eval_line e1 e2 e3 e4 d vl] draws lines in the graphing space. Returns the 
+   the evaluation of the same definition and vl that was put in by putting those 
+   two through [eval d vl] again*)
 and eval_line e1 e2 e3 e4 d vl = 
   let x1 = e1 |> eval_expr (VarLog.expose vl) |> fst in 
   let y1 = e2 |> eval_expr (VarLog.expose vl) |> fst in 
@@ -591,6 +600,10 @@ and eval_line e1 e2 e3 e4 d vl =
     end
   | _ -> failwith "precondition violated: not numerical coordinates"
 
+(**[eval_dgraph e d vl] sets a scale and graphs a user-defined function
+   Returns the 
+   the evaluation of the same definition and vl that was put in by putting those 
+   two through [eval d vl] again*) 
 and eval_dgraph e d vl = 
   let f = e |> eval_graph in 
   Graphing.graph_func (-10.) (10.) (-10.) (10.) 0 Graphics.black f;
@@ -625,16 +638,26 @@ and eval_matrixset m a b v d vl =
     end
   | _ -> failwith "precondition violated: matrix set"
 
+(**[eval_disp e d vl] prints out whatever string/integer/boolean/valid input
+   that you pass in. 
+   Returns the evaluation of the same definition and vl that was put in by 
+   putting those two through [eval d vl] again*) 
 and eval_disp e d vl = 
   let v = e |> eval_expr (VarLog.expose vl) |> fst |> string_of_val in 
   print_endline v;
   eval d vl
 
+(**[eval_prompt s d vl] prompts the user to input some value through the REPL
+    It takes their input so it can be used later on by calling 
+    [eval_assign s e d vl]*)
 and eval_prompt s d vl = 
   print_string (s ^ " >> ");
   let e = try (read_line () |> parse) with _ -> Val (Str "") in
   eval_assign s e d vl
 
+(**[eval_assign s e d vl] takes in a variable and an expression and sets
+   the variable equal to the value of the expression. Returns [eval d vl]
+   so it calls the big eval function again*)
 and eval_assign s e d vl =
   let v = e |> eval_expr (VarLog.expose vl) |> fst in 
   match v with 
@@ -642,6 +665,9 @@ and eval_assign s e d vl =
     VarLog.bind s (Matrix (Array.map Array.copy m)) vl; eval d vl
   | _ -> VarLog.bind s v vl; eval d vl
 
+(**[eval_if e d1 d2 d3 vl] evaluates if statements. [d1] corresponds
+   to the first if condition. [d2] corresponds to the "then" sections of an if-else
+   block. And [d3] corresponds to the body contained in the else block*)
 and eval_if e d1 d2 d3 vl =
   match e |> eval_expr (VarLog.expose vl) |> fst with 
   | Bool true -> 
