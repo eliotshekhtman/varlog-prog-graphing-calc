@@ -246,7 +246,8 @@ let parse_lin_equation3 str  =
   |_-> failwith "Wrong number of values"
 
 (**[parse_lin_equation3 str] converts a string representation of a system of
-   linear equations with 3 unknowns, [str], into the required arrays for solving*)
+   linear equations with 3 unknowns, [str], into the required arrays for
+   solving*)
 let parse_lin_equation2 str =  
   let string_array = String.split_on_char (',') (str) in
   match string_array with 
@@ -258,7 +259,8 @@ let parse_lin_equation2 str =
   |_-> failwith "Wrong number of values"
 
 (**[parse_lin_equation3 str] converts a string representation of a system of
-   linear equations with 2 unknowns, [str], into the required arrays for solving*)
+   linear equations with 2 unknowns, [str], into the required arrays for
+   solving*)
 let print_linear_equation_answer arr num =
   if(num = 3) then
     (

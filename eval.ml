@@ -103,7 +103,8 @@ let print_matrix arr =
   let stringified = printed |> print_matrix_helper arr in
   !stringified
 
-(** [scalar_mult f m] is the result of scalar multiplication of float [f] with matrix [m] *)
+(** [scalar_mult f m] is the result of scalar multiplication of float [f] with 
+    matrix [m] *)
 let scalar_mult a (arr: float array array) : float array array = 
   let arr' = Array.make_matrix (Array.length arr) (Array.length arr.(0)) 0. in
   for i = 0 to (arr|>length) - 1 do
@@ -442,7 +443,8 @@ and eval_matrixget vl m a b =
       (m.(a |> int_of_float).(b |> int_of_float), vl')
     else failwith "precondition violated: float indeces"
   | _ -> failwith "precondition violated: matrix get"
-(**[eval_boop vl boop e1 e2] evaluates the primitive expression [e1] [boop] [e2].
+(**[eval_boop vl boop e1 e2] evaluates the primitive expression [e1] [boop]
+   [e2].
    Requires: [e1], [e2] are booleans*) 
 and eval_boop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 
@@ -668,8 +670,8 @@ and eval_assign s e d vl =
   | _ -> VarLog.bind s v vl; eval d vl
 
 (**[eval_if e d1 d2 d3 vl] evaluates if statements. [d1] corresponds
-   to the first if condition. [d2] corresponds to the "then" sections of an if-else
-   block. And [d3] corresponds to the body contained in the else block*)
+   to the first if condition. [d2] corresponds to the "then" sections of an
+   if-else block. And [d3] corresponds to the body contained in the else block*)
 and eval_if e d1 d2 d3 vl =
   match e |> eval_expr (VarLog.expose vl) |> fst with 
   | Bool true -> 
