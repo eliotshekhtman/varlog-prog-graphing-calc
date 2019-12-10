@@ -575,7 +575,8 @@ and eval_set n s e d vl =
     end
   | _ -> failwith "precondition violated: not a built"
 
-
+(**[eval_structdef name cargs body d vl] creates a struct with arguments [cargs]
+   and body [body], and stores it in VarLog [vl] bound to identifier [name]*)
 and eval_structdef name cargs body d vl = 
   let s = Struct (cargs, body) in 
   VarLog.bind name s vl;
@@ -609,6 +610,7 @@ and eval_dgraph e d vl =
   Graphing.graph_func (-10.) (10.) (-10.) (10.) 0 Graphics.black f;
   eval d vl
 
+
 and eval_output x y v c d vl = 
   let x' = x |> eval_expr (VarLog.expose vl) |> fst in 
   let y' = y |> eval_expr (VarLog.expose vl) |> fst in 
@@ -629,12 +631,12 @@ and eval_matrixset m a b v d vl =
   | Matrix m, Num a, Num b, Num v -> begin 
       if (is_int a && is_int b) then 
         (m.(a |> int_of_float).(b |> int_of_float) <- v; eval d vl)
-      else failwith "precondition violated: float indeces"
+      else failwith "precondition violated: float indices"
     end
   | VarMat m, Num a, Num b, v -> begin 
       if (is_int a && is_int b) then 
         (m.(a |> int_of_float).(b |> int_of_float) <- v; eval d vl)
-      else failwith "precondition violated: float indeces"
+      else failwith "precondition violated: float indices"
     end
   | _ -> failwith "precondition violated: matrix set"
 
