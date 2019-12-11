@@ -2,6 +2,19 @@
 - xs = expression list (can be empty)
 - od = object definition, sd = short definition
 
+Phrases:
+- GRAPH e
+  - e is an expression representing an equation with variable x
+- NEWTON e
+  - e is an expression representing an equation with variable x
+- EXEC e
+  - e is an expression representing the string of a filename, excluding the file extension (must be of .vl)
+- SETSCALE
+- SOLVE 2x2
+- SOLVE 3x3
+- e
+- d
+
 Choice expressions:
 - INTEGRAL((e_left, e_right), e_func)
 - DERIVATIVE(e_val, e_func)
@@ -18,6 +31,8 @@ Choice expressions:
   - function application
 - struct <- ( xs )
   - built initialization/struct constructor application
+- class <- ( xs )
+  - object initialization/class constructor application
 - m[e1,e2]
   - calls on a cell of a varmat or a matrix
 
@@ -44,6 +59,7 @@ Definitions:
 - FUN name : xs -> {**(** END **)** d1 **(** END **)**} **(** END **(** d **))**
   - Note: either { END d1 END } or { d1 } is acceptable, but no other combination of END is possible
 - **(** END **)** d **(** END **)**
+- CLASS name : xs -> { d_inside } **(** END **(** d **))**
 - END
 
 Object definitions:
