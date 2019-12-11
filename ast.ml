@@ -1,3 +1,7 @@
+(** 
+    This is the Abstract Search Tree that is the representation of calculator
+    operations and VarLog language features.
+*)
 exception SyntaxError
 
 (** Type [id] represents an identifier linked to a value in a VarLog *)

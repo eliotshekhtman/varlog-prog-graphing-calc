@@ -1,3 +1,7 @@
+(** 
+   This is the module in which inputs are parsed, the AST is sent to eval,
+   and the results are sent back to repl.
+*)
 open Ast 
 open Graphing 
 open Eval
