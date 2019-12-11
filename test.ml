@@ -1,6 +1,7 @@
 open OUnit2
 open Ast
 open Main
+open Eval
 
 (* We are not testing I/O expressions/etc ([GETKEY], [PROMPT], [SOLVER], 
     [GRAPHING] etc), as they would interrupt the flow of the testing: 
@@ -27,23 +28,8 @@ let make_exec_test n i s =
             ~printer:(fun (s:string) -> s))
 
 
-let print_matrix arr = 
-  let printed = ref "" in
-  let row_length = Array.length arr in
-  let col_length = Array.length arr.(0) in
-  let print_matrix_helper arr str = 
-    for i = 0 to row_length - 1 do
-      for j = 0 to col_length - 1 do
-        str := !str ^ " " ^ (arr.(i).(j) |> string_of_float) ;
-      done;
-      str := !str ^ "\n";
-    done;
-    str
-  in 
-  let stringified = printed |> print_matrix_helper arr in
-  !stringified
-
 let matrix = [| [|0.;4.;0.|]; [|0.;0.;7.|] ; [|0.;0.;0.|] |] 
+let matrix2 = [| [|1.;4.;0.|]; [|0.;1.;7.|] ; [|0.;0.;1.|] |] 
 
 let eval_tests = [
   make_eval_test "integer" "22" "22";
@@ -148,18 +134,23 @@ let eval_tests = [
      FUN scalar: b -> {RETURN b * x} END y: scalar<-(6) END RETURN y[2,2]";
 
 
-  make_eval_test "function standard matrix mult test" (print_matrix matrix)
+  make_eval_test "function standard matrix mult test" (Eval.print_matrix matrix)
     "x : MATRIX(3,3) END x[0,0] : 1 END x[1,1] : 1 END x[2,2] : 1 END DISP x
      y : MATRIX(3,3) END y[0,1] : 4 END y[1,2] : 7 END DISP y
      FUN matMult: mOne mTwo -> {RETURN mOne * mTwo} 
      z: matMult<-(x y) END RETURN z";
+
+  make_eval_test "function standard matrix add test" (Eval.print_matrix matrix2)
+    "x : MATRIX(3,3) END x[0,0] : 1 END x[1,1] : 1 END x[2,2] : 1 END DISP x
+      y : MATRIX(3,3) END y[0,1] : 4 END y[1,2] : 7 END DISP y
+      FUN matAdd: mOne mTwo -> {RETURN mOne + mTwo} 
+      z: matAdd<-(x y) END RETURN z";
 
   make_eval_test "function1" "Bagel" 
     "FUN bagel :-> { RETURN \"Bagel\" } 
      RETURN bagel<-()";
 
   make_exec_test "disp" "" "testDISP";
-  (* make_exec_test "matrix" "" "testMATRIX"; *)
   make_eval_test "struct1" "" "STRUCT hello : a -> { x : a }";
   make_eval_test "struct2" "<struct>" 
     "STRUCT hello : a -> { x : a } END RETURN hello";
@@ -178,7 +169,6 @@ let eval_tests = [
      RETURN x[1,1]";
 
   make_exec_test "disp" "" "testDISP";
-  (*make_exec_test "matrix" "" "testMATRIX";*)
   make_exec_test "goto" "" "testGOTO";
   make_exec_test "random" "" "testRANDOM";
   make_exec_test "goto2" "" "testWHILE";

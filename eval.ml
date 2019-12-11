@@ -112,7 +112,7 @@ let is_int f =
   if f = f' then true 
   else false
 
-(** [print_matrix m] prints matrix [m] *)
+
 let print_matrix arr = 
   let printed = ref "" in
   let row_length = Array.length arr in
@@ -140,9 +140,22 @@ let scalar_mult a (arr: float array array) : float array array =
   done;
   arr'
 
+(** [add_mat a1 a2] returns the 2d float array which is the result of  of adding
+    multiplication of float [f] with matrix [m] *)
+let add_mat a1 a2  = 
+  if (Array.length a1 <> Array.length a2 || Array.length a1.(0) <> Array.length a1.(0)) then
+    failwith "matrices must have the same dimensions to be added" 
+  else
+    let arr' = Array.make_matrix (Array.length a1) (Array.length a1.(0)) 0. in
+    for i = 0 to (a1|>length) - 1 do
+      for j = 0 to (a1.(0)|>length) - 1 do
+        arr'.(i).(j) <-  a1.(i).(j) +. a2.(i).(j);
+      done;
+    done;
+    arr'
+
 (** [matrix_mult m1 m2] is the product of matrix [m1] and matrix [m2] *)
 let matrix_mult arr1 arr2 : float array array = 
-  (* let printed = ref "" in *)
   let r1 = Array.length arr1 in
   let c1 = Array.length arr1.(0) in
   let r2 = Array.length arr2 in
@@ -260,7 +273,7 @@ let add_helper v1 v2 =
   | Matrix a, Matrix b -> failwith "somebody pls implement matrix addition?"
   | _ -> failwith "precondition violated: add types"
 
-(** [add_helper v1 v2] is whether [v1] and [v2] are equal.
+(** [eq_helper v1 v2] is whether [v1] and [v2] are equal.
     Requires: [v1] and [v2] are both values. *)
 let eq_helper v1 v2 = 
   match v1, v2 with 
@@ -269,8 +282,7 @@ let eq_helper v1 v2 =
   | Bool a, Bool b -> Bool (a = b) 
   | _ -> Bool false
 
-(** [add_helper v1 v2] is whether [v1] is less than [v2].
-    Requires: [v1] and [v2] are both values. *)
+(** [lt_helper v1 v2] is whether [v1] is less than [v2]. *)
 let lt_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Bool (a < b)
@@ -278,8 +290,7 @@ let lt_helper v1 v2 =
   | Bool a, Bool b -> Bool (a < b) 
   | _ -> Bool false
 
-(** [add_helper v1 v2] is whether [v1] is greater than [v2].
-    Requires: [v1] and [v2] are both values. *)
+(** [gt_helper v1 v2] is whether [v1] is greater than [v2]. *)
 let gt_helper v1 v2 = 
   match v1, v2 with 
   | Num a, Num b -> Bool (a > b)
@@ -287,15 +298,14 @@ let gt_helper v1 v2 =
   | Bool a, Bool b -> Bool (a > b) 
   | _ -> Bool false
 
-(** [add_helper v1 v2] is the "not" operator acted on v1.
-    Requires: [v1] is of type Bool *)
+(** [not_val v] is the "not" operator acted on [v]. *)
 let not_val v = 
   match v with 
   | Bool b -> Bool (not b)
   | _ -> failwith "precondition violated: not bool"
 
 (**[substitute vl e] is the value that [e] represents in the
-   association list vl. Requires: [e] is a string*)
+   association list [vl]. *)
 let substitute vl s = 
   try List.assoc s vl with _ -> 
     failwith ("precondition violated: unbound var " ^ s)
@@ -304,13 +314,8 @@ let pull_num = function
   | Num n -> n 
   | _ -> failwith "precondition violated: not a number"  
 
-let rec merge_vl vl = function 
-  | [] -> vl 
-  | h :: t -> replace (fst h) (snd h)
-
 let rec eval_expr vl e = 
   match e with
-  (*| Keyword _ -> failwith "precondition violated: too many keywords" *)
   | Val v -> (v, vl) 
   | PreString s -> 
     let len = String.length s - 2 in 
@@ -342,6 +347,7 @@ let rec eval_expr vl e =
   | ComplApp(e, es) -> eval_complapp e es vl
   | _ -> failwith "lol right"
 
+(** [eval_add_helper args es clos vl_ext] *)
 and eval_app_helper args es clos vl_ext = 
   if List.length args != List.length es 
   then failwith "precondition violated: wrong # of args in function"
@@ -389,8 +395,8 @@ and eval_complapp e es vl =
     eval d (find_lbls x d) 
   | _ -> failwith "Can't do function application on non-function"
 
-(** [eval_varmat a b vl] is the result of evaluating a [Varmat] type. It creates
-    an a by b matrix that can have any value in its cells *)
+(** [eval_varmat a b vl] is the result of evaluating a [VarMat] type. It creates
+    an [a] by [b] matrix that can have any value in its cells *)
 and eval_varmat a b vl = 
   let r1 = eval_expr vl a in
   let r2 = eval_expr (snd r1) b in
@@ -470,8 +476,7 @@ and eval_matrixget vl m a b =
     else failwith "precondition violated: float indeces"
   | _ -> failwith "precondition violated: matrix get"
 (**[eval_boop vl boop e1 e2] evaluates the primitive expression [e1] [boop]
-   [e2].
-   Requires: [e1], [e2] are booleans*) 
+   [e2]. *) 
 and eval_boop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 
   match b, (fst r1) with 
@@ -484,14 +489,15 @@ and eval_boop vl b e1 e2 =
       | And, Bool a, Bool b -> (Bool (a && b), vl2)
       | Or, Bool a, Bool b -> (Bool (a || b), vl2) 
       | Xor, Bool a, Bool b -> (Bool (a <> b), vl2)
-      | _ -> failwith "unimplemented"
+      | _ -> failwith "Unimplemented: boop"
     end
 (**[eval_expr vl bop e1 e2] evaluates the primitive expression [e1] [bop] [e2].
-   Requires: [e1], [e2] have type expression*)  
+*)  
 and eval_bop vl b e1 e2 = 
   let r1 = eval_expr vl e1 in 
   let (r2, vl2) = eval_expr (snd r1) e2 in 
   match b, (fst r1), r2 with 
+  | Add, Matrix a, Matrix b -> (Matrix (add_mat a b), vl2)
   | Add, v1, v2 -> (add_helper v1 v2, vl2)
   | Subt, Num a, Num b -> (Num (a -. b), vl2)
   | Mult, Matrix a, Num b -> (Matrix (scalar_mult b a), vl2)
@@ -510,8 +516,7 @@ and eval_bop vl b e1 e2 =
   | Gt, v1, v2 -> (gt_helper v1 v2, vl2)
   | Leq, v1, v2 -> (gt_helper v1 v2 |> not_val, vl2)
   | _ -> failwith "precondition violated: bop input types"
-(**[eval_expr vl uop e] evaluates the primitive expression [uop] [e].
-   Requires: [e] has type expression*)
+(**[eval_expr vl uop e] evaluates the primitive expression [uop] [e]. *)
 and eval_uop vl u e = 
   let (r, vl') = eval_expr vl e in 
   match u, r with 
@@ -526,7 +531,7 @@ and eval_uop vl u e =
   | ArcTan, Num n -> (Num (atan n), vl')
   | _ -> failwith "precondition violated: uop"
 (**[eval_expr vl top e1 e2 e3] evaluates the primitive expression [top] [e1] 
-   [e2] [e3]. Requires: [e] has type expression*)
+   [e2] [e3]. *)
 and eval_top vl top e1 e2 e3 = 
   let r1 = eval_expr vl e1 in 
   let r2 = eval_expr (snd r1) e2 in 
@@ -534,7 +539,8 @@ and eval_top vl top e1 e2 e3 =
   | Integral, Num a, Num b -> 
     (Num (integrate a b 0. (e3 |> eval_graph)), (snd r2))
   | _ -> failwith "precondition violated: top"
-(**[eval_deriv vl der e1 e2] evaluates the derivative der*)
+(**[eval_deriv vl der e1 e2] evaluates the derivative [der] on [e2], 
+   at [e1]*)
 and eval_deriv vl der e1 e2 = 
   let r1 = eval_expr vl e1 in 
   match der, (fst r1) with 
@@ -583,8 +589,8 @@ and eval_while evaluated_once e d1 d2 vl =
     else r
   | _ -> failwith "precondition violated: while guard"
 
-(**[eval_classdef name cargs body d vl] evaluates a class and places the 
-   class into the varlog for future reference*)
+(** [eval_classdef name cargs body d vl] evaluates a class and places the 
+    class into the [VarLog] for future reference *)
 and eval_classdef name cargs body d vl = 
   let c = Class (cargs, body) in 
   VarLog.bind name c vl;
@@ -616,8 +622,8 @@ and eval_func args body vl =
   Closure (args, body, (VarLog.expose vl))
 
 (**[eval_line e1 e2 e3 e4 d vl] draws lines in the graphing space. Returns the 
-   the evaluation of the same definition and vl that was put in by putting those 
-   two through [eval d vl] again*)
+   the evaluation of the [d] and [vl] that was put in by putting 
+   those two through [eval d vl] again*)
 and eval_line e1 e2 e3 e4 d vl = 
   let x1 = e1 |> eval_expr (VarLog.expose vl) |> fst in 
   let y1 = e2 |> eval_expr (VarLog.expose vl) |> fst in 
@@ -631,7 +637,7 @@ and eval_line e1 e2 e3 e4 d vl =
 
 (**[eval_dgraph e d vl] sets a scale and graphs a user-defined function
    Returns the 
-   the evaluation of the same definition and vl that was put in by putting those 
+   the evaluation of the [d] and vl that was put in by putting those 
    two through [eval d vl] again*) 
 and eval_dgraph e d vl = 
   let f = e |> eval_graph in 
@@ -687,7 +693,7 @@ and eval_prompt s d vl =
 
 (**[eval_assign s e d vl] takes in a variable and an expression and sets
    the variable equal to the value of the expression. Returns [eval d vl]
-   so it calls the big eval function again*)
+   so it calls the big [eval] function again*)
 and eval_assign s e d vl =
   let v = e |> eval_expr (VarLog.expose vl) |> fst in 
   match v with 

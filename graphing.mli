@@ -1,6 +1,9 @@
 open Ast
 
-(**[better_int_of_float f] converts float [f] into an int*)
+(** [better_int_of_float f] is [f] cast to an integer, for the purposes
+    of the graph: if it's too big or too small, set to the extrema of [int],
+    divided by 2, because we'll never set the graph to be that large 
+    anyways. *)
 val better_int_of_float: float -> int
 
 (**[open_output_window] opens a graphing window*)

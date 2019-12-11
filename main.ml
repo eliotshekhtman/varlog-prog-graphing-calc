@@ -46,7 +46,6 @@ let rec newton_make e x =
     loop for applying different guesses to Newton's Method for 
     function [f] *)
 let rec newton_apply f = 
-  (** [apply n f r] is the result of applying [f] to [r] [n] times *)
   let rec apply n f r = 
     let res = f r in
     if r = res then r 
@@ -202,8 +201,9 @@ let inversed (matrix: float array array) num =
 (**[solve_linear_equation matrix vector num] is the solution of the set of
    linear equations with [num] unknowns, where the coefficients of the unknowns
    are represented by the [num] by [num] matrix [matrix] and the corresponding
-   solutions to the equations are represented by [vectore], which has length
-   [num]*)
+   solutions to the equations are represented by [vector], which has length
+   [num]
+   Requires: [num] is either 2 or 3*)
 let solve_linear_equation 
     (matrix: float array array) (vector: float array) num = 
   let inverse_matrix = inversed matrix num in
@@ -292,7 +292,6 @@ let linear_solver_helper s =
       let matrix = [|(fst eq1); (fst eq2); (fst eq3)|] in
       let target_vector = [|(snd eq1);(snd eq2);(snd eq3)|] in
       let answer = solve_linear_equation matrix target_vector 3 in
-      print_string "1...........";
       print_linear_equation_answer answer 3;
       "\nSolved!" 
     end
@@ -305,13 +304,12 @@ let linear_solver_helper s =
       let matrix = [|(fst eq1); (fst eq2);|] in
       let target_vector = [|(snd eq1);(snd eq2)|] in
       let answer = solve_linear_equation matrix target_vector 2 in
-      print_string "1...........";
       print_linear_equation_answer answer 2;
       "\nSolved!" 
     end
   | _-> failwith "Invalid input. Only 3x3 or 2x2 systems are supported"
 
-(**module Coords represents the maximum and minimum x and y coordinates
+(**module [Coords] represents the maximum and minimum x and y coordinates
    of a graphing window*)
 module Coords = struct
   type t = 
@@ -320,7 +318,7 @@ module Coords = struct
       mutable y_min : float; 
       mutable y_max : float } 
 
-  (**empty represents the coordinates of a newly opened graphing window*)
+  (** [empty] represents the coordinates of a newly opened graphing window*)
   let empty : t = 
     { x_min = (~-.10.); x_max = 10.; y_min = (~-.10.); y_max = 10. }
 
@@ -332,9 +330,9 @@ module Coords = struct
 
 end
 
-(**State is the module that holds type [t], which is the representation
-   of the current environment that holds variable values. In it are also 
-   functions that help update this environment*)
+(** [State] is the module that holds type [t], which is the representation
+    of the current environment that holds variable values. In it are also 
+    functions that help update this environment*)
 module State = struct 
   type t = (VarLog.var list) ref
   let empty : t = ref []

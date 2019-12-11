@@ -1,10 +1,6 @@
 open Ast
 open Graphics
 
-(** [better_int_of_float f] is [f] cast to an integer, for the purposes
-    of the graph: if it's too big or too small, set to the extrema of [int],
-    divided by 2, because we'll never set the graph to be that large 
-    anyways. *)
 let better_int_of_float (f : float) = 
   if f >= (max_int |> float_of_int) then max_int / 2
   else if f <= (min_int |> float_of_int) then min_int / 2
@@ -16,6 +12,7 @@ let num_ticks = 10
 let tick_height = window_height / num_ticks
 let tick_width = window_width / num_ticks
 
+
 let open_output_window () = 
   open_graph "";
   set_window_title "Output";
@@ -24,6 +21,8 @@ let open_output_window () =
   set_text_size 20;
   ()
 
+(**[parse_color color] converts an Ast.Color to a form recognizable by the
+   OCaml graphing module.*)
 let parse_color = function 
   | Color Red -> red 
   | Color Black -> black 
@@ -62,16 +61,15 @@ let draw_line x1 y1 x2 y2 =
   moveto (xi1 * x_interval) (window_height - yi1 * y_interval);
   lineto (xi2 * x_interval) (window_height - yi2 * y_interval); ()
 
+(**[graph_setup x_min x_max y_min y_max] creates a new empty graphing window
+   with range [x_min] to [x_max] and domain [y_min] to [y_max].*)
 let graph_setup x_min x_max y_min y_max = 
   (* Set up window *)
   open_graph "";
   set_window_title "Graph 2-D Functions";
   resize_window window_width window_height;
   set_color black;
-
-  let pixel_height = 
-    (y_max -. y_min) /. (float_of_int window_height) in
-
+  let pixel_height = (y_max -. y_min) /. (float_of_int window_height) in
   let ypix_to_coord y = y_min +. pixel_height *. y in
 
   (* Create horizontal axis *)
@@ -84,6 +82,8 @@ let graph_setup x_min x_max y_min y_max =
 
   (* Create tickmarks *)
   let tick_inc = 10 in
+
+  (** [vert_ticks c h] creates the vertical tick marks *)
   let rec vert_ticks c h = 
     if c <> 0 then begin
       moveto (window_width / 2 - tick_inc) h;
@@ -93,6 +93,7 @@ let graph_setup x_min x_max y_min y_max =
       vert_ticks (c-1) (h + tick_height)
     end
     else () in 
+  (** [horz_ticks c h] creates the horizontal tick marks *)
   let rec horz_ticks c w = 
     if c <> 0 then begin
       moveto w (window_height / 2 - tick_inc);
@@ -102,6 +103,7 @@ let graph_setup x_min x_max y_min y_max =
       horz_ticks (c-1) (w + tick_width)
     end
     else () in
+
   vert_ticks num_ticks 0; horz_ticks num_ticks 0
 
 let rec graph_func x_min x_max y_min y_max x c f =

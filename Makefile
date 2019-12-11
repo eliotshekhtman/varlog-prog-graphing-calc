@@ -1,5 +1,5 @@
 UNITS=authors eval main repl graphing
-MLS_WITHOUT_MLIS=ast main_lang
+MLS_WITHOUT_MLIS=ast varLog
 MLS=$(UNITS:=.ml) $(MLS_WITHOUT_MLIS:=.ml)
 OBJECTS=$(UNITS:=.cmo) $(MLS_WITHOUT_MLIS:=.cmo) parser.cmo
 MLIS=$(UNITS:=.mli)
@@ -28,7 +28,8 @@ repl:
 zip:
 	zip vΛrl0g.zip *.ml* * _tags Makefile
 
-docs: docs-public docs-private
+docs: 
+	docs-public docs-private
 	
 docs-public: build
 	mkdir -p doc.public
