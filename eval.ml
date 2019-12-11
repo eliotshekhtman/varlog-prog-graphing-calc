@@ -38,8 +38,8 @@ let rec has_goto = function
   | DDisp (_, d) -> has_goto d
   | DAssign (_, _, d) -> has_goto d
   | DPrompt (_, d) -> has_goto d
-  | DIf (_, d1, d2, d3) -> 
-    has_goto d1 || has_goto d2 || has_goto d3
+  | DIf (_, d1, d2, d3) -> has_goto d3
+  (*has_goto d1 || has_goto d2 || has_goto d3*)
   | DGoto (_, d) -> true 
   | DGotoSub (_, d) -> has_goto d
   | DLabel (_, d) -> has_goto d
@@ -53,6 +53,52 @@ let rec has_goto = function
   | DDefClass (_, _, _, d) -> has_goto d
   | DWhile (_, _, d) -> has_goto d
   | _ -> failwith "Unimplemented: has_goto"
+
+let rec has_return = function 
+  | DEnd -> false
+  | DReturn (e,d) -> true
+  | DGraph (_, d) -> has_return d
+  | DDisp (_, d) -> has_return d
+  | DAssign (_, _, d) -> has_return d
+  | DPrompt (_, d) -> has_return d
+  | DIf (_, d1, d2, d3) -> has_return d3
+  (*has_goto d1 || has_goto d2 || has_goto d3*)
+  | DGoto (_, d) -> true 
+  | DGotoSub (_, d) -> has_return d
+  | DLabel (_, d) -> has_return d
+  | DMatrixSet (_, _, _, _, d) -> has_return d
+  | DOutput (_, _, _, _, d) -> has_return d
+  | DLine (_, _, _, _, d) -> has_return d
+  | DFunction (_, _, _, d) -> has_return d
+  | DDefStruct (_, _, _, d) -> has_return d
+  | DStructSet (_, _, _, d) -> has_return d
+  | DObjSet (_, _, _, d) -> has_return d
+  | DDefClass (_, _, _, d) -> has_return d
+  | DWhile (_, _, d) -> has_return d
+  | _ -> failwith "Unimplemented: has_goto"
+
+let rec atoc = function 
+  | DEnd -> false
+  | DReturn (e,d) -> true
+  | DGraph (_, d) -> atoc d
+  | DDisp (_, d) -> atoc d
+  | DAssign (_, _, d) -> atoc d
+  | DPrompt (_, d) -> atoc d
+  | DIf (_, d1, d2, d3) ->
+    has_return d1 || has_return d2 || atoc d3
+  | DGoto (_, d) -> true 
+  | DGotoSub (_, d) -> atoc d
+  | DLabel (_, d) -> atoc d
+  | DMatrixSet (_, _, _, _, d) -> atoc d
+  | DOutput (_, _, _, _, d) -> atoc d
+  | DLine (_, _, _, _, d) -> atoc d
+  | DFunction (_, _, _, d) -> atoc d
+  | DDefStruct (_, _, _, d) -> atoc d
+  | DStructSet (_, _, _, d) -> atoc d
+  | DObjSet (_, _, _, d) -> atoc d
+  | DDefClass (_, _, _, d) -> atoc d
+  | DWhile (_, _, d) -> atoc d
+  | _ -> failwith "Unimplemented: atoc"
 
 (*BISECT-IGNORE-END*)
 
