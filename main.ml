@@ -5,7 +5,7 @@ open String
 open Stdlib
 open VarLog 
 
-(* exception DeterminantZero *)
+(** [No_keyword] *)
 exception No_keyword
 exception DeterminantZero
 
@@ -72,10 +72,9 @@ let newton_helper e =
   print_endline "Enter guesses for values: ";
   newton_apply f
 
-let matrix = [| [|1.;2.;3.|];[|0.;1.;5.|];[|5.;6.;0.|] |]
-let matrix_made = Array.make_matrix 3 3 4
-
-let find_det a d b c = a *. d -. b *. c
+(**[det a d b c] is the determinant of a 2 by 2 matrix represented by
+   [[a,b], [c,d]]*)
+let det a d b c = a *. d -. b *. c
 
 (**[determined_matrix2 matrix] is the determinant of a 2 by 2 matrix [matrix]*)
 let determined_matrix2 matrix = 
@@ -83,67 +82,48 @@ let determined_matrix2 matrix =
   let d1 = matrix.(1).(1) in
   let b1 = matrix.(0).(1) in
   let c1 = matrix.(1).(0) in
-  let det = find_det a1 d1 b1 c1 in
+  let det = det a1 d1 b1 c1 in
   let new_matrix = ([|
       [|d1; -1. *. b1|];
       [|-1.*.c1; a1|]
     |], det) in new_matrix
 
-(**[determined_matrix3 matrix] is the determinant of a 3 by 3 matrix [matrix]*)
-let determined_matrix3 (matrix:float array array ) = 
-  let a1 = matrix.(1).(1) in
-  let d1 = matrix.(2).(2) in
-  let b1 = matrix.(1).(2) in
-  let c1 = matrix.(2).(1) in
-  let det1 = find_det a1 d1 b1 c1 in 
-  let a2 = matrix.(1).(0) in
-  let d2 = matrix.(2).(2) in
-  let b2 = matrix.(1).(2) in
-  let c2 = matrix.(2).(0) in
-  let det2 = -1. *. find_det a2 d2 b2 c2 in
-  let a3 = matrix.(1).(0) in
-  let d3 = matrix.(2).(1) in
-  let b3 = matrix.(1).(1) in
-  let c3 = matrix.(2).(0) in
-  let det3 = find_det a3 d3 b3 c3 in
-  let a4 = matrix.(0).(1) in
-  let d4 = matrix.(2).(2) in
-  let b4 = matrix.(0).(2) in
-  let c4 = matrix.(2).(1) in
-  let det4 = -1. *.find_det a4 d4 b4 c4 in
-  let a5 = matrix.(0).(0) in
-  let d5 = matrix.(2).(2) in
-  let b5 = matrix.(0).(2) in
-  let c5 = matrix.(2).(0) in
-  let det5 = find_det a5 d5 b5 c5 in
-  let a6 = matrix.(0).(0) in
-  let d6 = matrix.(2).(1) in
-  let b6 = matrix.(0).(1) in
-  let c6 = matrix.(2).(0) in
-  let det6 = -1. *.find_det a6 d6 b6 c6 in
-  let a7 = matrix.(0).(1) in
-  let d7 = matrix.(1).(2) in
-  let b7 = matrix.(0).(2) in
-  let c7 = matrix.(1).(1) in
-  let det7 = find_det a7 d7 b7 c7 in
-  let a8 = matrix.(0).(0) in
-  let d8 = matrix.(1).(2) in
-  let b8 = matrix.(0).(2) in
-  let c8 = matrix.(1).(0) in
-  let det8 = -1. *.find_det a8 d8 b8 c8 in
-  let a9 = matrix.(0).(0) in
-  let d9 = matrix.(1).(1) in
-  let b9 = matrix.(0).(1) in
-  let c9 = matrix.(1).(0) in
-  let det9 = find_det a9 d9 b9 c9 in
-  let det = 
-    (matrix.(0).(0)*.det1) +. (matrix.(0).(1) *. det2) +. (matrix.(0).(2)*.det3)
-  in
+(**[make_matrix_from_det det1 det2 det3 det4 det5 det6 det7 det8 det9 det] is
+   the 3 by 3 matrix of determinants of every 2 by 2 matrix in the original 
+   3 by 3 matrix, tupled with the overall determinant of the 3 by 3 matrix
+   matrix. The final type is (float array array * float) 
+    Requires: 
+      [det1] ... [det9] are the correct determinants of each 2 by 2 in the 
+      larger 3 by 3 matrix
+      [det] is the correct overall determinant of the 3 by 3 matrix
+    Exception:
+      raises [DeterminantZero] if [det] is zero*)
+let make_matrix_from_det det1 det2 det3 det4 det5 det6 det7 det8 det9 det =
   if det = 0. then raise DeterminantZero
   else 
-    let new_matrix = ([|[|det1;det2;det3;|]; 
-                        [|det4;det5;det6;|];[|det7;det8;det9;|]|], det) in
-    new_matrix
+    let new_matrix = ([|[|det1;det2;det3;|]; [|det4;det5;det6;|];
+                        [|det7;det8;det9;|]|], det) 
+    in new_matrix
+
+(**[determined_matrix3 matrix] is the determinant of a 3 by 3 matrix [matrix]*)
+let determined_matrix3 (matrix:float array array ) = 
+  let det1 = det matrix.(1).(1) matrix.(2).(2) matrix.(1).(2) matrix.(2).(1) in
+  let det2 = -1. *. det matrix.(1).(0) matrix.(2).(2) matrix.(1).(2)
+                matrix.(2).(0) in
+  let det3 = det matrix.(1).(0) matrix.(2).(1) matrix.(1).(1) matrix.(2).(0) in
+  let det4 = -1. *.det matrix.(0).(1) matrix.(2).(2) matrix.(0).(2)
+                matrix.(2).(1) in
+  let det5 = det matrix.(0).(0) matrix.(2).(2)  matrix.(0).(2) matrix.(2).(0) in
+  let det6 = -1. *.det matrix.(0).(0) matrix.(2).(1) matrix.(0).(1)
+                matrix.(2).(0) in
+  let det7 = det matrix.(0).(1) matrix.(1).(2) matrix.(0).(2) matrix.(1).(1) in
+  let det8 = -1. *.det matrix.(0).(0) matrix.(1).(2) matrix.(0).(2) 
+                matrix.(1).(0) in
+  let det9 = det matrix.(0).(0) matrix.(1).(1) matrix.(0).(1) matrix.(1).(0) in
+  let det = 
+    (matrix.(0).(0)*.det1) +. (matrix.(0).(1) *. det2) +. (matrix.(0).(2)*.det3)
+  in make_matrix_from_det det1 det2 det3 det4 det5 det6 det7 det8 det9 det
+
 
 (**[reflect matrix] is the reflection of a 3 by 3 matrix [matrix]*)
 let reflect (matrix: float array array) =
@@ -161,11 +141,8 @@ let reflect (matrix: float array array) =
 (**[normalized matrix det num] is the normalized [num] by [num] matrix [matrix]
    that has determinant [det]*)
 let normalized matrix det num = 
-  print_string (string_of_float det);
-  print_string ("reached this point 1******");
   let inverse_det = if det = 0. then raise DeterminantZero else det ** -1. in
   if(num = 3) then (
-    print_string (inverse_det |> string_of_float);
     matrix.(0).(0) <- inverse_det *. matrix.(0).(0);
     matrix.(0).(1) <- inverse_det *. matrix.(0).(1);
     matrix.(0).(2) <- inverse_det *. matrix.(0).(2);
@@ -243,7 +220,7 @@ let parse_lin_equation3 str  =
     let z = s3 |> parse |> eval_expr [] |> fst |> pull_num in
     let answer = s4 |> parse |> eval_expr [] |> fst |> pull_num in
     ([|x;y;z|], answer);
-  |_-> failwith "Wrong number of values"
+  |_-> failwith "Wrong number of values. Redo ALL of your functions"
 
 (**[parse_lin_equation3 str] converts a string representation of a system of
    linear equations with 3 unknowns, [str], into the required arrays for
@@ -256,7 +233,8 @@ let parse_lin_equation2 str =
     let y = s2 |> parse |> eval_expr [] |> fst |> pull_num in
     let answer = s3 |> parse |> eval_expr [] |> fst |> pull_num in
     ([|x;y|], answer);
-  |_-> failwith "Wrong number of values"
+  |_-> failwith "Wrong number of values. Redo ALL of your functions"
+
 
 (**[parse_lin_equation3 str] converts a string representation of a system of
    linear equations with 2 unknowns, [str], into the required arrays for

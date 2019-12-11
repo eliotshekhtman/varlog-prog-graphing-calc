@@ -645,7 +645,9 @@ and eval_dgraph e d vl =
   Graphing.graph_func (-10.) (10.) (-10.) (10.) 0 Graphics.black f;
   eval d vl
 
-
+(** [eval_output x y v c d vl] is the evaluation of [d], but it
+    displays the evaluation of [v] at coordinates [x] [y] with
+    color [c] *)
 and eval_output x y v c d vl = 
   let x' = x |> eval_expr (VarLog.expose vl) |> fst in 
   let y' = y |> eval_expr (VarLog.expose vl) |> fst in 
@@ -657,6 +659,9 @@ and eval_output x y v c d vl =
     end
   | _ -> failwith "precondition violated: not numerical coordinates"
 
+(** [eval_matrixset m a b v d vl] is the evaluation of [d], but it
+    sets the value of [m] at coordinates [a] [b] to the evaluation 
+    of [v] *)
 and eval_matrixset m a b v d vl = 
   let m' = m |> eval_expr (VarLog.expose vl) |> fst in 
   let a' = a |> eval_expr (VarLog.expose vl) |> fst in
@@ -677,7 +682,7 @@ and eval_matrixset m a b v d vl =
 
 (**[eval_disp e d vl] prints out whatever string/integer/boolean/valid input
    that you pass in. 
-   Returns the evaluation of the same definition and vl that was put in by 
+   Returns the evaluation of the same definition and [vl] that was put in by 
    putting those two through [eval d vl] again*) 
 and eval_disp e d vl = 
   let v = e |> eval_expr (VarLog.expose vl) |> fst |> string_of_val in 

@@ -24,7 +24,9 @@ open Eval
      as we test almost all branches made available to us through the test
      cases and cover the rest in manual testing.  All evaluations are guaranteed
      to work as expected, and simple combinations of definitions are too, with 
-     complex examples being integrated in our complex test files.
+     complex examples being integrated in our complex test files. (aka the 
+     files with the scripting in our language: connectfour.vl, testLOOP.vl, 
+     chess_obj.vl, etc)
 
 *)
 
