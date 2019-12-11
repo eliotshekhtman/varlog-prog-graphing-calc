@@ -28,31 +28,57 @@ let rec find_lbls vl = function
 
 (*BISECT-IGNORE-BEGIN*)
 
-(** [has_goto d] is if there is an abrupt transfer of control
-    in [d], such as a [GOTO] or a [RETURN], which is in
-    essence not to different from a [GOTO] in standard usage *)
-let rec has_goto = function 
+
+(** [has_return d] is if there is a [RETURN] 
+    in [d] *)
+let rec has_return = function 
   | DEnd -> false
   | DReturn (e,d) -> true
-  | DGraph (_, d) -> has_goto d
-  | DDisp (_, d) -> has_goto d
-  | DAssign (_, _, d) -> has_goto d
-  | DPrompt (_, d) -> has_goto d
+  | DGraph (_, d) -> has_return d
+  | DDisp (_, d) -> has_return d
+  | DAssign (_, _, d) -> has_return d
+  | DPrompt (_, d) -> has_return d
   | DIf (_, d1, d2, d3) -> 
-    has_goto d1 || has_goto d2 || has_goto d3
+    has_return d1 || has_return d2 || has_return d3
+  | DGoto (_, d) -> has_return d 
+  | DGotoSub (_, d) -> has_return d
+  | DLabel (_, d) -> has_return d
+  | DMatrixSet (_, _, _, _, d) -> has_return d
+  | DOutput (_, _, _, _, d) -> has_return d
+  | DLine (_, _, _, _, d) -> has_return d
+  | DFunction (_, _, _, d) -> has_return d
+  | DDefStruct (_, _, _, d) -> has_return d
+  | DStructSet (_, _, _, d) -> has_return d
+  | DObjSet (_, _, _, d) -> has_return d
+  | DDefClass (_, _, _, d) -> has_return d
+  | DWhile (_, _, d) -> has_return d
+  | _ -> failwith "Unimplemented: has_return"
+
+(** [atoc d] is if there is an abrupt transfer of control
+    in [d], such as a [GOTO] or a [RETURN] which indicates that
+    there has been an Abrupt Transfer of Control (atoc). *)
+let rec atoc = function 
+  | DEnd -> false
+  | DReturn (e,d) -> true
+  | DGraph (_, d) -> atoc d
+  | DDisp (_, d) -> atoc d
+  | DAssign (_, _, d) -> atoc d
+  | DPrompt (_, d) -> atoc d
+  | DIf (_, d1, d2, d3) ->
+    has_return d1 || has_return d2 || atoc d3
   | DGoto (_, d) -> true 
-  | DGotoSub (_, d) -> has_goto d
-  | DLabel (_, d) -> has_goto d
-  | DMatrixSet (_, _, _, _, d) -> has_goto d
-  | DOutput (_, _, _, _, d) -> has_goto d
-  | DLine (_, _, _, _, d) -> has_goto d
-  | DFunction (_, _, _, d) -> has_goto d
-  | DDefStruct (_, _, _, d) -> has_goto d
-  | DStructSet (_, _, _, d) -> has_goto d
-  | DObjSet (_, _, _, d) -> has_goto d
-  | DDefClass (_, _, _, d) -> has_goto d
-  | DWhile (_, _, d) -> has_goto d
-  | _ -> failwith "Unimplemented: has_goto"
+  | DGotoSub (_, d) -> atoc d
+  | DLabel (_, d) -> atoc d
+  | DMatrixSet (_, _, _, _, d) -> atoc d
+  | DOutput (_, _, _, _, d) -> atoc d
+  | DLine (_, _, _, _, d) -> atoc d
+  | DFunction (_, _, _, d) -> atoc d
+  | DDefStruct (_, _, _, d) -> atoc d
+  | DStructSet (_, _, _, d) -> atoc d
+  | DObjSet (_, _, _, d) -> atoc d
+  | DDefClass (_, _, _, d) -> atoc d
+  | DWhile (_, _, d) -> atoc d
+  | _ -> failwith "Unimplemented: atoc"
 
 (*BISECT-IGNORE-END*)
 
@@ -548,11 +574,11 @@ and eval d vl =
 and eval_while evaluated_once e d1 d2 vl = 
   match e |> eval_expr (VarLog.expose vl) |> fst with 
   | Bool false -> 
-    if (not evaluated_once || d1 |> has_goto |> not) then eval d2 vl
+    if (not evaluated_once || d1 |> atoc |> not) then eval d2 vl
     else (Null, VarLog.expose vl)
   | Bool true -> 
     let r = eval d1 vl in 
-    if (not evaluated_once || d1 |> has_goto |> not) 
+    if (not evaluated_once || d1 |> atoc |> not) 
     then eval_while true e d1 d2 vl
     else r
   | _ -> failwith "precondition violated: while guard"
@@ -676,10 +702,10 @@ and eval_if e d1 d2 d3 vl =
   match e |> eval_expr (VarLog.expose vl) |> fst with 
   | Bool true -> 
     let res = eval d1 vl in
-    if(d1 |> has_goto |> not) then eval d3 vl else res
+    if(d1 |> atoc |> not) then eval d3 vl else res
   | Bool false -> 
     let res = eval d2 vl in
-    if(d2 |> has_goto |> not) then eval d3 vl else res
+    if(d2 |> atoc |> not) then eval d3 vl else res
   | _ -> failwith "precondition violated: if guard"
 
 let eval_init vl d = eval d (find_lbls vl d)
