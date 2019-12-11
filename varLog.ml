@@ -1,3 +1,7 @@
+(** 
+   VarLog is the module in which the label and variable environments are stored
+   and used in all the other modules for input/output and evaluation.
+*)
 open Ast
 
 module type VL = sig 

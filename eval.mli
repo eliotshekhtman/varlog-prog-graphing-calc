@@ -1,3 +1,7 @@
+(** 
+   This is the module in which all the evaluation takes place.
+*)
+
 open Ast 
 open Array
 open VarLog

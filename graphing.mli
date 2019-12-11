@@ -1,3 +1,7 @@
+(** 
+   This is the module in which graphing, as well as the input/output for scripts
+   takes place.
+*)
 open Ast
 
 (** [better_int_of_float f] is [f] cast to an integer, for the purposes
