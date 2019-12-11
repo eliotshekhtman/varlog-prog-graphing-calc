@@ -143,7 +143,8 @@ let scalar_mult a (arr: float array array) : float array array =
 (** [add_mat a1 a2] returns the 2d float array which is the result of  of adding
     multiplication of float [f] with matrix [m] *)
 let add_mat a1 a2  = 
-  if (Array.length a1 <> Array.length a2 || Array.length a1.(0) <> Array.length a1.(0)) then
+  if (Array.length a1 <> Array.length a2 || 
+      Array.length a1.(0) <> Array.length a1.(0)) then
     failwith "matrices must have the same dimensions to be added" 
   else
     let arr' = Array.make_matrix (Array.length a1) (Array.length a1.(0)) 0. in

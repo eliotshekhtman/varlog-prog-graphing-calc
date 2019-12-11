@@ -1,14 +1,18 @@
 NOT AN EXECUTABLE FILE
 
-Please run [cloc *.ml*], as we have dead code in directory legacy-files/.  These
-files represent time that we put into the project as a whole, and we didn't
-fully delete them partially so we have our old code for reference/if something
-goes wrong and partially so we'll have a record of all the work we did that we
-did in hubris and had to throw out when we learned a better way to do it.
-None of them play any role in our current project as it stands though.
+Please run [cloc *.ml*].  Any file in a subdirectory isn't to be counted as 
+live code for our submission.
 
-As a sidenote, we have many [.txt] files which represent executable scripts for 
-our language, and may be run through [EXEC "filename"] where "filename.txt" is
+It must be added that when you'll be looking at the parser, it'll look like a 
+mess of duplicated code at first glance, and ripe LOC garnering grounds; 
+however, each line is an important part of the parsing.  Newlines are,
+unfortunately, counted as a syntactic part of the language, and so we allowed
+multiple forms of every definition to allow for flexibility with newlines when 
+it shouldn't create an issue.  A clarified version of this is present in the 
+readme README.md, and you're welcome to verify that each line is accounted for.
+
+As a sidenote, we have many [.vl] files which represent executable scripts for 
+our language, and may be run through [EXEC "filename"] where "filename.vl" is
 the file to be executed.  They are not picked up in [cloc], and you may not 
 count them; however, their consideration as code written for the assignment 
 would be greatly appreciated as they took manhours as well to complete, and are 

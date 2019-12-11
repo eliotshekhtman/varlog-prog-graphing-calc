@@ -13,6 +13,18 @@ open Eval
      side effects, except by analysis.  We assume that their compilation,
      combined with our inspection, will ensure their scalability into 
      larger examples.  
+     Through OUnit, we mainly focused on testing things as they'd appear in
+     the REPL, so eval.ml is mainly tested, with other functions from
+     every other module coming into play (except modules State and Coords in
+     Main).  They were developed mainly through glass-box style, focusing
+     on covering all branches of the pattern matches; however, 
+     the manual testing delved into both as we attempted to ensure correctness. 
+
+     We posit that this testing approach demonstrates correctness of the system,
+     as we test almost all branches made available to us through the test
+     cases and cover the rest in manual testing.  All evaluations are guaranteed
+     to work as expected, and simple combinations of definitions are too, with 
+     complex examples being integrated in our complex test files.
 
 *)
 
