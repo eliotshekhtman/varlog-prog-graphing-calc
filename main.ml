@@ -332,7 +332,9 @@ module Coords = struct
 
 end
 
-
+(**State is the module that holds type [t], which is the representation
+   of the current environment that holds variable values. In it are also 
+   functions that help update this environment*)
 module State = struct 
   type t = (VarLog.var list) ref
   let empty : t = ref []
