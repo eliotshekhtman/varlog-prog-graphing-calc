@@ -7,11 +7,11 @@ let digit = ['0'-'9']
 let lletter = ['a'-'z']
 let uletter = ['A'-'Z']
 let float = digit+ '.'? digit*
-let word = (uletter | lletter)+
+let word = (uletter | lletter) (uletter | lletter | digit | '_')*
 let symbol = ('!' | ['#'-'~'])+
 let string = '"' (word | digit | white | symbol)+ '"'
-let comment = '`' (word | digit | white | symbol)* '`'
 let endchar = '\n'*
+let comment = '`' (word | digit | white | symbol | endchar)* '`'
 
 rule read =
   parse 
