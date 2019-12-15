@@ -1,0 +1,6 @@
+FUN fact : x -> {
+	IF x <= 0 THEN RETURN 1
+	ELSE RETURN (x * fact<-((x-1)))
+}
+
+DISP fact<-(3)

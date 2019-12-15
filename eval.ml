@@ -375,7 +375,8 @@ and eval_app n es vl =
     let res = eval body (find_lbls vl' body) in 
     (Object (res |> snd), vl)
   | Closure (args, d, vl_closure) ->  
-    let new_vl = eval_app_helper args es vl_closure vl in
+    let vl_c' = replace vl_closure n value in
+    let new_vl = eval_app_helper args es vl_c' vl in
     let x = ref (new_vl,[]) in
     eval d (find_lbls x d)
   | Struct (cargs, body) -> begin 
