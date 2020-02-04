@@ -113,6 +113,7 @@ and defn =
   | DStructSet of string * string * expr * defn
   | DObjSet of string * string * expr * defn
   | DWhile of expr * defn * defn
+  | DVoidFunc of expr * expr list * defn
   | DEnd 
   (** Type [phrase] represents a phrase containing either an expression or a
       definition *)

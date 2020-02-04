@@ -402,6 +402,19 @@ defn:
 		{ if has_dups xs
 			then $syntaxerror (* duplicate argument names *)
 			else DFunction (n, xs, d, DEnd) }
+	
+	| n = NAME; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; END; d = defn; { DVoidFunc (Var n, es, d) }
+	| n = NAME; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; END; { DVoidFunc (Var n, es, DEnd) }
+	| n = NAME; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; { DVoidFunc (Var n, es, DEnd) }
+	| n = NAME; RARROW; LPAREN; RPAREN; END; d = defn; { DVoidFunc (Var n, [], d) }
+	| n = NAME; RARROW; LPAREN; RPAREN; END; { DVoidFunc (Var n, [], DEnd) }
+	| n = NAME; RARROW; LPAREN; RPAREN; { DVoidFunc (Var n, [], DEnd) }
+	| e = expr; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; END; d = defn; { DVoidFunc (e, es, d) }
+	| e = expr; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; END; { DVoidFunc (e, es, DEnd) }
+	| e = expr; RARROW; LPAREN; es = nonempty_list(expr); RPAREN; { DVoidFunc (e, es, DEnd) }
+	| e = expr; RARROW; LPAREN; RPAREN; END; d = defn; { DVoidFunc (e, [], d) }
+	| e = expr; RARROW; LPAREN; RPAREN; END; { DVoidFunc (e, [], DEnd) }
+	| e = expr; RARROW; LPAREN; RPAREN; { DVoidFunc (e, [], DEnd) }
 	;
 
 short_defn:

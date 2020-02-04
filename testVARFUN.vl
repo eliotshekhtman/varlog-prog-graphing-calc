@@ -1,0 +1,10 @@
+FUN f :-> { a : 3 }
+a : 4
+DISP a
+f<-()
+DISP a
+b : 5
+FUN g :-> { b : 6 }
+DISP b
+g<-()
+DISP b

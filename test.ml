@@ -213,13 +213,18 @@ let eval_tests = [
       greet : hello<-(3)
       greet.a : 4
       RETURN greet.val<-()|};
-  (* make_eval_test "objfunc4" "4" 
-     {|CLASS hello : a -> { 
+  make_eval_test "objfunc4" "4" 
+    {|CLASS hello : a -> { 
         FUN val :-> { a : a+1 }
       }
       greet : hello<-(3)
-      null : greet.val<-()
-      RETURN greet.a|}; *)
+      greet.val<-()
+      RETURN greet.a|};
+  make_eval_test "funcvar1" "4"
+    {|a : 3
+      FUN f :-> { a : a+1 }
+      f<-()
+      RETURN a|};
 ]
 
 let tests = [

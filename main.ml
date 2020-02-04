@@ -343,7 +343,10 @@ let set_scale coords =
 
 let interp (s : string) : string =
   match s |> parse_phrase with 
-  | Expr e -> e |> eval_expr (ref (!State.empty, [])) |> fst |> string_of_val
+  | Expr e -> 
+    let res = e |> eval_expr (ref (!State.empty, [])) in 
+    State.update_state State.empty (VarLog.expose (snd res));
+    res |> fst |> string_of_val
   | Defn d -> begin 
       let vl' = ref (!State.empty, []) in
       let res = s |> Main_lang.parse |> eval_init vl' in 

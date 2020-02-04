@@ -24,6 +24,7 @@ let rec find_lbls vl = function
   | DWhile (_, _, d) -> find_lbls vl d
   | DDefClass (_, _, _, d) -> find_lbls vl d
   | DObjSet (_, _, _, d) -> find_lbls vl d
+  | DVoidFunc (_, _, d) -> find_lbls vl d
   | _ -> failwith "Unimplemented: find_lbls"
 
 (*BISECT-IGNORE-BEGIN*)
@@ -52,6 +53,7 @@ let rec has_return = function
   | DObjSet (_, _, _, d) -> has_return d
   | DDefClass (_, _, _, d) -> has_return d
   | DWhile (_, _, d) -> has_return d
+  | DVoidFunc (_, _, d) -> has_return d
   | _ -> failwith "Unimplemented: has_return"
 
 (** [atoc d] is if there is an abrupt transfer of control
@@ -78,6 +80,7 @@ let rec atoc = function
   | DObjSet (_, _, _, d) -> atoc d
   | DDefClass (_, _, _, d) -> atoc d
   | DWhile (_, _, d) -> atoc d
+  | DVoidFunc (_, _, d) -> atoc d
   | _ -> failwith "Unimplemented: atoc"
 
 (*BISECT-IGNORE-END*)
@@ -312,6 +315,15 @@ let substitute vl s =
   try List.assoc s vl with _ -> 
     failwith ("precondition violated: unbound var " ^ s)
 
+let reinstate_vars vl_ext vl_int = 
+  let rec reinstate_vars_helper = function 
+    | [] -> ()
+    | (name, value) :: t -> 
+      match VarLog.find name vl_int with 
+      | None -> reinstate_vars_helper t
+      | Some v -> VarLog.bind name v vl_ext; reinstate_vars_helper t
+  in reinstate_vars_helper (VarLog.expose vl_ext)
+
 let pull_num = function 
   | Num n -> n 
   | _ -> failwith "precondition violated: not a number"  
@@ -384,7 +396,9 @@ and eval_app n es vl =
   | Closure (args, d, vl_closure) ->  
     VarLog.bind n value vl_closure;
     let new_vl = eval_app_helper args es vl_closure vl in
-    eval d (find_lbls new_vl d)
+    let res = eval d (find_lbls new_vl d) in
+    reinstate_vars vl_closure (snd res);
+    res
   | Struct (cargs, body) -> begin 
       let new_vl = eval_app_helper cargs es vl (VarLog.empty ()) in
       let res = eval body new_vl |> snd in
@@ -399,7 +413,9 @@ and eval_complapp e es vl =
   match clsr with 
   | Closure (args, d, vl_closure) -> 
     let new_vl = eval_app_helper args es vl_closure vl in
-    eval d (find_lbls new_vl d) 
+    let res = eval d (find_lbls new_vl d) in
+    reinstate_vars vl_closure (snd res);
+    res
   | _ -> failwith "Can't do function application on non-function"
 
 (** [eval_varmat a b vl] is the result of evaluating a [VarMat] type. It creates
@@ -582,7 +598,20 @@ and eval d vl =
   | DObjSet (n, s, e, d) -> 
     eval_set n s e d vl
   | DWhile (e, d1, d2) -> eval_while false e d1 d2 vl
+  | DVoidFunc (e, elst, d) -> eval_voidfunc e elst d vl
   | _ -> failwith "Unimplemented: eval"
+(** [eval_voidfunc e elst d] evaluates a closure given 
+    in [e] with arguments [es] in VarLog [vl], and updates
+    [vl] with preexisting variables *)
+and eval_voidfunc e elst d vl =
+  let clsr = eval_expr vl e |> fst in 
+  match clsr with 
+  | Closure (args, body, vl_closure) -> 
+    let new_vl = eval_app_helper args elst vl_closure vl in
+    let res_vl = eval body (find_lbls new_vl body) |> snd in 
+    reinstate_vars vl_closure res_vl;
+    eval d vl
+  | _ -> failwith "Can't do function application on non-function"
 (**[eval_while evaluated_once e d1 d2 vl] evaluates a while loop*)
 and eval_while evaluated_once e d1 d2 vl = 
   match e |> eval_expr (vl) |> fst with 
