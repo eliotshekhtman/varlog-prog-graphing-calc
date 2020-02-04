@@ -1,0 +1,11 @@
+LBL checkPoint
+DISP "Hello"
+IF true THEN (
+  DISP "1"
+  IF false THEN (
+    GOTO end
+  )
+)
+DISP "3"
+LBL end
+DISP "4"

@@ -83,13 +83,14 @@ and value =
   | Num of float 
   | Bool of bool 
   | Str of string
-  | Closure of id list * defn * ((string * value) list)
+  | Closure of id list * defn * 
+               (((string * value) list) * ((string * defn) list)) ref
   | Matrix of float array array
   | VarMat of value array array
-  | Built of (string * value) list
+  | Built of (((string * value) list) * ((string * defn) list)) ref
   | Struct of id list * defn
   | Class of id list * defn 
-  | Object of (string * value) list
+  | Object of (((string * value) list) * ((string * defn) list)) ref
   | Color of color
   | Null
   (** Type [defn] represents a definition *)

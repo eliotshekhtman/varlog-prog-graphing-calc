@@ -45,10 +45,12 @@ CLASS piece : x y -> {
     )
     IF type="P" THEN (
       DISP "pawn "+type+" "+team+" "+x+" "+y+" "+xb+" "+yb
-      IF team="B" & x=1 & xb=3 THEN RETURN true
-      IF team="W" & x=6 & xb=4 THEN RETURN true 
-      IF team="B" & xb=x+1 THEN RETURN true 
-      IF team="W" & xb=x-1 THEN RETURN true
+      IF y=yb THEN (
+        IF team="B" & x=1 & xb=3 THEN RETURN true
+        IF team="W" & x=6 & xb=4 THEN RETURN true 
+        IF team="B" & xb=x+1 THEN RETURN true 
+        IF team="W" & xb=x-1 THEN RETURN true
+      )
       weat : team="W" & (next.team="B") & (xb=x-1) & (yb=y+1 | yb=y-1)
       beat : team="B" & (next.team="W") & (xb=x+1) & (yb=y+1 | yb=y-1)
       DISP next.team
@@ -127,11 +129,15 @@ WHILE(xold >= 0 & yold >= 0 & xnew >= 0 & ynew >= 0) {
   xnew : PROMPT
   ynew : PROMPT
   oldp : board[xold,yold]
+  DISP "Old coords: " + oldp.x + " " + oldp.y
   IF oldp.validMove<-(turn xnew ynew board) THEN (
     oldp.moved : true 
     oldp.x : xnew END oldp.y : ynew
+    DISP "New coords: " + oldp.x + " " + oldp.y
     board[xold,yold] : nullc<-()
     board[xnew,ynew] : oldp
+    temp : board[xnew, ynew]
+    DISP "New coords: " + temp.x + " " + temp.y
     IF turn="W" THEN turn : "B"
     ELSE turn : "W"
     GOSUB DrawBoard END GOSUB DrawGrid

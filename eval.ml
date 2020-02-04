@@ -306,8 +306,9 @@ let not_val v =
   | _ -> failwith "precondition violated: not bool"
 
 (**[substitute vl e] is the value that [e] represents in the
-   association list [vl]. *)
+   VarLog [vl]. *)
 let substitute vl s = 
+  let vl = !vl |> fst in
   try List.assoc s vl with _ -> 
     failwith ("precondition violated: unbound var " ^ s)
 
@@ -348,20 +349,27 @@ let rec eval_expr vl e =
   | ComplApp(e, es) -> eval_complapp e es vl
   | _ -> failwith "lol right"
 
-(** [eval_add_helper args es clos vl_ext] *)
+(** [eval_add_helper args es clos vl_ext] is the VarLog created by 
+    evaluating all the expressions [es] using the external VarLog
+    [vl_ext], and binding them to [args] in the closure's VarLog [clos]
+    Precondition: [args] must have as many terms as [es] *)
 and eval_app_helper args es clos vl_ext = 
   if List.length args != List.length es 
   then failwith "precondition violated: wrong # of args in function"
   else
+    (** [bind_args args ex vl vl_ext] is the VarLog created by evaluating
+        all the expressions [ex] using the external VarLog [vl_ext], and
+        binding them to [args] in the closure's VarLog [vl] *)
     let rec bind_args args ex vl vl_ext = 
       match args, ex with 
       | [], [] -> vl 
       | h1 :: t1, h2 :: t2 ->
         let val_arg = fst (eval_expr vl_ext h2) in 
-        bind_args t1 t2 (replace vl h1 val_arg) vl_ext
+        VarLog.bind h1 val_arg vl;
+        bind_args t1 t2 vl vl_ext
       | _ -> failwith "improper # args checking"
     in 
-    let new_vl = bind_args args es clos vl_ext in 
+    let new_vl = bind_args args es (ref (!clos)) vl_ext in 
     new_vl  
 
 (** [eval_app n es vl] is the evaluation of the function bound to [n] in 
@@ -370,18 +378,16 @@ and eval_app n es vl =
   let value = substitute vl n in
   match value with 
   | Class (cargs, body) -> 
-    let new_vl = eval_app_helper cargs es [] vl in 
-    let vl' = ref (new_vl, []) in 
-    let res = eval body (find_lbls vl' body) in 
+    let new_vl = eval_app_helper cargs es (VarLog.empty ()) vl in
+    let res = eval body (find_lbls new_vl body) in 
     (Object (res |> snd), vl)
   | Closure (args, d, vl_closure) ->  
-    let vl_c' = replace vl_closure n value in
-    let new_vl = eval_app_helper args es vl_c' vl in
-    let x = ref (new_vl,[]) in
-    eval d (find_lbls x d)
+    VarLog.bind n value vl_closure;
+    let new_vl = eval_app_helper args es vl_closure vl in
+    eval d (find_lbls new_vl d)
   | Struct (cargs, body) -> begin 
-      let new_vl = eval_app_helper cargs es vl [] in
-      let res = eval body (ref (new_vl, [])) |> snd in
+      let new_vl = eval_app_helper cargs es vl (VarLog.empty ()) in
+      let res = eval body new_vl |> snd in
       (Built res, vl)
     end
   | _ -> failwith "Can't do function application on non-function" 
@@ -393,8 +399,7 @@ and eval_complapp e es vl =
   match clsr with 
   | Closure (args, d, vl_closure) -> 
     let new_vl = eval_app_helper args es vl_closure vl in
-    let x = ref (new_vl,[]) in
-    eval d (find_lbls x d) 
+    eval d (find_lbls new_vl d) 
   | _ -> failwith "Can't do function application on non-function"
 
 (** [eval_varmat a b vl] is the result of evaluating a [VarMat] type. It creates
@@ -552,9 +557,9 @@ and eval_deriv vl der e1 e2 =
 (**[eval d vl] evaluates definition [d] in VarLog [vl]*)
 and eval d vl = 
   match d with 
-  | DEnd -> (Null, VarLog.expose vl)
+  | DEnd -> (Null, vl)
   | DReturn (e, d) ->  
-    (e |> eval_expr (VarLog.expose vl) |> fst, VarLog.expose vl)
+    (e |> eval_expr (vl) |> fst, vl)
   | DGraph (e, d) -> eval_dgraph e d vl
   | DDisp (e, d) -> eval_disp e d vl 
   | DAssign (s, e, d) -> eval_assign s e d vl
@@ -580,10 +585,10 @@ and eval d vl =
   | _ -> failwith "Unimplemented: eval"
 (**[eval_while evaluated_once e d1 d2 vl] evaluates a while loop*)
 and eval_while evaluated_once e d1 d2 vl = 
-  match e |> eval_expr (VarLog.expose vl) |> fst with 
+  match e |> eval_expr (vl) |> fst with 
   | Bool false -> 
     if (not evaluated_once || d1 |> atoc |> not) then eval d2 vl
-    else (Null, VarLog.expose vl)
+    else (Null, vl)
   | Bool true -> 
     let r = eval d1 vl in 
     if (not evaluated_once || d1 |> atoc |> not) 
@@ -602,12 +607,14 @@ and eval_classdef name cargs body d vl =
 and eval_set n s e d vl = 
   match VarLog.find n vl with 
   | Some (Built vl') -> begin 
-      let v = e |> eval_expr (VarLog.expose vl) |> fst in 
-      VarLog.bind n (Built (replace vl' s v)) vl; eval d vl
+      let v = e |> eval_expr (vl) |> fst in 
+      VarLog.bind s v vl';
+      VarLog.bind n (Built vl') vl; eval d vl
     end
   | Some (Object vl') -> begin 
-      let v = e |> eval_expr (VarLog.expose vl) |> fst in 
-      VarLog.bind n (Object (replace vl' s v)) vl; eval d vl
+      let v = e |> eval_expr (vl) |> fst in 
+      VarLog.bind s v vl';
+      VarLog.bind n (Object vl') vl; eval d vl
     end
   | _ -> failwith "precondition violated: not a built"
 
@@ -621,16 +628,16 @@ and eval_structdef name cargs body d vl =
 (**[eval_func args body vl] evaluates function [body] with arguments [args] in
    VarLog [vl]*)
 and eval_func args body vl = 
-  Closure (args, body, (VarLog.expose vl))
+  Closure (args, body, (vl))
 
 (**[eval_line e1 e2 e3 e4 d vl] draws lines in the graphing space. Returns the 
    the evaluation of the [d] and [vl] that was put in by putting 
    those two through [eval d vl] again*)
 and eval_line e1 e2 e3 e4 d vl = 
-  let x1 = e1 |> eval_expr (VarLog.expose vl) |> fst in 
-  let y1 = e2 |> eval_expr (VarLog.expose vl) |> fst in 
-  let x2 = e3 |> eval_expr (VarLog.expose vl) |> fst in 
-  let y2 = e4 |> eval_expr (VarLog.expose vl) |> fst in 
+  let x1 = e1 |> eval_expr (vl) |> fst in 
+  let y1 = e2 |> eval_expr (vl) |> fst in 
+  let x2 = e3 |> eval_expr (vl) |> fst in 
+  let y2 = e4 |> eval_expr (vl) |> fst in 
   match x1, y1, x2, y2 with 
   | Num f1, Num f2, Num f3, Num f4 -> begin 
       Graphing.draw_line f1 f2 f3 f4; eval d vl
@@ -650,10 +657,10 @@ and eval_dgraph e d vl =
     displays the evaluation of [v] at coordinates [x] [y] with
     color [c] *)
 and eval_output x y v c d vl = 
-  let x' = x |> eval_expr (VarLog.expose vl) |> fst in 
-  let y' = y |> eval_expr (VarLog.expose vl) |> fst in 
-  let v' = v |> eval_expr (VarLog.expose vl) |> fst in 
-  let c' = c |> eval_expr (VarLog.expose vl) |> fst in 
+  let x' = x |> eval_expr (vl) |> fst in 
+  let y' = y |> eval_expr (vl) |> fst in 
+  let v' = v |> eval_expr (vl) |> fst in 
+  let c' = c |> eval_expr (vl) |> fst in 
   match x', y' with 
   | Num a, Num b -> begin 
       Graphing.output a b (v' |> string_of_val) c'; eval d vl
@@ -664,10 +671,10 @@ and eval_output x y v c d vl =
     sets the value of [m] at coordinates [a] [b] to the evaluation 
     of [v] *)
 and eval_matrixset m a b v d vl = 
-  let m' = m |> eval_expr (VarLog.expose vl) |> fst in 
-  let a' = a |> eval_expr (VarLog.expose vl) |> fst in
-  let b' = b |> eval_expr (VarLog.expose vl) |> fst in
-  let v' = v |> eval_expr (VarLog.expose vl) |> fst in
+  let m' = m |> eval_expr (vl) |> fst in 
+  let a' = a |> eval_expr (vl) |> fst in
+  let b' = b |> eval_expr (vl) |> fst in
+  let v' = v |> eval_expr (vl) |> fst in
   match m', a', b', v' with 
   | Matrix m, Num a, Num b, Num v -> begin 
       if (is_int a && is_int b) then 
@@ -686,7 +693,7 @@ and eval_matrixset m a b v d vl =
    Returns the evaluation of the same definition and [vl] that was put in by 
    putting those two through [eval d vl] again*) 
 and eval_disp e d vl = 
-  let v = e |> eval_expr (VarLog.expose vl) |> fst |> string_of_val in 
+  let v = e |> eval_expr (vl) |> fst |> string_of_val in 
   print_endline v;
   eval d vl
 
@@ -702,7 +709,7 @@ and eval_prompt s d vl =
    the variable equal to the value of the expression. Returns [eval d vl]
    so it calls the big [eval] function again*)
 and eval_assign s e d vl =
-  let v = e |> eval_expr (VarLog.expose vl) |> fst in 
+  let v = e |> eval_expr (vl) |> fst in 
   match v with 
   | Matrix m -> 
     VarLog.bind s (Matrix (Array.map Array.copy m)) vl; eval d vl
@@ -712,7 +719,7 @@ and eval_assign s e d vl =
    to the first if condition. [d2] corresponds to the "then" sections of an
    if-else block. And [d3] corresponds to the body contained in the else block*)
 and eval_if e d1 d2 d3 vl =
-  match e |> eval_expr (VarLog.expose vl) |> fst with 
+  match e |> eval_expr (vl) |> fst with 
   | Bool true -> 
     let res = eval d1 vl in
     if(d1 |> atoc |> not) then eval d3 vl else res

@@ -56,7 +56,7 @@ let rec newton_apply f =
   match read_line () with 
   | "QUIT" -> "Quitting" 
   | s -> 
-    let inp = (s |> parse |> eval_expr [] |> fst |> pull_num) in 
+    let inp = (s |> parse |> eval_expr (VarLog.empty ()) |> fst |> pull_num) in 
     let res = apply 1000000 f inp in 
     let res' = close_int res in
     res |> string_of_float |> print_endline; 
@@ -215,10 +215,10 @@ let parse_lin_equation3 str  =
   let string_array = String.split_on_char (',') (str) in
   match string_array with
   |s1::s2::s3::s4::[]  -> 
-    let x = s1 |> parse |> eval_expr [] |> fst |> pull_num in
-    let y = s2 |> parse |> eval_expr [] |> fst |> pull_num in
-    let z = s3 |> parse |> eval_expr [] |> fst |> pull_num in
-    let answer = s4 |> parse |> eval_expr [] |> fst |> pull_num in
+    let x = s1 |> parse |> eval_expr (VarLog.empty ()) |> fst |> pull_num in
+    let y = s2 |> parse |> eval_expr (VarLog.empty ()) |> fst |> pull_num in
+    let z = s3 |> parse |> eval_expr (VarLog.empty ()) |> fst |> pull_num in
+    let answer = s4 |> parse |> eval_expr (VarLog.empty ()) |> fst |> pull_num in
     ([|x;y;z|], answer);
   |_-> failwith "Wrong number of values. Redo ALL of your functions"
 
@@ -229,9 +229,9 @@ let parse_lin_equation2 str =
   let string_array = String.split_on_char (',') (str) in
   match string_array with 
   |s1::s2::s3::[] -> 
-    let x = s1 |> parse |> eval_expr [] |> fst |> pull_num in
-    let y = s2 |> parse |> eval_expr [] |> fst |> pull_num in
-    let answer = s3 |> parse |> eval_expr [] |> fst |> pull_num in
+    let x = s1 |> parse |> eval_expr (VarLog.empty ()) |> fst |> pull_num in
+    let y = s2 |> parse |> eval_expr (VarLog.empty ()) |> fst |> pull_num in
+    let answer = s3 |> parse |> eval_expr (VarLog.empty ()) |> fst |> pull_num in
     ([|x;y|], answer);
   |_-> failwith "Wrong number of values. Redo ALL of your functions"
 
@@ -343,11 +343,11 @@ let set_scale coords =
 
 let interp (s : string) : string =
   match s |> parse_phrase with 
-  | Expr e -> e |> eval_expr !State.empty |> fst |> string_of_val
+  | Expr e -> e |> eval_expr (ref (!State.empty, [])) |> fst |> string_of_val
   | Defn d -> begin 
       let vl' = ref (!State.empty, []) in
       let res = s |> Main_lang.parse |> eval_init vl' in 
-      State.update_state State.empty (snd res); (fst res) |> string_of_val
+      State.update_state State.empty (VarLog.expose (snd res)); (fst res) |> string_of_val
     end
   | Solver s -> linear_solver_helper s
   | SetScale -> set_scale Coords.empty; ""
@@ -356,5 +356,5 @@ let interp (s : string) : string =
     Graphing.graph em.x_min em.x_max em.y_min em.y_max (e |> eval_graph); 
     "Graphed"
   | Newton e -> newton_helper e
-  | Exec e -> exec_helper (e |> eval_expr [] |> fst)
+  | Exec e -> exec_helper (e |> eval_expr (VarLog.empty ()) |> fst)
   | _ -> raise No_keyword

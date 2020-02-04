@@ -23,12 +23,12 @@ val derive: float -> (float -> float) -> float
 val pull_num: Ast.value -> float
 
 (** [eval_expr vl e] evaluates [e]. Requires: [e] has type expression *)
-val eval_expr: (string * Ast.value) list -> Ast.expr -> 
-  Ast.value * (string * Ast.value) list
+val eval_expr: VarLog.t -> Ast.expr -> 
+  Ast.value * VarLog.t
 
 (** [eval_init vl d] is the result of evaluating definition [d],
     tupled to the state at the end of evaluation *)
-val eval_init: VarLog.t -> Ast.defn -> Ast.value * VarLog.var list
+val eval_init: VarLog.t -> Ast.defn -> Ast.value * VarLog.t
 
 (** [print_matrix m] returns the string representation of matrix [m] *)
 val print_matrix : float array array -> string

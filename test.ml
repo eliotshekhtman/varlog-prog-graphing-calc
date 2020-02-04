@@ -188,6 +188,38 @@ let eval_tests = [
   make_exec_test "goto2" "" "testWHILE";
 
 
+  (* Post-CS3110 tests *)
+  make_eval_test "objvar1" "4" 
+    "CLASS hello : a -> { DISP \"hi\" }
+     greet : hello<-(3)
+     greet.a : 4
+     RETURN greet.a";
+  make_eval_test "objfunc1" "3" 
+    {|CLASS hello : a -> { 
+        FUN val :-> { RETURN a }
+      }
+      greet : hello<-(3)
+      RETURN greet.val<-()|};
+  make_eval_test "objfunc2" "4" 
+    {|CLASS hello : a -> { 
+        FUN val :-> { RETURN a+1 }
+      }
+      greet : hello<-(3)
+      RETURN greet.val<-()|};
+  make_eval_test "objfunc3" "4" 
+    {|CLASS hello : a -> { 
+        FUN val :-> { RETURN a }
+      }
+      greet : hello<-(3)
+      greet.a : 4
+      RETURN greet.val<-()|};
+  (* make_eval_test "objfunc4" "4" 
+     {|CLASS hello : a -> { 
+        FUN val :-> { a : a+1 }
+      }
+      greet : hello<-(3)
+      null : greet.val<-()
+      RETURN greet.a|}; *)
 ]
 
 let tests = [
