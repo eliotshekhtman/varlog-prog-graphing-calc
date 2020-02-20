@@ -9,3 +9,69 @@ IF true THEN (
 DISP "3"
 LBL end
 DISP "4"
+`Hello 1 3 4`
+
+IF true THEN (
+  IF false THEN (
+    GOTO hi
+  )
+  ELSE (
+    DISP "Goto test"
+  )
+  DISP "finished that"
+)
+`Goto test finished that`
+`GOOD`
+
+IF true THEN (
+  IF true THEN (
+    GOTO hi 
+  )
+  ELSE (
+    DISP "Don't goto test"
+  )
+  DISP "finished x2"
+)
+DISP "don't hit this"
+`supposed to do nothing, currently comes back from lbl hi`
+`so it currently says end don't hit this`
+`BAD`
+
+IF true THEN (
+  IF false THEN (
+    RETURN
+  )
+  ELSE (
+    DISP "Return test"
+  )
+  DISP "finished x3.1"
+)
+DISP "Hit this x2.1"
+`Return test finished x3.1 Hit this x2.1`
+`currently says Return test finished x3.1 and kills the program`
+`skips over Hit this x2.1 - even if doesn't execute return, will still`
+`not execute d3`
+`BAD`
+
+IF true THEN (
+  IF true THEN (
+    RETURN
+  )
+  ELSE (
+    DISP "Don't return test"
+  )
+  DISP "finished x3"
+)
+DISP "don't hit this x2"
+`supposed to end program, no outputs`
+`GOOD`
+
+IF true THEN (
+  GOTO hi
+)
+DISP "aaa"
+`supposed to be all skipped`
+`GOOD`
+LBL hi
+DISP "end"
+

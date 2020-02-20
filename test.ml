@@ -225,6 +225,11 @@ let eval_tests = [
       FUN f :-> { a : a+1 }
       f<-()
       RETURN a|};
+  make_eval_test "funcvar2" "4"
+    {|a : 3
+      FUN f :-> { a : a+1 END RETURN 2 }
+      b : f<-()
+      RETURN a|};
 ]
 
 let tests = [
