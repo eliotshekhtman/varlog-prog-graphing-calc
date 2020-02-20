@@ -1,0 +1,195 @@
+CLASS coordinates : x y -> {
+  FUN moveX : xDir -> { 
+    IF x+xDir >= 0 & x+xDir <= 30 THEN x : x+xDir
+  }
+  FUN moveY : yDir -> {
+    IF y+yDir >= 0 & y+yDir <= 30 THEN y : y+yDir
+  }
+}
+
+CLASS nullc : x y -> {
+  id : "null"
+  img : " "
+  FUN step : mat -> {
+    coords : coordinates<-(-1 -1)
+    coords.x : x
+    coords.y : y
+    RETURN coords
+  }
+}
+
+CLASS wolf : x y -> {
+  id : "wolf"
+  img : "w"
+  `max age = 200`
+  age : 0
+  `max hunger = 50`
+  hunger : 0
+
+  FUN sheepNearby : mat -> {
+    coords : coordinates<-(-1 -1) END range : 0
+    IF age < 100 THEN range : 4
+    ELSE (
+      IF age < 150 THEN range : 3
+      ELSE range : 2
+    )
+    xi : x-range END yi : y-range 
+    WHILE(yi < y+range) {
+      WHILE(xi < x+range) {
+        IF xi >= 0 & xi <= 30 & yi >= 0 & yi <= 30 THEN (
+          spot : mat[xi,yi]
+          IF spot.id = "sheep" THEN (
+            coords.x : xi END coords.y : yi 
+            RETURN coords
+          )
+        )
+        xi : xi+1
+      } 
+      yi : yi+1
+    }
+    coords.x : x END coords.y : y 
+    RETURN coords
+  }
+
+  FUN step : mat -> {
+    age : age+1
+    hunger : hunger+1
+    coords : coordinates<-(-1 -1)
+    coords.x : x END coords.y : y
+    IF age > 50 THEN img : "W"
+    sheep : sheepNearby<-(mat)
+    xDir : 0 END yDir : 0
+    IF sheep[0,0] = x & sheep[1,0] = y THEN (
+      xDir : RANDINT(-1,2) END yDir : RANDINT(-1,2)
+    )
+    ELSE (
+      IF sheep[0,0] < x THEN xDir : -1
+      IF sheep[0,0] > x THEN xDir : 1
+      IF sheep[1,0] < y THEN yDir : -1
+      IF sheep[1,0] > y THEN yDir : 1
+    )
+    coords.moveX<-(xDir) END coords.moveY<-(yDir)
+    RETURN coords
+  }
+
+  FUN eat : sheep -> {
+    preyAge : sheep
+    IF preyAge < hunger THEN hunger : hunger-preyAge 
+    ELSE (
+      IF hunger > 0 THEN (
+        IF preyAge/2 > hunger THEN hunger : 0-(preyAge-hunger)/4
+        ELSE hunger : 0
+      )
+      ELSE hunger : 0-preyAge/10
+    )
+  }
+}
+
+CLASS sheep : x y -> {
+  id : "sheep"
+  img : "s"
+  `max age = 300`
+  age : 0
+  `max hunger = 50`
+  hunger : 0
+
+  FUN maxGrass : gmat -> {
+    max : 0
+    coords : coordinates<-(-1 -1) END range : 1
+    xi : x-range END yi : y-range 
+    WHILE(yi < y+range) {
+      WHILE(xi < x+range) {
+        IF xi >= 0 & xi <= 30 & yi >= 0 & yi <= 30 THEN (
+          spot : gmat[xi,yi]
+          IF spot.grass > max THEN (
+            coords.x : xi END coords.y : yi
+            max : spot.grass
+          )
+        )
+        xi : xi+1
+      } 
+      yi : yi+1
+    }
+    IF max = 0 THEN (
+      xDir : RANDINT(-1,2) END yDir : RANDINT(-1,2)
+      coords.x : x END coords.y : y
+      coords.moveX<-(xDir) END coords.moveY<-(yDir)
+    )
+    RETURN coords
+  }
+
+  FUN step : gmat -> {
+    age : age+1
+    hunger : hunger+1
+    coords : MATRIX(2,1)
+    RETURN maxGrass<-(gmat)
+  }
+
+  FUN eat : grass -> {
+    IF grass < hunger THEN hunger : hunger-grass 
+    ELSE hunger : 0
+  }
+}
+
+GOTO init
+
+LBL InitBoard
+x : 0 END y : 0
+WHILE(y < 30) {
+  x : 0
+  WHILE(x < 30) {
+    gmat[x,y] : gmat[x,y]+RANDOM(2,10)
+    x : x+1
+  } 
+  y : y+1
+}
+RETURN
+
+LBL StepGrass
+x : 0 END y : 0
+WHILE(y < 30) {
+  x : 0
+  WHILE(x < 30) {
+    IF gmat[x,y] < 20 THEN gmat[x,y] : gmat[x,y]+RANDOM(0,2)
+    x : x+1
+  } 
+  y : y+1
+}
+RETURN 
+
+LBL MoveCreature
+`Must have defined x y xn yn`
+
+RETURN
+
+LBL StepCreatures
+i : 0
+WHILE(i < 500) {
+  creature : cmat[0,i]
+  IF creature.id!="null" THEN (
+    IF creature.id="sheep" THEN (
+      coords : creature.step<-(gmat)
+    )
+    ELSE (
+      coords : creature.step<-(mat)
+    )
+    newSpace : mat[coords.x,coords.y]
+    IF creature.id=newSpace.id THEN (
+      j : 0
+      WHILE(j < 500 | cmat[0,j].id!="null) {
+        j : j+1
+      }
+    )
+  )
+  
+
+  x : x+1
+}
+RETURN 
+
+LBL init 
+
+gmat : MATRIX(30,30)
+mat : VARMAT(30,30)
+cmat : VARMAT(1,500)
+GOSUB 
