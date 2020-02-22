@@ -1,0 +1,180 @@
+`[die] FIELDS: sides
+ FUNCTIONS: setSides(s), weightSide(s), roll, printInfo`
+CLASS die : sides -> {
+  GOTO initSides 
+  LBL ResetWeights 
+  weights : VARMAT(1,sides)
+  indexSides : 0
+  WHILE(indexSides < sides) {
+    weights[0,indexSides] : 10
+    indexSides : indexSides+1
+  }
+  RETURN
+  LBL initSides
+  GOSUB ResetWeights
+
+  FUN setSides : s -> {
+    sides : s 
+    GOSUB ResetWeights
+  }
+
+  FUN weightSide : s -> {
+    IF s < 0 THEN (
+      DISP "Invalid side: less than 0"
+      RETURN -1
+    )
+    IF s >= sides THEN (
+      DISP "Invalid side: not enough sides"
+      RETURN -1
+    )
+    weights[0,s] : weights[0,s]+1
+  }
+
+  FUN roll :-> {
+    sum : 0 END indexSides : 0
+    WHILE(indexSides < sides) {
+      sum : sum+weights[0,indexSides]
+      indexSides : indexSides+1
+    }
+    rand : RANDINT(0, sum)
+    res : -1 END indexSides : 0
+    WHILE(rand > 0 & indexSides < sides) {
+      rand : rand-weights[0,indexSides]
+      res : indexSides
+      indexSides : indexSides+1
+    }
+    RETURN res
+  }
+
+  FUN printInfo :-> {
+    DISP "Sides: "+sides 
+    indexSides : 0
+    WHILE(indexSides < sides) {
+      DISP "Weight of die "+indexSides+": "+weights[0,indexSides]
+      indexSides : indexSides+1
+    }
+    RETURN 0
+  }
+}
+
+GOTO init 
+
+LBL InitDice
+index : 0
+WHILE(index < numDice) {
+  dice[0,index] : die<-(6)
+  index : index+1
+}
+RETURN
+
+LBL NewDie
+temp : VARMAT(1,numDice+1)
+index : 0
+WHILE(index < numDice) {
+  temp[0,index] : dice[0,index]
+  index : index+1
+}
+temp[0,numDice] : die<-(6)
+dice : temp 
+numDice : numDice+1
+RETURN
+
+LBL InitCodes 
+QUIT : 0
+quit : 0
+print : 1
+roll : 10
+weight : 2
+add : 3
+rollall : 11
+printall : 20
+set : 4
+RETURN
+
+LBL init
+GOSUB InitCodes
+numDice : 1
+dice : VARMAT(1,numDice)
+GOSUB InitDice
+inp : " "
+recognized : 0
+DISP "Input codes: "
+DISP "quit, print, roll, weight, add, rollall, printall, set"
+WHILE(inp != "quit" & inp != "QUIT" & inp != 0) {
+  recognized : 0
+  inp : PROMPT
+  IF inp = "print" | inp = 1 THEN (
+    num : PROMPT 
+    IF num < 0 | num >= numDice THEN DISP "Invalid die index"
+    ELSE (
+      tempDie : dice[0,num]
+      tempDie.printInfo<-()
+    )
+    recognized : 1
+  )
+  IF inp = "roll" | inp = 10 THEN (
+    num : PROMPT 
+    IF num < 0 | num >= numDice THEN DISP "Invalid die index"
+    ELSE (
+      tempDie : dice[0,num]
+      DISP tempDie.roll<-()
+    )
+    recognized : 1
+  )
+  IF inp = "rollall" | inp = 11 THEN (
+    index : 0 END sum : 0
+    WHILE(index < numDice) {
+      temp : dice[0,index]
+      sum : sum+temp.roll<-()
+      index : index+1
+    }
+    DISP sum 
+    recognized : 1
+  )
+  IF inp = "printall" | inp = 20 THEN (
+    index : 0
+    WHILE(index < numDice) {
+      tempDie : dice[0,index]
+      DISP "Info of die "+index+": "
+      tempDie.printInfo<-()
+      index : index+1
+    }
+    recognized : 1
+  )
+  IF inp = "weight" | inp = 2 THEN (
+    num : PROMPT 
+    IF num < 0 | num >= numDice THEN DISP "Invalid die index"
+    ELSE (
+      side : PROMPT
+      tempDie : dice[0,num]
+      tempDie.weightSide<-(side)
+      dice[0,num] : tempDie
+    )
+    recognized : 1
+  )
+  IF inp = "set" | inp = 4 THEN (
+    num : PROMPT 
+    IF num < 0 | num >= numDice THEN DISP "Invalid die index"
+    ELSE (
+      numSides : PROMPT
+      IF numSides >= 0 THEN (
+        tempDie : dice[0,num]
+        tempDie.setSides<-(numSides)
+        dice[0,num] : tempDie
+      )
+      ELSE DISP "Invalid number of sides"
+    )
+    recognized : 1
+  )
+  IF inp = "add" | inp = 3 THEN (
+    GOSUB NewDie
+    recognized : 1
+  )
+  IF inp = "quit" | inp = "QUIT" | inp = 0 THEN (
+    DISP "Quitting"
+    recognized : 1
+  )
+  IF recognized = 0 THEN (
+    DISP "Invalid input: not recognized"
+  )
+}
